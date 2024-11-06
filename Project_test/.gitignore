@@ -1,0 +1,41 @@
+# Maven/Gradle build directories
+/target
+/build
+!**/src/main/**/target/
+!**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Eclipse/STS specific files
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Bytecode files
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Miscellaneous
+HELP.md
+
+.project
