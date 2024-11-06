@@ -1,6 +1,6 @@
 package com.example.demo.member;
 
-public enum grade {
+public enum Grade {
 	B,
 	S,
 	G,
