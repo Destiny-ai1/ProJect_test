@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.OrderDao">
+	<insert id="save" useGeneratedKeys="true">
+		<selectKey keyProperty="ono" order="BEFORE" resultType="long">
+			select orders_seq.nextval from dual
+		</selectKey>
+		insert into orders(ono, username, order_time, order_price)
+		values(#{ono}, #{username}, #{orderTime}, #{orderPrice})
+	</insert>
+	
+	<resultMap id="joinMap" type="com.example.demo.dto.ProductDto$Read">
+		<id property="pno" column="pno" />
+		<result property="vendor" column="vendor" />
+		<result property="name" column="name" />
+		<result property="price" column="price" />
+		<result property="stock" column="stock" />
+		<collection property="images" javaType="java.util.List" ofType="string">
+			<result column="image" />
+		</collection>
+	</resultMap>
+	<select id="findById" resultMap="joinMap">
+		select p.*, pi.name as image from product p join product_image pi on p.pno=pi.pno where p.pno=#{pno}
+	</select>
+</mapper>

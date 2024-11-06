@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.CartDao">
+	<select id="findByUsername" resultType="com.example.demo.dto.CartDto$Read">
+		select c.pno, p.vendor, p.name, p.price, #{imageUrl} || i.name as image, c.count, c.cart_item_price 
+		from cart_item c join product p on c.pno=p.pno join product_image i on c.pno=i.pno 
+		where c.username=#{username} and i.ino=0
+	</select>
+
+	<delete id="deleteAll">
+		delete from cart_item where pno in
+		<foreach collection="pnos" item="item" open="(" separator="," close=")">
+        #{item}
+  	</foreach>
+	</delete>
+	
+	<select id="findByUsernameAndPnos" resultType="com.example.demo.dto.CartDto$Read">
+		select c.pno, p.vendor, p.name, p.price, #{imageUrl} || i.name as image, c.count, c.cart_item_price 
+		from cart_item c join product p on c.pno=p.pno join product_image i on c.pno=i.pno 
+		where c.username=#{username} and c.pno in 
+		<foreach collection="pnos" item="item" open="(" separator="," close=")">
+        	#{item}
+  		</foreach>
+		and i.ino=0
+	</select>
+</mapper>

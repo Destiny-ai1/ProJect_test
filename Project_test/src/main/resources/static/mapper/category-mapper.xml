@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.CategoryDao">
+	<resultMap type="com.example.demo.dto.CategoryDto" id="findAll">
+		<id property="cno" column="gcno" />
+		<result property="cname" column="gcname" />
+		<collection property="children" javaType="java.util.ArrayList" resultMap="mapForParent" />
+	</resultMap>
+	<resultMap type="com.example.demo.dto.CategoryDto" id="mapForParent">
+		<id property="cno" column="pcno" />
+		<result property="cname" column="pcname" />
+		<collection property="children" javaType="java.util.ArrayList" resultMap="mapForChild" />
+	</resultMap>
+	<resultMap type="com.example.demo.dto.CategoryDto" id="mapForChild">
+		<id property="cno" column="ccno" />
+		<result property="cname" column="ccname" />
+	</resultMap>
+	<select id="findAll" resultMap="findAll">
+		select g.cno gcno, g.cname gcname, p.cno pcno, p.cname pcname, c.cno ccno, c.cname ccname from category g 
+		join category p on p.parent = g.cno 
+		join category c on c.parent = p.cno
+		where g.parent is null	
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
