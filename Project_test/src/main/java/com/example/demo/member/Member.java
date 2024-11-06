@@ -21,7 +21,7 @@ public class Member {
 	private String email;
 	private LocalDate joinday;
 	private long totalpurchase;
-	private grade grade;
+	private Grade grade;
 	private Integer loginFailCount;
 	private Boolean enabled;
 	private Role role;
