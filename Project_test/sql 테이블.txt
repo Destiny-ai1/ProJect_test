@@ -1,3 +1,26 @@
+-- 시스템 user 제작
+create user c##winter_shop identified by 1234;
+grant connect, resource to c##winter_shop;
+alter user c##winter_shop default tablespace users quota unlimited on users;
+
+-- 3번삭제
+drop table member;
+drop table category;
+drop table item;
+drop table image;
+drop table cart;
+drop table address;
+drop table board;
+drop table orders;
+drop table orders_detail;
+drop table card;
+drop table payment;
+drop table review;
+
+PURGE RECYCLEBIN;
+
+select * from tab;
+
 --회원테이블
 create table member (
     username varchar2(50 CHAR),                             -- 회원의 고유 Id (primary key)
@@ -149,3 +172,5 @@ create table review(
     constraint review_fk_username foreign key (username) references member (username),
     constraint review_fk_order_no foreign key (order_no) references orders (order_no)
 );
+
+select * from tab;
