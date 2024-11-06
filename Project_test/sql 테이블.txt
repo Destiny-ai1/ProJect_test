@@ -1,0 +1,151 @@
+--회원테이블
+create table member (
+    username varchar2(50 CHAR),                             -- 회원의 고유 Id (primary key)
+    password varchar2(60 CHAR),                             -- 회원의 비밀번호
+    name varchar2(50 CHAR),                                 -- 회원의 이름
+    email varchar2(30 CHAR),                                -- 회원의 이메일 주소
+    phone varchar2(20 char),                                -- 회원의 전화번호
+    joinday date,                                           -- 회원 가입일
+    totalpurchase number(10, 2),                            -- 회원의 총 구매 금액
+    grade varchar2(10 CHAR),                                -- 회원 등급 (예: 일반, VIP)
+    login_fail_Count number(1),                             -- 로그인 실패 횟수
+    enabled number(1),                                      -- 계정 활성화 상태 (1: 활성, 0: 비활성)
+    role varchar2(20 CHAR),                                 -- 회원의 역할 (예: 관리자, 사용자)
+    point_money number(7),                                  -- 포인트잔액
+    constraint member_pk_username primary key(username)
+);
+
+--카테고리
+create table category(
+    cno number(5),                                          --카테고리 번호
+    cname varchar2(20 char),                                --카테고리 이름
+    pno number(5),                                          --상위 카테고리
+    constraint category_pk_cno primary key(cno),
+    constraint category_fk_parent foreign key (pno) references category (cno)
+);
+
+--상품
+create table item (
+    item_no number(10),                                     -- 상품 고유 번호 (primary Key)
+    item_irum varchar2(50 CHAR),                            -- 상품 이름
+    item_info varchar2(100 CHAR),                           -- 상품 정보
+    item_price number(10),                                  -- 상품 가격
+    item_jadgo number(2),                                   -- 재고 수량
+    item_sell_qty number(2),                                -- 판매된 상품의 수량
+    add_good_cnt number(7),                                 -- 별점합계
+    review_ea number(7),                                    -- 리뷰 갯수
+    constraint item_pk_item_no primary Key(item_no),
+    cno number(5),                                          -- 카테고리 ID (외래 키)
+    constraint fk_item_category foreign key (cno) references category (cno) -- 카테고리와의 관계
+);
+
+--상품 이미지
+create table image (
+    image_no number(5),                                     -- 상품 이미지 번호
+    item_no number(10),                                     -- 상품 번호 (외래 키로 참조)
+    image_name varchar2(200 char),                          -- 상품 이미지 이름
+    constraint image_pk_image_no primary key(image_no),
+    constraint fk_image_item foreign key (item_no) references item (item_no)
+);
+
+--장바구니
+create table cart(
+    item_no number(10),                                     -- 상품 번호 (외래 키)+(기본키)
+    username varchar2(50 CHAR),                             -- 회원 아이디 (외래 키)
+    cart_ea number(2),                                      -- 장바구니 구매 갯수
+    cart_price number(7),                                   -- 장바구니 구매 가격
+    cart_totalprice number(10),                             -- 장바구니 구매 총 가격
+    constraint cart_pk_item_no primary key (item_no),               -- 상품번호 외래키 +기본키로
+    constraint fk_cart_member foreign key (username) references member (username),  -- 회원 테이블과의 외래 키 관계
+    constraint fk_cart_item foreign key (item_no) references item (item_no)         -- 상품 테이블과의 외래 키 관계
+);
+
+--배송지
+create table address(
+    member_username varchar2(50 CHAR),                       -- 회원 ID (외래 키)
+    post_no number(10),                                      -- 배송지번호 constraint
+    post_main_address varchar2(100 char),                    -- 기본배송지
+    address_number number(10),                               -- 우편번호 
+    load_address varchar2(100 char),                         -- 도로명 주소
+    detail_address varchar2(100 char),                       -- 상세주소
+    post_name varchar2(100 char),                            -- 배송지이름
+    constraint address_pk_post_no primary key(post_no),
+    constraint fk_address_member foreign key (member_username) references member (username)
+);
+
+--게시판(고객센터, 공지사항, Q&A)
+create table board(
+    bno number(7),                                              -- 글번호
+    title varchar2(20 char),                                    -- 글제목
+    writer varchar2(10 char),                                   -- 작성자
+    content varchar2(200 char),                                 -- 글내용
+    write_time date,                                            -- 작성시간
+    read_cnt number(7),                                         -- 조회수
+    board_password number(6),                                   -- 글 비밀번호
+    comments varchar2(100 char),                                -- 댓글
+    username VARCHAR2(50 CHAR),                                 -- 회원 ID (외래 키)
+    constraint pk_board_bno primary key(bno),
+    constraint fk_board_username foreign key (username) references member (username)
+);
+
+--주문
+create table orders(
+    order_no NUMBER(20),                                        -- 주문번호 (primary key)
+    order_date DATE,                                            -- 주문 날짜
+    total_price NUMBER(10),                                     -- 주문 총 금액
+    order_status VARCHAR2(20),                                  -- 주문 상태
+    used_point NUMBER(10),                                      -- 사용 포인트
+    act_payment NUMBER(10),                                     -- 실제 결제 금액
+    member_username varchar2(50 char),                          -- 회원 ID (외래 키, member 테이블 참조)
+    post_no number(10),                                         -- 배송지 번호 (외래 키, address 테이블 참조)
+    constraint orders_pk_order_no primary key (order_no),
+    constraint orders_fk_member_username foreign key (member_username) references member (username),
+    constraint orders_fk_post_no foreign key (post_no) references address (post_no)
+);
+
+--주문 상세
+create table orders_detail(
+    order_no number(20),                                         -- 주문번호 (외래 키, orders 테이블 참조)
+    item_no number(20),                                          -- 상품번호 (외래 키, item 테이블 참조)
+    image varchar2(200 char),                                    -- 이미지
+    detail_ea number(7),                                         -- 수량
+    price number(9),                                             -- 가격
+    review_written char(1),                                      -- 리뷰 작성 여부 (Y/N)
+    constraint orders_detail_pk primary key (order_no, item_no),
+    constraint orders_detail_fk_order_no foreign key (order_no) references orders (order_no),
+    constraint orders_detail_fk_item_no foreign key (item_no) references item (item_no)
+);
+
+--카드
+create table card(
+    card_no number(20),                                        --카드번호
+    ex_date date,                                              -- 유효기간
+    cvc number(3),                                             -- cvc 번호
+    member_username varchar2(50 char),                         -- 회원 ID (외래 키, member 테이블 참조)
+    constraint card_pk_card_no primary key (card_no),
+    constraint card_fk_member_username foreign key (member_username) references member (username)
+);
+
+--결제
+create table payment (
+    order_no number(20),                                       -- 주문번호 (외래 키, orders 테이블 참조)
+    pay_method varchar2(20 char),                              -- 결제 수단
+    point_add number(10),                                      -- 포인트 적립 금액
+    card_no number(20),                                        -- 카드 번호 (외래 키, card 테이블 참조)
+    constraint payment_pk primary key (order_no),
+    constraint payment_fk_order_no foreign key (order_no) references orders (order_no),
+    constraint payment_fk_card_no foreign key (card_no) references card (card_no)
+);
+
+--리뷰
+create table review(
+    review_no number(7),                                        --리뷰 번호
+    review_write_time date,                                     --리뷰 작성시간
+    review_writer varchar2(20 char),                            --리뷰 작성자
+    review_good_cnt number(7),                                  --리뷰 별점
+    username varchar2(50 char),                                 -- 회원 ID (외래 키, member 테이블 참조)
+    order_no number(20),                                        -- 주문번호 (외래 키, orders 테이블 참조)
+    constraint review_pk_review_no primary key (review_no),
+    constraint review_fk_username foreign key (username) references member (username),
+    constraint review_fk_order_no foreign key (order_no) references orders (order_no)
+);
