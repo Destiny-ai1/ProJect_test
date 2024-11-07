@@ -91,12 +91,12 @@ create table cart(
 
 --배송지
 create table address(
-    member_username varchar2(50 CHAR),                       -- 회원 ID (외래 키)
+    member_username varchar2(50 CHAR),                          -- 회원 ID (외래 키)
     address_no number(10),                                      -- 배송지번호 constraint
-    address_main varchar2(100 char),                    -- 기본배송지
-    post_no number(10),                               -- 우편번호 
-    address_road varchar2(100 char),                         -- 도로명 주소
-    address_detail varchar2(100 char),                       -- 상세주소
+    address_main varchar2(100 char),                            -- 기본배송지
+    post_no number(10),                                         -- 우편번호 
+    address_road varchar2(100 char),                            -- 도로명 주소
+    address_detail varchar2(100 char),                          -- 상세주소
     address_name varchar2(100 char),                            -- 배송지이름
     constraint address_pk_address_no primary key(address_no),
     constraint fk_address_member foreign key (member_username) references member (username)
@@ -116,7 +116,7 @@ create table board(
     cno number(5),												-- 카테고리 번호(외래 키)
     constraint pk_board_bno primary key(bno),
     constraint fk_board_username foreign key (username) references member (username),
-    constraint fk_board_cno foreign key (cno) references category cno(cno)
+    constraint fk_board_cno foreign key (cno) references category (cno)
 );
 
 --주문
@@ -128,10 +128,10 @@ create table orders(
     used_point NUMBER(10),                                      -- 사용 포인트
     act_payment NUMBER(10),                                     -- 실제 결제 금액
     member_username varchar2(50 char),                          -- 회원 ID (외래 키, member 테이블 참조)
-    post_no number(10),                                         -- 배송지 번호 (외래 키, address 테이블 참조)
-    constraint orders_pk_order_no primary key (order_no),
+    address_no number(10),                                      -- 배송지 번호 (외래 키, address 테이블 참조)
+    constraint orders_pk_order_no primary key (order_no),       -- 주문번호 고유키
     constraint orders_fk_member_username foreign key (member_username) references member (username),
-    constraint orders_fk_post_no foreign key (post_no) references address (post_no)
+    constraint orders_fk_post_no foreign key (address_no) references address (address_no)
 );
 
 --주문 상세
