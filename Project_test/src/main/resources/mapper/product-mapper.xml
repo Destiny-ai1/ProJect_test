@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.dao.ProductDao">
+<mapper namespace="com.example.demo.item.ItemDao">
+
 	<insert id="save" useGeneratedKeys="true">
-		<selectKey keyProperty="pno" order="BEFORE" resultType="long">
-			select product_seq.nextval from dual
-		</selectKey>
-		insert into product(pno, vendor, name, price, stock, info)
-		values(#{pno}, #{vendor}, #{name}, #{price}, #{stock}, #{info})
-	</insert>
+    <selectKey keyProperty="item_no" order="BEFORE" resultType="long">
+        select ITEM_SEQ.nextval from dual
+    </selectKey>
+    insert into item(item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, add_good_cnt, review_ea, cno)
+    values(#{item_no}, #{item_irum}, #{item_info}, #{item_price}, #{item_jango}, #{item_sell_qty}, #{add_good_cnt}, #{review_ea}, #{cno})
+</insert>
 	
-	<resultMap id="joinMap" type="com.example.demo.dto.ProductDto$Read">
-		<id property="pno" column="pno" />
-		<result property="vendor" column="vendor" />
-		<result property="name" column="name" />
-		<result property="info" column="info" />
-		<result property="price" column="price" />
-		<result property="stock" column="stock" />
+	<resultMap id="joinMap" type="com.example.demo.item.ItemDto$Read">
+		<id property="item_no" column="item_no" />
+		<result property="item_irum" column="item_irum" />
+		<result property="item_info" column="item_info" />
+		<result property="item_price" column="item_price" />
+		<result property="item_jango" column="item_jango" />
+		<result property="item_sell_qty" column="item_sell_qty" />
+		<result property="add_good_cnt" column="add_good_cnt" />
+		<result property="review_ea" column="review_ea" />
+		<result property="cno" column="cno" />
+		<!-- 
 		<collection property="images" javaType="java.util.List" ofType="string">
 			<result column="image" />
 		</collection>
@@ -23,4 +28,6 @@
 	<select id="findById" resultMap="joinMap">
 		select p.*, #{imageUrl} || pi.name as image from product p join product_image pi on p.pno=pi.pno where p.pno=#{pno}
 	</select>
+	 -->
+	 </resultMap>
 </mapper>

@@ -64,7 +64,9 @@ create table item (
     constraint fk_item_category foreign key (cno) references category (cno) -- 카테고리와의 관계
 );
 
-create sequence item_seq;
+create sequence item_seq;									-- 아이템 테이블 시퀀스 생성
+GRANT SELECT ON item_seq TO c##winter_shop;					-- 아이템 테이블 시퀀스를 user아이디에 권한부여
+SELECT sequence_name FROM user_sequences WHERE sequence_name = 'ITEM_SEQ';	-- 아이템 시퀀스 생성여부 검색
 
 --상품 이미지
 create table image (
