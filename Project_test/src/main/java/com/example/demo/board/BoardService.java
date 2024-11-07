@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.board.BoardDto.BoardRead;
+import com.example.demo.exception.FailException;
 
 @Service
 public class BoardService {

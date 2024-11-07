@@ -5,7 +5,7 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.exception.JobFailException;
+import com.example.demo.exception.FailException;
 
 @Service
 public class OrderService {
@@ -21,7 +21,7 @@ public class OrderService {
 
     public OrderDto.Read getOrder(Long orderNo) {
         return orderDao.findById(orderNo)
-                .orElseThrow(() -> new JobFailException("주문을 찾을 수 없습니다"));
+                .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
     }
 
     public List<OrderDto.OrderList> getAllOrders() {
@@ -30,13 +30,13 @@ public class OrderService {
 
     public void updateOrder(OrderDto.Update dto) {
         OrderDto.Read order = orderDao.findById(dto.getOrderNo())
-                .orElseThrow(() -> new JobFailException("주문을 찾을 수 없습니다"));
+                .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
         orderDao.update(dto.toEntity());
     }
 
     public void deleteOrder(Long orderNo) {
         OrderDto.Read order = orderDao.findById(orderNo)
-                .orElseThrow(() -> new JobFailException("주문을 찾을 수 없습니다"));
+                .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
         orderDao.delete(orderNo);
     }
 }
