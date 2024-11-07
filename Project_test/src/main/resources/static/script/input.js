@@ -1,3 +1,4 @@
+//회원가입관련
 function loadProfile() {
     const file = $('#profile')[0].files[0];
     const maxSize = 1024 * 1024;

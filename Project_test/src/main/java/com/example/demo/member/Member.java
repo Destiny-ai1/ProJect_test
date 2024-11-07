@@ -4,17 +4,17 @@ import java.time.*;
 
 import org.springframework.context.support.BeanDefinitionDsl.*;
 
+import com.example.demo.enums.*;
+import com.example.demo.enums.Role;
+
 import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
-
-@Entity
 public class Member {
-	@Id
 	private String username;
 	private String password;
 	private String name;
