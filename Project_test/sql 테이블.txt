@@ -17,6 +17,8 @@ drop table card;
 drop table payment;
 drop table review;
 
+drop sequence item_seq;
+
 PURGE RECYCLEBIN;
 
 select * from tab;
@@ -61,6 +63,8 @@ create table item (
     cno number(5),                                          -- 카테고리 ID (외래 키)
     constraint fk_item_category foreign key (cno) references category (cno) -- 카테고리와의 관계
 );
+
+create sequence item_seq;
 
 --상품 이미지
 create table image (
