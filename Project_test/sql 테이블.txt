@@ -90,13 +90,13 @@ create table cart(
 --배송지
 create table address(
     member_username varchar2(50 CHAR),                       -- 회원 ID (외래 키)
-    post_no number(10),                                      -- 배송지번호 constraint
-    post_main_address varchar2(100 char),                    -- 기본배송지
-    address_number number(10),                               -- 우편번호 
-    load_address varchar2(100 char),                         -- 도로명 주소
-    detail_address varchar2(100 char),                       -- 상세주소
-    post_name varchar2(100 char),                            -- 배송지이름
-    constraint address_pk_post_no primary key(post_no),
+    address_no number(10),                                      -- 배송지번호 constraint
+    address_main varchar2(100 char),                    -- 기본배송지
+    post_no number(10),                               -- 우편번호 
+    address_road varchar2(100 char),                         -- 도로명 주소
+    address_detail varchar2(100 char),                       -- 상세주소
+    address_name varchar2(100 char),                            -- 배송지이름
+    constraint address_pk_address_no primary key(address_no),
     constraint fk_address_member foreign key (member_username) references member (username)
 );
 
