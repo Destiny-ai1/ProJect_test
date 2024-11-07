@@ -1,5 +1,8 @@
 package com.example.demo.board;
 
-public class BoardDao {
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface BoardDao {
 
 }
