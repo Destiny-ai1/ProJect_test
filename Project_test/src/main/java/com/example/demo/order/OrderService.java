@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.exception.FailException;
 
+import jakarta.transaction.Transactional;
+
+
 @Service
 public class OrderService {
 
@@ -17,6 +20,7 @@ public class OrderService {
     private OrderDetailDao orderDetailDao;
 
     // 주문 생성 로직
+    @Transactional
     public Long createOrder(OrderDto.Create dto) {
         Order order = dto.toEntity(); // DTO를 엔티티로 변환
         orderDao.save(order); // 데이터베이스에 저장
@@ -54,6 +58,7 @@ public class OrderService {
     }
 
     // 주문 업데이트 로직
+    @Transactional
     public void updateOrder(OrderDto.Update dto) {
         OrderDto.Read order = orderDao.findById(dto.getOrderNo())
                 .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
@@ -68,6 +73,7 @@ public class OrderService {
     }
 
     // 주문 삭제 로직
+    @Transactional
     public void deleteOrder(Long orderNo) {
         OrderDto.Read order = orderDao.findById(orderNo)
                 .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
