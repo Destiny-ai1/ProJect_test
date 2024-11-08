@@ -2,12 +2,10 @@ package com.example.demo.member;
 
 import java.time.*;
 
-import org.springframework.context.support.BeanDefinitionDsl.*;
-
 import com.example.demo.enums.*;
 import com.example.demo.enums.Role;
 
-import jakarta.persistence.*;
+
 import lombok.*;
 
 @Getter
