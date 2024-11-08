@@ -135,12 +135,13 @@ create table orders(
 );
 
 --주문 상세
-create table orders_detail(
+create table orders_detail (
     order_no number(20),                                         -- 주문번호 (외래 키, orders 테이블 참조)
     item_no number(20),                                          -- 상품번호 (외래 키, item 테이블 참조)
-    image varchar2(200 char),                                    -- 이미지
+    item_name varchar2(100 char),                                -- 상품명
+    image varchar2(300 char),                                    -- 이미지 (URL 경로)
     detail_ea number(7),                                         -- 수량
-    price number(9),                                             -- 가격
+    price number(9),                                             -- 가격 (개당)
     review_written char(1),                                      -- 리뷰 작성 여부 (Y/N)
     constraint orders_detail_pk primary key (order_no, item_no),
     constraint orders_detail_fk_order_no foreign key (order_no) references orders (order_no),
