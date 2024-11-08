@@ -1,5 +1,9 @@
 package com.example.demo.item;
 
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
@@ -12,6 +16,7 @@ public class ItemDto {
 		private String item_irum;
 		private String item_info;
 		private Long item_price;
+		private String image;
 	}
 	
 	@Data
@@ -38,6 +43,10 @@ public class ItemDto {
 		@NotEmpty(message="제품 잔고를 입력하세요")
 		private Long item_jango;
 		
-		/* private List<MultipartFiles> images; */	// 이미지 추가 후 이용
+		private List<MultipartFile> image;
+		
+		public Item toEntity() {
+			return new Item(null, item_no, item_info, item_price, item_jango, null, null, null, null);
+		}
 	}
 }
