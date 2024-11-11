@@ -34,7 +34,11 @@ public class CardController { // 카드 관련 요청을 처리하는 컨트롤�
         if (br.hasErrors()) { // 입력 데이터에 오류가 있는 경우
             return new ModelAndView("card/add").addObject("errors", br.getAllErrors()); // 오류 메시지를 포함한 뷰 반환
         }
-        cardService.addCard(dto); // 카드 정보 추가
+        try {
+            cardService.addCard(dto); // 카드 정보 추가
+        } catch (FailException e) {
+            return new ModelAndView("card/add").addObject("errorMessage", e.getMessage()); // 중복 카드 번호 에러 메시지 전달
+        }
         return new ModelAndView("redirect:/card/list"); // 카드 목록으로 리디렉션
     }
 

@@ -1,9 +1,8 @@
 package com.example.demo.review;
 
-import java.time.LocalDate;
-
 import jakarta.validation.constraints.*;
 import lombok.*;
+import java.time.LocalDate;
 
 public class ReviewDto { // 리뷰 관련 데이터 전달 객체
     private ReviewDto() {}

@@ -1,26 +1,43 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.dao.CartDao">
-	<select id="findByUsername" resultType="com.example.demo.dto.CartDto$Read">
-		select c.pno, p.vendor, p.name, p.price, #{imageUrl} || i.name as image, c.count, c.cart_item_price 
-		from cart_item c join product p on c.pno=p.pno join product_image i on c.pno=i.pno 
-		where c.username=#{username} and i.ino=0
+
+<mapper namespace="com.example.demo.cart.CartDao">
+
+    <!-- 장바구니 항목 저장 -->
+    <insert id="save" parameterType="com.example.demo.cart.Cart">
+        INSERT INTO cart (item_no, username, cart_ea, cart_price, cart_totalprice)
+        VALUES (#{itemNo}, #{username}, #{cartEa}, #{cartPrice}, #{cartTotalPrice})
+    </insert>
+
+    <!-- 회원 아이디로 장바구니 조회 -->
+    <select id="findAllByUsername" parameterType="string" resultMap="CartReadResultMap">
+        SELECT * FROM cart WHERE username = #{username}
+    </select>
+    
+    <!-- 상품 번호와 사용자 이름으로 장바구니 항목 조회 -->
+	<select id="findByItemNoAndUsername" parameterType="map" resultMap="CartReadResultMap">
+	    SELECT * FROM cart WHERE item_no = #{itemNo} AND username = #{username}
 	</select>
 
-	<delete id="deleteAll">
-		delete from cart_item where pno in
-		<foreach collection="pnos" item="item" open="(" separator="," close=")">
-        #{item}
-  	</foreach>
-	</delete>
-	
-	<select id="findByUsernameAndPnos" resultType="com.example.demo.dto.CartDto$Read">
-		select c.pno, p.vendor, p.name, p.price, #{imageUrl} || i.name as image, c.count, c.cart_item_price 
-		from cart_item c join product p on c.pno=p.pno join product_image i on c.pno=i.pno 
-		where c.username=#{username} and c.pno in 
-		<foreach collection="pnos" item="item" open="(" separator="," close=")">
-        	#{item}
-  		</foreach>
-		and i.ino=0
-	</select>
+    <!-- 장바구니 상품 수량 업데이트 -->
+    <update id="update" parameterType="com.example.demo.cart.Cart">
+        UPDATE cart
+        SET cart_ea = #{cartEa}
+        WHERE item_no = #{itemNo} AND username = #{username}
+    </update>
+
+    <!-- 장바구니 항목 삭제 -->
+    <delete id="delete" parameterType="map">
+        DELETE FROM cart WHERE item_no = #{itemNo} AND username = #{username}
+    </delete>
+
+    <!-- 장바구니 조회를 위한 CartReadResultMap -->
+    <resultMap id="CartReadResultMap" type="com.example.demo.cart.CartDto.Read">
+        <id property="itemNo" column="item_no" />
+        <result property="username" column="username" />
+        <result property="cartEa" column="cart_ea" />
+        <result property="cartPrice" column="cart_price" />
+        <result property="cartTotalPrice" column="cart_totalprice" />
+    </resultMap>
+
 </mapper>

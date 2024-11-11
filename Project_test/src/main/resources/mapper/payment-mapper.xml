@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.payment.PaymentDao">
+
+    <!-- 결제 정보 저장 -->
+    <insert id="save" parameterType="com.example.demo.payment.Payment">
+        INSERT INTO payment (order_no, pay_method, point_add, card_no)
+        VALUES (#{orderNo}, #{payMethod}, #{pointAdd}, #{cardNo})
+    </insert>
+
+    <!-- 주문 번호로 결제 정보 조회 -->
+    <select id="findById" parameterType="long" resultMap="PaymentReadResultMap">
+        SELECT * FROM payment WHERE order_no = #{orderNo}
+    </select>
+
+    <!-- 모든 결제 정보 조회 -->
+    <select id="findAll" resultMap="PaymentReadResultMap">
+        SELECT * FROM payment
+    </select>
+
+    <!-- 결제 정보 업데이트 -->
+    <update id="update" parameterType="com.example.demo.payment.Payment">
+        UPDATE payment
+        SET pay_method = #{payMethod}, point_add = #{pointAdd}
+        WHERE order_no = #{orderNo}
+    </update>
+
+    <!-- 결제 정보 삭제 -->
+    <delete id="delete" parameterType="long">
+        DELETE FROM payment WHERE order_no = #{orderNo}
+    </delete>
+
+    <!-- 결제 조회를 위한 PaymentReadResultMap -->
+    <resultMap id="PaymentReadResultMap" type="com.example.demo.payment.PaymentDto.Read">
+        <id property="orderNo" column="order_no" />
+        <result property="payMethod" column="pay_method" />
+        <result property="pointAdd" column="point_add" />
+        <result property="cardNo" column="card_no" />
+    </resultMap>
+
+</mapper>

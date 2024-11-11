@@ -1,6 +1,6 @@
 package com.example.demo.card;
 
-import java.util.*;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +16,11 @@ public class CardService { // 카드 비즈니스 로직을 처리하는 서비�
 
     @Transactional
     public void addCard(CardDto.Create dto) { // 카드 정보를 추가하는 메소드
+        // 카드 번호 중복 체크
+        if (cardDao.isCardNoExists(dto.getCardNo())) {
+            throw new FailException("이미 등록된 카드입니다");
+        }
+        
         Card card = dto.toEntity(); // DTO를 엔티티로 변환
         cardDao.save(card); // 카드 정보 저장
     }

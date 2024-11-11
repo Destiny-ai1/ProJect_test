@@ -17,6 +17,10 @@ public interface CardDao { // 카드 관련 데이터 접근 객체 (DAO)
     // 회원 아이디로 카드 정보 조회
     @Select("SELECT * FROM card WHERE member_username = #{memberUsername}")
     List<CardDto.Read> findAllByUsername(@Param("memberUsername") String memberUsername); // 특정 회원의 모든 카드 정보 조회
+    
+    // 카드 번호 중복 체크
+    @Select("SELECT COUNT(*) > 0 FROM card WHERE card_no = #{cardNo}")
+    boolean isCardNoExists(@Param("cardNo") Long cardNo); // 카드 번호가 이미 존재하는지 확인
 
     // 카드 정보 업데이트
     @Update("UPDATE card SET ex_date = #{exDate}, cvc = #{cvc} WHERE card_no = #{cardNo}")
