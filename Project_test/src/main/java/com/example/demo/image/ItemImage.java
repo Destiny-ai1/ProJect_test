@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ItemImage {
-	private Long image_no;
-	private Long item_no;
-	private String image_name;
+	private Long imageNo;
+	private Long itemNo;
+	private String imageName;
 }
