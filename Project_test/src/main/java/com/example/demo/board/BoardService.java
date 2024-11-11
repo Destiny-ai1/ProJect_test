@@ -18,7 +18,7 @@ import com.example.demo.member.MemberReadBoardDao;
 @Service
 public class BoardService {
 	@Autowired 
-    private BoardDao boardDao;
+    private BoardMybatisDao boardDao;
 	
 	//고객센터 QnA작성할때
 	public Long write(BoardDto.Create dto, String loginId) {
@@ -42,7 +42,7 @@ public class BoardService {
 		//2. 로그인을 했거나,남이 작성한글인경우 조회수 증가
 		boolean ReadCheck= MemberReadBoardDao.existsByBnoAndloginId(bno,loginId);
 		if(ReadCheck==false) {
-			MemberReadBoardDao.save(bno,loginId);
+			MemberReadBoardDao.save(loginId,bno);
 			boardDao.increaseReadCnt(bno);
 			dto.ReadCnt();
 		}

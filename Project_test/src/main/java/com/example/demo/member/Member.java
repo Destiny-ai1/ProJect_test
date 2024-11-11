@@ -12,6 +12,7 @@ import com.example.demo.enums.Role;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
 import lombok.*;
 
 @Getter
@@ -21,6 +22,7 @@ import lombok.*;
 @Entity
 @DynamicUpdate
 public class Member {
+	@Id
 	private String username;
 	private String password;
 	private String name;
@@ -46,7 +48,7 @@ public class Member {
 		return new MemberDto.Member_Read(name, email, phone_number, joinday.toLocalDate(), totalpurchase, grade.name(), role.name(), point);
 	}
 	
-	//계정 블럭걸때
+	//계정 블록걸때
 	public void Member_Block() {
 		this.enabled= false;
 		this.loginFailCount= 5;
@@ -55,5 +57,11 @@ public class Member {
 	//로그인 실패횟수 올라가는 카운트
 	public void Member_login_Fail_Count() {
 		this.loginFailCount=0;
+	}
+	
+	public void update(String email, String phone_number, String encodedPassword) {
+	    this.email = email;
+	    this.phone_number = phone_number;
+	    this.password = encodedPassword; 
 	}
 }

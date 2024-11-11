@@ -12,16 +12,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.enums.PasswordChange;
-
+import com.example.demo.exception.FailException;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 @Service
 public class MemberService {
 	@Autowired
 	private PasswordEncoder encoder;
 	@Autowired
-	private MemberDao memberDao;
+	private MemberDaoMyBatisXML memberDao;
 	@Autowired
 	private MemberMailUtil mailUtil;
 	
@@ -38,11 +39,13 @@ public class MemberService {
 		memberDao.save(member);  
 	}
 	
-	public boolean 아이디사용가능(String username) {
+	//아이디 사용가능 
+	public boolean Id_Available(String username) {
 		return !memberDao.existsById(username);
 	}
 	
-	public Optional<String> 아이디찾기(String email) {
+	//아이디 찾기
+	public Optional<String> Idfind(String email) {
 		return memberDao.findByIdUsernameByEmail(email);
 	}
 	
@@ -71,7 +74,7 @@ public class MemberService {
 	}
 	
 	//회원 탈퇴할때
-	public void 탈퇴(String loginId) {
+	public void delete(String loginId) {
 		Member member = memberDao.findById(loginId).get();
 		memberDao.delete(member);
 	}
@@ -98,5 +101,14 @@ public class MemberService {
 		memberDao.Update_Point(username,totalpurchase);
 		//최종 포인트
 		return MemberPoint+PointAdd;
+	}
+	
+	//회원정보에서 업데이트 처리
+	public void update(@Valid MemberDto.Member_update dto, String loginId) {
+		Member member = memberDao.findById(loginId).orElseThrow(()-> new FailException("Member not found"));
+	    // encoder를 사용해서 비밀번호를 암호화
+	    String encodedPassword = encoder.encode(dto.getNewPassword());
+	    // 이메일, 전화번호, 암호화된 비밀번호를 업데이트
+	    member.update(dto.getEmail(), dto.getPhone_number(), encodedPassword);
 	}
 }

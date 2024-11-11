@@ -1,19 +1,21 @@
 package com.example.demo.member;
 
-import org.apache.ibatis.annotations.Mapper;
 
-@Mapper
+
+
+//@Mapper
 public interface MemberReadBoardDao {
-
-	static void save(Long bno, String loginId) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	static boolean existsByBnoAndloginId(Long bno, String loginId) {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	static void save(String loginId, Long bno) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 
 
 }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.member.MemberDaoMyBatisXML">
+	<!--회원가입 읽어오기-->
+	<insert id="save" parameterType="com.example.demo.member.Member">
+        insert into member (username, password, name, email, phone_number, joinday, totalpurchase, grade, login_fail_count, enabled, role, point)
+        values (#{username}, #{password}, #{name}, #{email}, #{phone_number}, #{joinday}, #{totalpurchase}, #{grade}, #{loginFailCount}, #{enabled}, #{role}, #{point})
+    </insert>
+    
+    <!--아이디 사용가능한지 확인-->
+    <select id="existsById" parameterType="String" resultType="boolean">
+        select count(username) > 0 from member where username = #{username}
+    </select>
+    
+    <!-- 이메일을 통해 아이디 찾기 -->
+    <select id="findByIdUsernameByEmail" parameterType="string" resultType="string">
+        select username from member where email = #{email}
+    </select>
+    
+    <!-- 회원 정보 조회 -->
+    <select id="findById" parameterType="string" resultType="com.example.demo.member.Member">
+        select * from member where username = #{username}
+    </select>
+	
+	<!-- 회원 탈퇴 -->
+    <delete id="delete" parameterType="com.example.demo.member.Member">
+        delete from member where username = #{username}
+    </delete>
+
+    <!-- 로그인 실패 시 카운트 증가 및 계정 블럭 -->
+    <update id="memberLoginFailAndBlock" parameterType="string">
+        update member set login_fail_count = login_fail_count + 1,
+        enabled = case when login_fail_count + 1 >= 5 then 0 else enabled end where username = #{username}
+    </update>
+
+    <!-- 로그인 성공 시 실패 카운트 초기화 -->
+    <update id="loginSuccessReset" parameterType="string">
+        update member set login_fail_count = 0 where username = #{username}
+    </update>
+
+    <!-- 회원 포인트 조회 -->
+    <select id="findPointsByMemberId" parameterType="string" resultType="int">
+        select point_money from member where username = #{username}
+    </select>
+
+    <!-- 회원 포인트 업데이트 -->
+    <update id="updatePoints" parameterType="map">
+        update member set point_money = point_money + #{points} where username = #{username}
+    </update>
+</mapper>
