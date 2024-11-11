@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.4/dist/sweetalert2.min.css" rel="stylesheet">
+<link href="/style/main.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.4/dist/sweetalert2.all.min.js"></script>
+<style>
+	.form-select {
+		width: 300px;
+		display:inline-block;
+		margin-left: 10px;
+	}
+	
+	.ck-editor__editable_inline:not(.ck-comment__input *) {
+		height: 600px;
+		overflow-y: auto;
+	}
+</style>
+<script>
+	$(document).ready(function() {
+		const message = '[[${message}]]';
+		if(message!='') {
+			Swal.fire({
+				icon: "error",
+				title: "서버 메시지",
+				text: message
+			});
+		}
+	});
+</script>
+<script>
+	$(document).ready(function() {
+		$('#add').click(function() {
+			if($("#small").val()==null) {
+				alert("카테고리를 선택하세요");
+				return false;
+			}
+			let allEmpty = true
+			for(const image of $('.images')) {
+				if(image.files.length>0) {
+					allEmpty = false;
+					break;
+				}
+			}
+			if(allEmpty==true) {
+				alert("이미지를 선택하세요");
+				return false;
+			}
+			$('#add-form').submit();
+		});
+		
+		
+		$('#major').change(async function() {
+			const cno = $('#major option:selected').val();
+			try {
+				const result = await $.ajax(`/api/categories?cno=${cno}`)
+				const $middle = $('#middle');
+				$middle.empty();
+				$(`<option selected disabled>중분류를 선택하세요</option>`).appendTo($middle);
+				for(const c of result) {
+					$(`<option value='${c.CNO}'>${c.CNAME}</option>`).appendTo($middle);
+				}
+			} catch(err) {
+				console.log(err);
+			}
+		});
+		
+		$('#middle').change(async function() {
+			const cno = $('#middle option:selected').val();
+			try {
+				const result = await $.ajax(`/api/categories?cno=${cno}`)
+				const $small = $('#small');
+				$small.empty();
+				$(`<option selected disabled>소분류를 선택하세요</option>`).appendTo($small);
+				for(const c of result) {
+					$(`<option value='${c.CNO}'>${c.CNAME}</option>`).appendTo($small);
+				}
+			} catch(err) {
+				console.log(err);
+			}
+		});
+	});	
+</script>
+<script>
+	// ckeditor 초기화 함수
+	$(document).ready(function() {
+		async function initEditor() {
+			try {
+				editor = await ClassicEditor.create(document.getElementById('info'), {
+					ckfinder: {
+						uploadUrl: '/api/images'
+					}
+				});
+			} catch(err) {
+				console.log(err);
+			}
+		}
+			
+		initEditor();		
+	})
+</script>
+<title>Insert title here</title>
+</head>
+<body>
+	<div id="app">
+		<header th:replace="~{/fragment/header.html}"> </header>
+		<nav th:replace="~{/fragment/nav.html}"></nav>
+		<section>
+			<form id="add-form" method="post" action="/items/add" enctype="multipart/form-data">
+  			  <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+				<input type="hidden" name="_csrf" th:value="${_csrf.token}">
+				<div>
+					<select id="major" class="form-select">
+						<option disabled selected>대분류 선택</option>
+						<option th:each="m:${category}" th:text="${m.CNAME}" th:value="${m.CNO}"></option>
+					</select>
+					<select id="middle" class="form-select">
+						<option disabled selected>대분류부터 선택</option>
+					</select>
+					<select id="small" class="form-select" name="cno">
+						<option disabled selected>중분류부터 선택</option>
+					</select>
+				</div>
+				<div class="mb-3 mt-3">
+					<input type="file" name="images" class="images form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
+					<input type="file" name="images" class="images form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
+					<input type="file" name="images" class="images form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
+				</div>
+				<div class="mb-3 mt-3">
+					<label for="vendor" class="form-label">제조사:</label> 
+					<input type="text" class="form-control" id="vendor" placeholder="제조사..." name="vendor">
+				</div>
+				<div class="mb-3 mt-3">
+					<label for="name" class="form-label">제품명:</label> 
+					<input type="text" class="form-control" id="name" placeholder="제품명..." name="name">
+				</div>
+				<div class="mb-3 mt-3">
+					<label for="price" class="form-label">가격:</label> 
+					<input type="number" class="form-control" id="price" placeholder="가격..." 	name="price">
+				</div>
+				<div class="mb-3 mt-3">
+					<label for="stock" class="form-label">재고:</label> 
+					<input type="number" class="form-control" id="stock" placeholder="재고..." 	name="stock">
+				</div>
+				<div class="mb-3 mt-3">
+					<textarea id="info" name="info"></textarea>
+				</div>			
+				<div class="d-grid mb-3 mt-3">
+					<button type="button" class="btn btn-primary" id="add">추가</button>
+				</div>
+			</form>
+		</section>
+		<footer th:replace="~{/fragment/footer.html}"> </footer>
+	</div>			
+</body>
+</html>
