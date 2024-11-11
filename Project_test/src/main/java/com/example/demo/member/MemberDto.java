@@ -8,10 +8,11 @@ import com.example.demo.enums.Role;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 public class MemberDto {
-	private MemberDto() {}
+private MemberDto() {}
 	
 	//계정 생성할때 필수로 받을값
 	@NotEmpty
@@ -40,14 +41,16 @@ public class MemberDto {
 	
 	//회원정보를 출력할때 나오는것들
 	@Data
+	@AllArgsConstructor
 	public static class Member_Read{
 		private String name;
 		@Email
 		private String email;
 		private String phone_number;
 		private LocalDate joinday;
+		private int totalpurchase;
 		private String grade;
-		private Role role;
+		private String role;
 		private int point;
 	}
 }

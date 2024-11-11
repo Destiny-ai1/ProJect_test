@@ -2,10 +2,12 @@ package com.example.demo.member;
 
 import java.time.*;
 
+
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.demo.enums.*;
 import com.example.demo.enums.Role;
+
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,5 +36,24 @@ public class Member {
 	private Role role;
 	private int point;
 	
-	//패스워드 
+	//바꿀 비밀번호
+	public void changePassword(String password) {
+		this.password = password;
+	}
+	
+	//회원정보를 읽어오기
+	public MemberDto.Member_Read MyDetail(String loginId){
+		return new MemberDto.Member_Read(name, email, phone_number, joinday.toLocalDate(), totalpurchase, grade.name(), role.name(), point);
+	}
+	
+	//계정 블럭걸때
+	public void Member_Block() {
+		this.enabled= false;
+		this.loginFailCount= 5;
+	}
+	
+	//로그인 실패횟수 올라가는 카운트
+	public void Member_login_Fail_Count() {
+		this.loginFailCount=0;
+	}
 }
