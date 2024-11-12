@@ -67,7 +67,7 @@ public class ItemService {
 	}
 	
 	// 상품 번호를 이용하여 상품 이름을 조회
-	public Object getItemNameById(Long itemNo) {
+	public String getItemNameById(Long itemNo) {
 		return itemDao.getItemNameById(itemNo);
 	}
 	
