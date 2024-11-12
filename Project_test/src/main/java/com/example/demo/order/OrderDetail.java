@@ -22,5 +22,5 @@ public class OrderDetail {
     private int detailEa;
     private int price;
     private char reviewWritten;
-    
+   
 }

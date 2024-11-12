@@ -37,6 +37,15 @@ public class CartDto { // 장바구니 관련 데이터 전달 객체
         private int cartTotalPrice; // 상품의 총 가격
         private String itemName; // 상품 이름 (item 패키지에서 가져옴)
         private String itemImageUrl; // 상품 이미지 URL (image 패키지에서 가져옴)
+        // 추가: setItemName 메서드
+        public void setItemName(String itemName) {
+            this.itemName = itemName;
+        }
+
+        // 추가: setItemImageUrl 메서드
+        public void setItemImageUrl(String itemImageUrl) {
+            this.itemImageUrl = itemImageUrl;
+        }
     }
 
     @Data

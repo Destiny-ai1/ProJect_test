@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.example.demo.order.OrderDao">
 
     <!-- 주문 저장 -->
@@ -20,9 +21,7 @@
 
     <!-- 주문 정보 업데이트 -->
     <update id="update" parameterType="com.example.demo.order.Order">
-        UPDATE orders
-        SET order_status = #{orderStatus}
-        WHERE order_no = #{orderNo}
+        UPDATE orders SET order_status = #{orderStatus} WHERE order_no = #{orderNo}
     </update>
 
     <!-- 주문 삭제 -->
@@ -40,6 +39,8 @@
         <result property="actPayment" column="act_payment" />
         <result property="memberUsername" column="member_username" />
         <result property="postNo" column="post_no" />
+        <!-- 주문 상세 정보 조인 매핑 -->
+        <collection property="orderDetails" ofType="com.example.demo.order.OrderDetailDto" resultMap="OrderDetailResultMap" />
     </resultMap>
 
     <!-- 주문 목록 조회를 위한 OrderListResultMap -->

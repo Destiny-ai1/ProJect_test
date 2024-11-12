@@ -27,7 +27,8 @@ public class OrderService {
 
         // 주문 상세 정보 처리 로직
         if (dto.getOrderDetails() != null) {
-            for (OrderDetail detail : dto.getOrderDetails()) {
+            for (OrderDetailDto detailDto : dto.getOrderDetails()) {
+                OrderDetail detail = detailDto.toEntity(); // OrderDetailDto를 OrderDetail로 변환
                 detail.setOrderNo(order.getOrderNo()); // 주문 번호 설정
                 orderDetailDao.save(detail); // 각 주문 상세를 데이터베이스에 저장
             }
@@ -40,20 +41,49 @@ public class OrderService {
     public OrderDto.Read getOrder(Long orderNo) {
         OrderDto.Read order = orderDao.findById(orderNo)
                 .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
+        
         // 주문 상세 정보 조회 추가
         List<OrderDetail> orderDetails = orderDetailDao.findByOrderNo(orderNo);
-        order.setOrderDetails(orderDetails);
+        
+        // OrderDetail을 OrderDetailDto로 변환
+        List<OrderDetailDto> orderDetailDtos = new ArrayList<>();
+        for (OrderDetail detail : orderDetails) {
+            OrderDetailDto detailDto = new OrderDetailDto(
+                    detail.getItemNo(),
+                    detail.getItemName(),
+                    detail.getImage(),
+                    detail.getDetailEa()
+            );
+            orderDetailDtos.add(detailDto);
+        }
+        
+        order.setOrderDetails(orderDetailDtos); // OrderDetailDto 리스트 설정
         return order;
     }
 
     // 전체 주문 목록 조회 로직
     public List<OrderDto.OrderList> getAllOrders() {
         List<OrderDto.OrderList> orders = orderDao.findAll();
+        
         // 각 주문의 주문 상세 정보 조회 로직 추가 (선택 사항)
         for (OrderDto.OrderList order : orders) {
             List<OrderDetail> orderDetails = orderDetailDao.findByOrderNo(order.getOrderNo());
-            order.setOrderDetails(orderDetails);
+            
+            // OrderDetail을 OrderDetailDto로 변환
+            List<OrderDetailDto> orderDetailDtos = new ArrayList<>();
+            for (OrderDetail detail : orderDetails) {
+                OrderDetailDto detailDto = new OrderDetailDto(
+                        detail.getItemNo(),
+                        detail.getItemName(),
+                        detail.getImage(),
+                        detail.getDetailEa()
+                );
+                orderDetailDtos.add(detailDto);
+            }
+            
+            order.setOrderDetails(orderDetailDtos); // OrderDetailDto 리스트 설정
         }
+        
         return orders;
     }
 
@@ -66,7 +96,12 @@ public class OrderService {
 
         // 주문 상세 정보 업데이트 로직 추가
         if (dto.getOrderDetails() != null) {
-            for (OrderDetail detail : dto.getOrderDetails()) {
+            for (OrderDetailDto detailDto : dto.getOrderDetails()) {
+                // OrderDetailDto를 OrderDetail로 변환
+                OrderDetail detail = detailDto.toEntity();
+                detail.setOrderNo(dto.getOrderNo()); // 주문 번호 설정
+
+                // 주문 상세 정보 업데이트
                 orderDetailDao.update(detail);
             }
         }
