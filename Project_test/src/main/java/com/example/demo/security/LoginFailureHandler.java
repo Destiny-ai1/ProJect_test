@@ -9,7 +9,7 @@ import org.springframework.security.web.authentication.*;
 import org.springframework.stereotype.*;
 
 import com.example.demo.member.Member;
-import com.example.demo.member.MemberDaoMyBatisXML;
+import com.example.demo.member.MemberDao;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -18,7 +18,7 @@ import jakarta.transaction.*;
 @Component
 public class LoginFailureHandler implements AuthenticationFailureHandler {
 	@Autowired
-	private MemberDaoMyBatisXML memberDao;
+	private MemberDao memberDao;
 	
 	@Transactional
 	@Override

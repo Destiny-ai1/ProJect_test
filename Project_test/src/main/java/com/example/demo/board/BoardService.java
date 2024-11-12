@@ -18,7 +18,7 @@ import com.example.demo.member.MemberReadBoardDao;
 @Service
 public class BoardService {
 	@Autowired 
-    private BoardMybatisDao boardDao;
+    private BoardDao boardDao;
 	
 	//고객센터 QnA작성할때
 	public Long write(BoardDto.Create dto, String loginId) {

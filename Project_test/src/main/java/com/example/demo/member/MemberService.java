@@ -22,7 +22,7 @@ public class MemberService {
 	@Autowired
 	private PasswordEncoder encoder;
 	@Autowired
-	private MemberDaoMyBatisXML memberDao;
+	private MemberDao memberDao;
 	@Autowired
 	private MemberMailUtil mailUtil;
 	

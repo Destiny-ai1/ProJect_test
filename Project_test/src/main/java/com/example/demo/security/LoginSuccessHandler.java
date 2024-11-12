@@ -7,7 +7,7 @@ import org.springframework.security.core.*;
 import org.springframework.security.web.authentication.*;
 import org.springframework.stereotype.*;
 
-import com.example.demo.member.MemberDaoMyBatisXML;
+import com.example.demo.member.MemberDao;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -16,7 +16,7 @@ import jakarta.transaction.*;
 @Component
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 	@Autowired
-	private MemberDaoMyBatisXML memberDao;
+	private MemberDao memberDao;
 	
 	@Transactional
 	@Override

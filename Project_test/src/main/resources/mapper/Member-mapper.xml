@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.member.MemberDaoMyBatisXML">
+<mapper namespace="com.example.demo.member.MemberDao">
 	<!--회원가입 읽어오기-->
 	<insert id="save" parameterType="com.example.demo.member.Member">
-        insert into member (username, password, name, email, phone_number, joinday, totalpurchase, grade, login_fail_count, enabled, role, point)
+        insert into member (username, password, name, email, phone, joinday, totalpurchase, grade, login_fail_count, enabled, role, point_money)
         values (#{username}, #{password}, #{name}, #{email}, #{phone_number}, #{joinday}, #{totalpurchase}, #{grade}, #{loginFailCount}, #{enabled}, #{role}, #{point})
     </insert>
     

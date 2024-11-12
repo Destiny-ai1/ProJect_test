@@ -4,7 +4,7 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.*;
 
 import com.example.demo.member.Member;
-import com.example.demo.member.MemberDaoMyBatisXML;
+import com.example.demo.member.MemberDao;
 
 import lombok.*;
 
@@ -12,7 +12,7 @@ import lombok.*;
 @RequiredArgsConstructor
 @Component
 public class MyUserDetailsService implements UserDetailsService {
-	private final MemberDaoMyBatisXML memberDao;
+	private final MemberDao memberDao;
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
