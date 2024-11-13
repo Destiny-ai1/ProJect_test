@@ -18,6 +18,7 @@ drop table payment;
 drop table review;
 
 drop sequence item_seq;
+drop sequence image_seq;
 
 PURGE RECYCLEBIN;
 
@@ -55,8 +56,8 @@ create table item (
     item_irum varchar2(50 CHAR),                            -- 상품 이름
     item_info varchar2(100 CHAR),                           -- 상품 정보
     item_price number(10),                                  -- 상품 가격
-    item_jadgo number(2),                                   -- 재고 수량
-    item_sell_qty number(2),                                -- 판매된 상품의 수량
+    item_jango number(5),                                   -- 재고 수량
+    item_sell_qty number(5),                                -- 판매된 상품의 수량
     add_good_cnt number(7),                                 -- 별점합계
     review_ea number(7),                                    -- 리뷰 갯수
     constraint item_pk_item_no primary Key(item_no),

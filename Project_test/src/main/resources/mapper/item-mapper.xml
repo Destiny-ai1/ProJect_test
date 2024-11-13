@@ -2,32 +2,42 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.item.ItemDao">
 
-<insert id="save" useGeneratedKeys="true">
+<insert id="save" useGeneratedKeys="true" keyProperty="itemNo">
     <selectKey keyProperty="itemNo" order="BEFORE" resultType="long">
         select ITEM_SEQ.nextval from dual
     </selectKey>
     insert into item(item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, add_good_cnt, review_ea, cno)
-    values(#{itemNo}, #{itemIrum}, #{itemInfo}, #{itemPrice}, #{itemJango}, #{itemSellQty}, #{addGoodCnt}, #{reviewEa}, #{cno})
+    values(
+    	#{itemNo, jdbcType=NUMERIC}, 
+        #{itemIrum, jdbcType=VARCHAR}, 
+        #{itemInfo, jdbcType=VARCHAR}, 
+        #{itemPrice, jdbcType=NUMERIC}, 
+        #{itemJango, jdbcType=NUMERIC}, 
+        #{itemSellQty, jdbcType=INTEGER}, 
+        #{addGoodCnt, jdbcType=INTEGER}, 
+        #{reviewEa, jdbcType=INTEGER}, 
+        #{cno, jdbcType=INTEGER}
+        )
 </insert>
 	
 	<resultMap id="joinMap" type="com.example.demo.item.ItemDto$Read">
-		<id property="item_no" column="itemNo" />
-		<result property="item_irum" column="itemIrum" />
-		<result property="item_info" column="itemInfo" />
-		<result property="item_price" column="itemPrice" />
-		<result property="item_jango" column="itemJango" />
-		<result property="item_sell_qty" column="itemSellQty" />
-		<result property="add_good_cnt" column="addGoodCnt" />
-		<result property="review_ea" column="reviewEa" />
+		<id property="itemNo" column="item_no" />
+		<result property="itemIrum" column="item_irum" />
+		<result property="itemInfo" column="item_info" />
+		<result property="itemPrice" column="item_price" />
+		<result property="itemJango" column="item_jango" />
+		<result property="itemSellQty" column="item_sell_qty" />
+		<result property="addGoodCnt" column="add_good_cnt" />
+		<result property="reviewEa" column="review_ea" />
 		<result property="cno" column="cno" />
 		
-		<collection property="image" javaType="java.util.List" ofType="string">
+		<collection property="images" javaType="java.util.List" ofType="string">
 			<result column="image" />
 		</collection>
 	</resultMap>
 	
 	<select id="findById" resultMap="joinMap">
-		select i.*, #{imageUrl} || it.item_irum as image from item it join image im on it.item_no=im.item_no where it.item_no=#{item_no}
+		select i.*, #{imageUrl} || it.item_irum as image from item it join image im on it.item_no=im.item_no where it.item_no=#{itemNo}
 	</select>
 
 </mapper>

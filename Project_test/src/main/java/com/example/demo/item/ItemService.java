@@ -1,9 +1,13 @@
 package com.example.demo.item;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.category.CategoryDao;
 import com.example.demo.image.ImageDao;
-import com.example.demo.image.ImageService;
 import com.example.demo.image.ItemImage;
 
 @Service
@@ -23,19 +26,16 @@ public class ItemService {
 	@Autowired
 	private CategoryDao categoryDao;
 	@Autowired
-	private ImageService imageService;
-	@Autowired
 	private ImageDao imageDao;
 
+	// 생성자 주입
+	public ItemService(ItemDao itemDao) {
+		this.itemDao = itemDao;
+	}
 	
 	// 카테고리 대분류
 	public List<Map> findMajorCategory() {
 		return categoryDao.findMajorCategory();
-	}
-	
-	// 생성자 주입
-	public ItemService(ItemDao itemDao) {
-		this.itemDao = itemDao;
 	}
 	
 	// 아이템 리스트
@@ -45,25 +45,34 @@ public class ItemService {
 	
 	// 상품 생성 서비스
 	public void save(ItemDto.Create dto) {
-		Item item  = dto.toEntity();					// item 정의
-		itemDao.save(item);								// item에 dao정보를 삽입
-		
-		List<MultipartFile> images = dto.getImage();	// 생성되는 아이템에 원하는 이미지 불러오기
-		
-		// test필요
-		// 상품에 따른 상품사진 개수 지정-사진이 없다면 건너뛰기
-		for(long i=0; i<images.size(); i++) {
-			try {																
-				String savedImageFilename = imageService.saveImage(images.get((int) i), item.getItemNo(), i);
-				// 저장된 이미지 파일 이름을 db에 저장하는 로직이 'imageService'에 존재
-				if (savedImageFilename != null) {
-					// 이미지 파일 이름을 db에 저장하는 작업을 추가
-					imageDao.save(new ItemImage(item.getItemNo(), i, savedImageFilename)); // db에 저장
-				}
-			} catch (IOException e) {
-				e.printStackTrace(); // 오류 발생시 예외처리
+        Item item = dto.toEntity();  // ItemDto.Create를 Item으로 변환
+        itemDao.save(item);          // item을 DB에 저장
+
+        List<MultipartFile> images = dto.getImage();  // 이미지 목록
+
+        if (images == null || images.isEmpty()) {
+            images = new ArrayList<>();
+        }
+
+        // 상품에 대한 이미지를 처리
+        for (Long i = 0L; i < images.size(); i++) {
+        	int index = i.intValue();
+            MultipartFile imageFile = images.get(index);
+            if (imageFile.isEmpty()) {
+                continue;  // 이미지 파일이 비어있으면 건너뛰기
+            }
+
+            String extension = FilenameUtils.getExtension(imageFile.getOriginalFilename());
+            String saveFilename = UUID.randomUUID().toString() + "." + extension;
+
+            File file = new File(imageUrl, saveFilename);
+            try {
+                imageFile.transferTo(file);  // 실제 파일 저장
+                imageDao.save(new ItemImage(item.getItemNo(), i, saveFilename));  // DB에 이미지 정보 저장
+            } catch (IOException e) {
+                e.printStackTrace();  // 예외 처리
 			}
-		}
+		}	
 	}
 	
 	// 상품 번호를 이용하여 상품 이름을 조회
@@ -71,8 +80,8 @@ public class ItemService {
 		return itemDao.getItemNameById(itemNo);
 	}
 	
-	// test 필요
-	public ItemDto.Read read(Integer itemNo, String imageUrl) {					// 상품을 읽어오는 부분
+	// 상품 번호로 상품 읽기
+	public ItemDto.Read read(Long itemNo, String imageUrl) {				
 		return itemDao.findById(itemNo, imageUrl);
 	}
 }

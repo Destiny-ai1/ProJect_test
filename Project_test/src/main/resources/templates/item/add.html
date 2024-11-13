@@ -40,6 +40,7 @@
 				alert("카테고리를 선택하세요");
 				return false;
 			}
+			
 			let allEmpty = true
 			for(const image of $('.images')) {
 				if(image.files.length>0) {
@@ -63,7 +64,7 @@
 				$middle.empty();
 				$(`<option selected disabled>중분류를 선택하세요</option>`).appendTo($middle);
 				for(const c of result) {
-					$(`<option value='${c.CNO}'>${c.CNAME}</option>`).appendTo($middle);
+					$(`<option value='${c.cno}'>${c.cname}</option>`).appendTo($middle);
 				}
 			} catch(err) {
 				console.log(err);
@@ -78,7 +79,7 @@
 				$small.empty();
 				$(`<option selected disabled>소분류를 선택하세요</option>`).appendTo($small);
 				for(const c of result) {
-					$(`<option value='${c.CNO}'>${c.CNAME}</option>`).appendTo($small);
+					$(`<option value='${c.cno}'>${c.cname}</option>`).appendTo($small);
 				}
 			} catch(err) {
 				console.log(err);
@@ -111,9 +112,7 @@
 		<header th:replace="~{/fragment/header.html}"> </header>
 		<nav th:replace="~{/fragment/nav.html}"></nav>
 		<section>
-			<form id="add-form" method="post" action="/items/add" enctype="multipart/form-data">
-  			  <input type="hidden" name="_csrf" th:value="${_csrf.token}">
-				<input type="hidden" name="_csrf" th:value="${_csrf.token}">
+			<form id="add-form" method="post" action="/item/add" enctype="multipart/form-data">
 				<div>
 					<select id="major" class="form-select">
 						<option disabled selected>대분류 선택</option>
@@ -127,28 +126,24 @@
 					</select>
 				</div>
 				<div class="mb-3 mt-3">
-					<input type="file" name="images" class="images form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
-					<input type="file" name="images" class="images form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
-					<input type="file" name="images" class="images form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
-				</div>
-				<div class="mb-3 mt-3">
-					<label for="vendor" class="form-label">제조사:</label> 
-					<input type="text" class="form-control" id="vendor" placeholder="제조사..." name="vendor">
+					<input type="file" name="images" class="image form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
+					<input type="file" name="images" class="image form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
+					<input type="file" name="images" class="image form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
 				</div>
 				<div class="mb-3 mt-3">
 					<label for="name" class="form-label">제품명:</label> 
-					<input type="text" class="form-control" id="name" placeholder="제품명..." name="name">
+					<input type="text" class="form-control" id="item_irum" placeholder="제품명..." name="itemIrum">
 				</div>
 				<div class="mb-3 mt-3">
 					<label for="price" class="form-label">가격:</label> 
-					<input type="number" class="form-control" id="price" placeholder="가격..." 	name="price">
+					<input type="number" class="form-control" id="item_price" placeholder="가격..." 	name="itemPrice">
 				</div>
 				<div class="mb-3 mt-3">
-					<label for="stock" class="form-label">재고:</label> 
-					<input type="number" class="form-control" id="stock" placeholder="재고..." 	name="stock">
+					<label for="jango" class="form-label">잔고:</label> 
+					<input type="number" class="form-control" id="item_jango" placeholder="잔고..." 	name="itemJango">
 				</div>
 				<div class="mb-3 mt-3">
-					<textarea id="info" name="info"></textarea>
+					<textarea id="item_info" name="itemInfo"></textarea>
 				</div>			
 				<div class="d-grid mb-3 mt-3">
 					<button type="button" class="btn btn-primary" id="add">추가</button>

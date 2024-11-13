@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Component
 public class Item {
 	public Long itemNo;
-	public String itemIum;
+	public String itemIrum;
 	public String itemInfo;
 	public Long itemPrice;
 	public Long itemJango;

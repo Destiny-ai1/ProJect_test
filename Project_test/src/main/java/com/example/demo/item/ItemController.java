@@ -24,8 +24,8 @@ public class ItemController {
 	// 상품 리스트 메인에 출력
 	@GetMapping("/")
 	public ModelAndView list(Principal p) {
-		List<ItemDto.ItemList> result = service.findAll();
-		return new ModelAndView("item/list").addObject("result", result);
+		List<ItemDto.ItemList> result = service.findAll(); // 상품 목록 조회
+		return new ModelAndView("item/list").addObject("result", result); // list.html에 결과 전달
 	}
 	
 	// 관리자의 아이템 추가 이동
@@ -33,19 +33,19 @@ public class ItemController {
 	@GetMapping("/item/add")
 	public ModelAndView addItem() {
 		List<Map> majorCategory = service.findMajorCategory();
-		return new ModelAndView("itme/add").addObject("category", majorCategory);
+		return new ModelAndView("item/add").addObject("category", majorCategory); // 카테고리 추가
 	}
 	
 	/* @Secured("enum_admin(어드민 입력)") */
 	@PostMapping("/item/add")
 	public ModelAndView addItem(@Valid ItemDto.Create dto, BindingResult br	) {
 		service.save(dto);
-		return null;
+		return new ModelAndView("redirect:/");
 	}
 	
 	@GetMapping("/item/read")
-	public ModelAndView read(Integer itemNo, String imageUrl) {
-		ItemDto.Read result = service .read(itemNo, imageUrl);
+	public ModelAndView read(Long itemNo, String imageUrl) {
+		ItemDto.Read result = service.read(itemNo, imageUrl);	// 상품 상세 정보 조회
 		return new ModelAndView("item/read").addObject("result", result);
 	}
 	
@@ -54,6 +54,6 @@ public class ItemController {
 	public ModelAndView CVEHandler(ConstraintViolationException e, RedirectAttributes ra) {
 		String message = e.getConstraintViolations().stream().findFirst().get().getMessage();
 		ra.addFlashAttribute("message", message);
-		return new ModelAndView("redirect:/product/add");
+		return new ModelAndView("redirect:/item/add");
 	}
 }
