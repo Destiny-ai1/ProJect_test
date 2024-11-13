@@ -7,19 +7,19 @@
         values (#{username}, #{password}, #{name}, #{email}, #{phone_number}, #{joinday}, #{totalpurchase}, #{grade}, #{loginFailCount}, #{enabled}, #{role}, #{point})
     </insert>
     
-    <!--아이디 사용가능한지 확인-->
-    <select id="existsById" parameterType="String" resultType="boolean">
-        select count(username) > 0 from member where username = #{username}
+    <!--아이디 중복인지 체크후 사용가능한지 확인-->
+    <select id="existsById" parameterType="String" resultType="int">
+        select count(username) from member where username = #{username}
     </select>
     
     <!-- 이메일을 통해 아이디 찾기 -->
-    <select id="findByIdUsernameByEmail" parameterType="string" resultType="string">
-        select username from member where email = #{email}
+    <select id="findByIdUsernameByEmail" parameterType="map" resultType="com.example.demo.member.Member">
+        select username from member where name=#{name} and email = #{email}
     </select>
     
-    <!-- 회원 정보 조회 -->
-    <select id="findById" parameterType="string" resultType="com.example.demo.member.Member">
-        select * from member where username = #{username}
+    <!-- 이메일로 임시비밀번호를 받아와서 임시비밀번호로 바꾸기-->
+    <select id="findBypasswordUsernameByEmail" parameterType="map" resultType="com.example.demo.member.Member">
+        select * from member where username = #{username} and name=#{name} and email = #{email}
     </select>
 	
 	<!-- 회원 탈퇴 -->
