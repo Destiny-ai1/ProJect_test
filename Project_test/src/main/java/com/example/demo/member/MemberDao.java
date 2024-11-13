@@ -1,8 +1,10 @@
 package com.example.demo.member;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
+
 
 
 @Mapper
@@ -11,13 +13,13 @@ public interface MemberDao {
 	public int save(Member member);
 		
 	//아이디사용여부
-	public boolean existsById(String username);
+	int existsById(String username);
 		
-	//아이디 찾기 이메일로 인증
-	public Optional<String> findByIdUsernameByEmail(String email);
-		
-	//내정보 불러오기
-	public Optional<Member> findById(String username);
+	//아이디 찾기
+	Optional<Member> findByIdUsernameByEmail(Map<String, Object> params);
+	
+	//	비밀번호 찾기 이메일로 인증
+	Optional<Member> findBypasswordUsernameByEmail(Map<String, Object> params);
 		
 	//회원 탈퇴
 	public int delete(Member member);
@@ -33,8 +35,8 @@ public interface MemberDao {
 		
 	//포인트 적립
 	public void Update_Point(String username, int totalpurchase);
-
 	
-
-
+	//회원 조회
+	public Optional<Member> findById(String username);
+	
 }

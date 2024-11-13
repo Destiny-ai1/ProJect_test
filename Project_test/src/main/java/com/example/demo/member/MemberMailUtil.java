@@ -1,11 +1,15 @@
 package com.example.demo.member;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+
+
+
 @Component
 public class MemberMailUtil {
 	@Autowired

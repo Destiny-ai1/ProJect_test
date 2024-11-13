@@ -2,12 +2,13 @@ package com.example.demo.member;
 
 
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,8 @@ public class MemberService {
 	@Autowired
 	private MemberDao memberDao;
 	@Autowired
-	private MemberMailUtil mailUtil;
+	private MemberMailUtil mailSend;
+
 	
 	
 	//회원가입
@@ -39,26 +41,48 @@ public class MemberService {
 		memberDao.save(member);  
 	}
 	
-	//아이디 사용가능 
+	//중복인지 아닌지 확인후 아이디 사용가능 
 	public boolean Id_Available(String username) {
-		return !memberDao.existsById(username);
+		int count = memberDao.existsById(username);
+	    return count == 0;
 	}
 	
-	//아이디 찾기
-	public Optional<String> Idfind(String email) {
-		return memberDao.findByIdUsernameByEmail(email);
+	//이메일을 통해서 아이디 찾기
+	public Optional<String> Idfind(String name,String email) {
+		Map<String, Object> params = new HashMap<>();
+        params.put("name", name);
+        params.put("email", email);
+        Optional<Member> username = memberDao.findByIdUsernameByEmail(params);
+        username.ifPresent(user->{
+        	String subject = "아이디 찾기 결과";
+            String content = "회원님의 아이디는 " + user.getUsername() + " 입니다.";
+            mailSend.MailSend(email, subject, content);
+        });
+        return null;
 	}
 	
 	@Transactional
-	public boolean 비밀번호찾기로_임시비밀번호_발급(String username) {
-		Optional<Member> result = memberDao.findById(username);
-		if(result.isEmpty())
-			return false;
+	public boolean 비밀번호찾기로_임시비밀번호_발급(String username,String name, String email) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("username", username);
+	    params.put("name", name);
+	    params.put("email", email);
+	    
+	    Optional<Member> optionalMember = memberDao.findBypasswordUsernameByEmail(params);
+        if (optionalMember.isEmpty()) {
+            return false;
+        }
+
+        Member member = optionalMember.get();
 		String newPassword = RandomStringUtils.randomAlphanumeric(20);
 		String newEncodedPassword = encoder.encode(newPassword);
-		Member member = result.get();
+		
 		member.changePassword(newEncodedPassword);
-		mailUtil.MailSend(member.getEmail(), "임시비밀번호 입니다", "임시비밀번호  : " + newPassword);
+		memberDao.save(member);
+		
+		String subject = "임시비밀번호 발급";
+	    String content = "임시 비밀번호: " + newPassword;
+	    mailSend.MailSend(email, subject, content);
 		return true;
 	}
 		
@@ -68,9 +92,9 @@ public class MemberService {
 		return encoder.matches(password, encodedPassword);	
 	}
 	//내정보 불러올때
-	public MemberDto.Member_Read 내정보보기(String loginId) {
-		Member member = memberDao.findById(loginId).get();
-		return member.MyDetail(loginId);
+	public MemberDto.Member_Read 내정보보기(String username) {
+		Member member = memberDao.findById(username).get();
+		return member.MyDetail(username);
 	}
 	
 	//회원 탈퇴할때
