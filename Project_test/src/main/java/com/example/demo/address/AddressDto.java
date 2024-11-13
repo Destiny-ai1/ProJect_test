@@ -10,7 +10,7 @@ public class AddressDto {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Create {
-        @NotNull
+        @NotEmpty
         private String addressMain;
         @NotNull
         private int postNo;
@@ -29,8 +29,6 @@ public class AddressDto {
     }
 
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
     public static class Read {
         private Long addressNo;
         private String addressMain;

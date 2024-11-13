@@ -7,17 +7,40 @@
 
     <!-- 배송지 정보 저장 -->
     <insert id="save" parameterType="com.example.demo.address.Address">
-        INSERT INTO address (address_main, post_no, address_road, address_detail, address_name, member_username)
-        VALUES (#{addressMain}, #{postNo}, #{addressRoad}, #{addressDetail}, #{addressName}, #{memberUsername})
-    </insert>
+    <!-- SELECT KEY를 사용하여 addressNo 값을 생성 -->
+    <selectKey keyProperty="addressNo" resultType="long" order="BEFORE">
+        SELECT address_no_seq.nextval FROM dual
+    </selectKey>
+
+    INSERT INTO address (
+        address_no,
+        address_main,
+        post_no,
+        address_road,
+        address_detail,
+        address_name,
+        member_username
+    )
+    VALUES (
+        #{addressNo}, <!-- 위에서 생성한 addressNo 값 -->
+        #{addressMain},
+        #{postNo},
+        #{addressRoad},
+        #{addressDetail},
+        #{addressName},
+        #{memberUsername}
+    )
+</insert>
+
+
 
     <!-- 주소 번호로 배송지 조회 -->
-    <select id="findById" parameterType="long" resultMap="AddressReadResultMap">
+    <select id="findById" parameterType="java.lang.Long" resultMap="AddressReadResultMap">
         SELECT * FROM address WHERE address_no = #{addressNo}
     </select>
 
     <!-- 회원 아이디로 모든 배송지 조회 -->
-    <select id="findAllByUsername" parameterType="string" resultMap="AddressReadResultMap">
+    <select id="findAllByUsername" parameterType="java.lang.String" resultMap="AddressReadResultMap">
         SELECT * FROM address WHERE member_username = #{memberUsername}
     </select>
 
@@ -29,13 +52,13 @@
     </update>
 
     <!-- 배송지 삭제 -->
-    <delete id="delete" parameterType="long">
+    <delete id="delete" parameterType="java.lang.Long">
         DELETE FROM address WHERE address_no = #{addressNo}
     </delete>
 
     <!-- 배송지 조회를 위한 AddressReadResultMap -->
-    <resultMap id="AddressReadResultMap" type="com.example.demo.address.AddressDto.Read">
-        <id property="addressNo" column="address_no" />
+    <resultMap id="AddressReadResultMap" type="com.example.demo.address.AddressDto$Read">
+        <id property="addressNo" column="address_no" javaType="Long" />
         <result property="addressMain" column="address_main" />
         <result property="postNo" column="post_no" />
         <result property="addressRoad" column="address_road" />
