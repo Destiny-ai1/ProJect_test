@@ -8,7 +8,8 @@ import org.apache.ibatis.annotations.*;
 public interface AddressDao {
     // 배송지 정보 저장
     //@Insert("INSERT INTO address (address_main, post_no, address_road, address_detail, address_name, member_username) VALUES (#{addressMain}, #{postNo}, #{addressRoad}, #{addressDetail}, #{addressName}, #{memberUsername})")
-    public int save(Address address);
+    // 어노테이션을 넣으면 mapper가 안읽힘
+	public int save(Address address);
 
     // 주소 번호로 배송지 조회
     //@Select("SELECT * FROM address WHERE address_no = #{addressNo}")
