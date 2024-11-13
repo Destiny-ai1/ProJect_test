@@ -1,7 +1,7 @@
 insert into category values(1, '스키', null);
 insert into category values(2, '스키용품', null);
 insert into category values(3, '스노우보드', null);
-insert into category values(4, '스노우보드', null);
+insert into category values(4, '스노우보드용품', null);
 insert into category values(11, '폴', 1);
 insert into category values(12, '플레이트', 1);
 insert into category values(21, '고글', 2);
