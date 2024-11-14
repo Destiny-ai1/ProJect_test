@@ -69,9 +69,10 @@ public class ItemService {
             try {
                 imageFile.transferTo(file);  // 실제 파일 저장
                 imageDao.save(new ItemImage(item.getItemNo(), i, saveFilename));  // DB에 이미지 정보 저장
+                System.out.println("이미지 DB 저장: " + saveFilename);  // DB 저장 로그 출력
             } catch (IOException e) {
                 e.printStackTrace();  // 예외 처리
-			}
+            }
 		}	
 	}
 	

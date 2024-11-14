@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageRestController {
 	@Value("${itemimage.upload.path}")
 	private String imageFolder;
+	@Value("${itemimage.url}")
+	private String imageUrl;
 	
 	@PostMapping("/api/images")
 	public ResponseEntity<?> itemImageUpload(MultipartFile upload) {
@@ -30,13 +32,21 @@ public class ImageRestController {
 		String saveImageName = UUID.randomUUID() + "." + extension;
 		
 		File file = new File(imageFolder + saveImageName);
+		
+		// 경로가 없으면 생성
+	    if (!file.getParentFile().exists()) {
+	        file.getParentFile().mkdirs();  // 경로 생성
+	    }
+		
 		try {
 			upload.transferTo(file);
+			System.out.println("파일 저장 경로: " + file.getAbsolutePath());  // 파일 저장 경로 출력
 		} catch (IllegalStateException | IOException e) {
 			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패");
 		}
 		
-		String address = imageFolder + saveImageName;
+		String address = imageUrl + saveImageName;
 		Map<String, Object> map = Map.of("uploaded",1,"url",address,"filename", saveImageName);
 		return ResponseEntity.ok(map);
 	}

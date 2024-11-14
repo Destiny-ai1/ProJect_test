@@ -10,9 +10,9 @@ import org.apache.ibatis.annotations.Select;
 public interface CategoryDao {
 	public List<CategoryDto> findAll();
 	
-	@Select("select cno,cname from category where parent is null")
+	@Select("select cno,cname from category where pno is null")
 	public List<Map> findMajorCategory();
 	
-	@Select("select cno, cname from category where parent=#{cno}")
+	@Select("select cno, cname from category where pno=#{cno}")
 	public List<Map> findChildCategoryByParent(Long cno);
 }
