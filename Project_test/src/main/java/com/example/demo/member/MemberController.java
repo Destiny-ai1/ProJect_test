@@ -108,11 +108,10 @@ public class MemberController {
 	//비밀번호 확인이 됬으면 내정보페이지로 보내기
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/member/readme")
-	public ModelAndView readme(HttpSession session, Principal principal) {
-		if(session.getAttribute("checkPassword")==null) 
-			return new ModelAndView("redirect:/member/check-password");
-		MemberDto.Member_Read dto = memberService.내정보보기(principal.getName());
-		return new ModelAndView("member/readme").addObject("result", dto);
+	public ModelAndView readme(Principal principal) {
+	    // 서비스에서 비밀번호 확인 후 정보 조회
+	    MemberDto.Member_Read dto = memberService.내정보보기(principal.getName(), "입력된 비밀번호"); // 비밀번호 입력받은 값
+	    return new ModelAndView("member/readme").addObject("result", dto);
 	}
 	
 	//탈퇴시 탈퇴 처리하는 페이지로 보낸다

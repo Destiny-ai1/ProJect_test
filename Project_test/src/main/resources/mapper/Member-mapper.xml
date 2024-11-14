@@ -3,8 +3,8 @@
 <mapper namespace="com.example.demo.member.MemberDao">
 	<!--회원가입 읽어오기-->
 	<insert id="save" parameterType="com.example.demo.member.Member">
-        insert into member (username, password, name, email, phone, joinday, totalpurchase, grade, login_fail_count, enabled, role, point_money)
-        values (#{username}, #{password}, #{name}, #{email}, #{phone_number}, #{joinday}, #{totalpurchase}, #{grade}, #{loginFailCount}, #{enabled}, #{role}, #{point})
+        insert into member (username, password, name, email, phone, joinday, totalpurchase, grade, login_fail_count, enabled, role, point)
+        values (#{username}, #{password}, #{name}, #{email}, #{phone}, #{joinday}, #{totalpurchase}, #{grade}, #{loginFailCount}, #{enabled}, #{role}, #{point})
     </insert>
     
     <!--아이디 중복인지 체크후 사용가능한지 확인-->
@@ -13,7 +13,7 @@
     </select>
     
     <!-- 이메일을 통해 아이디 찾기 -->
-    <select id="findByIdUsernameByEmail" parameterType="map" resultType="com.example.demo.member.Member">
+    <select id="findByIdUsernameByEmail" parameterType="map" resultType="String">
         select username from member where name=#{name} and email = #{email}
     </select>
     
@@ -21,11 +21,43 @@
     <select id="findBypasswordUsernameByEmail" parameterType="map" resultType="com.example.demo.member.Member">
         select * from member where username = #{username} and name=#{name} and email = #{email}
     </select>
+    
+    <!--임시비밀번호 날라온값을 DB에 업데이트 시킨다-->
+    <update id="update" parameterType="com.example.demo.member.Member">
+    update member set password = #{password} where username = #{username}
+	</update>
 	
-	<!-- 회원 탈퇴 -->
-    <delete id="delete" parameterType="com.example.demo.member.Member">
-        delete from member where username = #{username}
-    </delete>
+	<!-- 회원 정보 불러올때 -->
+    <select id="UserDetails" parameterType="String" resultType="com.example.demo.member.MemberDto$Member_Read">
+        select name,email,phone,joinday,totalpurchase,grade,role,point from member where username = #{username}
+    </select>
+    
+    <!-- 회원 정보를 불러올때 password 입력받기 -->
+    <select id="UserDetailspassword" parameterType="String" resultType="String">
+        select password from member where username = #{username}
+    </select>
+    
+    <!--DB에 암호화된 정보를 불러오기-->
+    <select id="PasswordDB" parameterType="String" resultType="String">
+    select password from member where username = #{username}
+	</select>
+	
+    <!-- 내정보에서 비밀번호 변경  -->
+    <update id="PasswordChange">
+       	update member set password = #{newPassword} where username = #{username}
+    </update>
+	
+	<!-- 회원 포인트 조회 -->
+    <select id="userpoint" parameterType="map">
+        select point from member where username = #{username}
+    </select>
+    
+	<!-- 회원 포인트 업데이트 -->
+    <update id="Update_Point" parameterType="map">
+        update member set point = point + #{points} where username = #{username}
+    </update>
+
+
 
     <!-- 로그인 실패 시 카운트 증가 및 계정 블럭 -->
     <update id="memberLoginFailAndBlock" parameterType="string">
@@ -38,13 +70,8 @@
         update member set login_fail_count = 0 where username = #{username}
     </update>
 
-    <!-- 회원 포인트 조회 -->
-    <select id="findPointsByMemberId" parameterType="string" resultType="int">
-        select point_money from member where username = #{username}
-    </select>
-
-    <!-- 회원 포인트 업데이트 -->
-    <update id="updatePoints" parameterType="map">
-        update member set point_money = point_money + #{points} where username = #{username}
-    </update>
+    <!-- 회원 탈퇴 -->
+    <delete id="delete" parameterType="com.example.demo.member.Member">
+        delete from member where username = #{username}
+    </delete>
 </mapper>

@@ -52,10 +52,10 @@ public class MemberService {
 		Map<String, Object> params = new HashMap<>();
         params.put("name", name);
         params.put("email", email);
-        Optional<Member> username = memberDao.findByIdUsernameByEmail(params);
+        Optional<String> username = memberDao.findByIdUsernameByEmail(params);
         username.ifPresent(user->{
         	String subject = "아이디 찾기 결과";
-            String content = "회원님의 아이디는 " + user.getUsername() + " 입니다.";
+            String content = "회원님의 아이디는 " + user + " 입니다.";
             mailSend.MailSend(email, subject, content);
         });
         return null;
@@ -72,59 +72,83 @@ public class MemberService {
         if (optionalMember.isEmpty()) {
             return false;
         }
-
+      
         Member member = optionalMember.get();
 		String newPassword = RandomStringUtils.randomAlphanumeric(20);
 		String newEncodedPassword = encoder.encode(newPassword);
 		
 		member.changePassword(newEncodedPassword);
-		memberDao.save(member);
+		memberDao.update(member);
 		
 		String subject = "임시비밀번호 발급";
 	    String content = "임시 비밀번호: " + newPassword;
 	    mailSend.MailSend(email, subject, content);
 		return true;
 	}
-		
-	// 로그인을 한 상태에서 내정보 누르면 비밀번호 확인
-	public boolean 비밀번호확인(String password, String loginId) {
-		String encodedPassword = memberDao.findById(loginId).get().getPassword();
-		return encoder.matches(password, encodedPassword);	
-	}
+	
 	//내정보 불러올때
-	public MemberDto.Member_Read 내정보보기(String username) {
-		Member member = memberDao.findById(username).get();
-		return member.MyDetail(username);
+	public MemberDto.Member_Read 내정보보기(String loginId, String password) {
+		if(!비밀번호확인(password, loginId)) { throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");}
+		MemberDto.Member_Read memberInfo = memberDao.UserDetails(loginId);
+        return memberInfo;
 	}
 	
-	//회원 탈퇴할때
-	public void delete(String loginId) {
-		Member member = memberDao.findById(loginId).get();
-		memberDao.delete(member);
+	//비밀번호 확인
+	public boolean 비밀번호확인(String password, String loginId) {
+		String encodedPassword = memberDao.UserDetailspassword(loginId);
+		return encoder.matches(password, encodedPassword);
 	}
-
+	
+	//비밀번호 바꾸기
 	@Transactional
 	public PasswordChange updatePassword(MemberDto.Member_update dto, String loginId) {
-		if(dto.getOldPassword().equals(dto.getNewPassword())==true)
+		if(dto.getOldPassword().equals(dto.getNewPassword())==true) {
 			return PasswordChange.Old_Password;
-		Member member = memberDao.findById(loginId).get();
-		boolean result = encoder.matches(dto.getOldPassword(), member.getPassword());
-		if(result==false)
+		}
+		
+		String encodedPassword = memberDao.PasswordDB(loginId);
+		boolean result = encoder.matches(dto.getOldPassword(),encodedPassword);
+		if(result==false) {
 			return PasswordChange.Password_Check_Fail;
-		String newEncodedPassword = encoder.encode(dto.getNewPassword());
-		member.changePassword(newEncodedPassword);
+		}
+		String newPassword = encoder.encode(dto.getNewPassword());
+		memberDao.PasswordChange(newPassword,loginId);
 		return PasswordChange.Success;
 	}
-	//회원간 포인트 조회 및 적립
-	public int MemberPoint(String username,int totalpurchase) {
-		//회원별 포인트 조회
-		int MemberPoint=memberDao.FindPointByusername(username);
-		//포인트 적립(구매금액의 5%)
-		int PointAdd = (int)(totalpurchase* 0.05);
-		//적립된 point 를 업데이트
-		memberDao.Update_Point(username,totalpurchase);
-		//최종 포인트
-		return MemberPoint+PointAdd;
+	
+	//회원이 물건구매후 구매금액의 5%포인트적립 및 등급 상승 및 총구매금액 업데이트
+	@Transactional
+    public int updateMemberPurchase(String loginId, int purchaseAmount) {
+        // 현재 포인트, 총 구매금액, 등급을 조회
+        int currentPoints = memberDao.userpoint(loginId);						//기존포인트 조회
+        int currentTotalPurchase = memberDao.totalPurchase(loginId);			//기존 회원의 총구매금액 조회
+
+        // 포인트 계산 (구매금액의 5%)
+        int pointsToAdd = (int) (purchaseAmount * 0.05);
+        int updatedPoints = currentPoints + pointsToAdd;
+
+        // 총 구매 금액 업데이트
+        int updatedTotalPurchase = currentTotalPurchase + purchaseAmount;
+
+        // 등급 계산
+        Grade newGrade = determineGrade(updatedTotalPurchase);
+
+        // 데이터베이스 업데이트 (포인트, 총 구매금액, 등급)
+        memberDao.updateMemberInfo(loginId, updatedPoints, updatedTotalPurchase, newGrade);
+
+        return updatedPoints;  // 업데이트된 포인트 반환
+    }
+
+    private Grade determineGrade(int totalPurchase) {
+        if (totalPurchase >= 1_000_000) {
+            return Grade.DIAMOND;
+        } else if (totalPurchase >= 500_000) {
+            return Grade.GOLD;
+        } else if (totalPurchase >= 300_000) {
+            return Grade.SILVER;
+        } else {
+            return Grade.BRONZE;
+        }						//최종 포인트
 	}
 	
 	//회원정보에서 업데이트 처리
@@ -135,4 +159,11 @@ public class MemberService {
 	    // 이메일, 전화번호, 암호화된 비밀번호를 업데이트
 	    member.update(dto.getEmail(), dto.getPhone_number(), encodedPassword);
 	}
+	
+	//회원 탈퇴할때
+		public void delete(String loginId) {
+			Member member = memberDao.findById(loginId).get();
+			memberDao.delete(member);
+	}
+
 }

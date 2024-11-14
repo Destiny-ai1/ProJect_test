@@ -42,6 +42,7 @@ public class MemberRestController {
 		return ResponseEntity.ok("회원님의 아이디는"+result.get()+"입니다");
 	}
 	
+	//임시비밀번호 받아와서 리셋시키기
 	@PatchMapping("/members/reset-password")
 	public ResponseEntity<?> 비밀번호리셋(
 			@RequestParam @Valid @NotEmpty String username,

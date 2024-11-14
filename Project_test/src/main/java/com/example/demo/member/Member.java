@@ -3,15 +3,12 @@ package com.example.demo.member;
 import java.time.*;
 
 
-import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.demo.enums.*;
 import com.example.demo.enums.Role;
 
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import lombok.*;
 
@@ -20,21 +17,19 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@DynamicUpdate
+@ToString
 public class Member {
 	@Id
 	private String username;
 	private String password;
 	private String name;
 	private String email;
-	private String phone_number;
-	private LocalDateTime joinday;
+	private String phone;
+	private LocalDate joinday;
 	private int totalpurchase;
-	@Enumerated(EnumType.STRING)
 	private Grade grade;
 	private Integer loginFailCount;
 	private Boolean enabled;
-	@Enumerated(EnumType.STRING)
 	private Role role;
 	private int point;
 	
@@ -45,7 +40,7 @@ public class Member {
 	
 	//회원정보를 읽어오기
 	public MemberDto.Member_Read MyDetail(String loginId){
-		return new MemberDto.Member_Read(name, email, phone_number, joinday.toLocalDate(), totalpurchase, grade.name(), role.name(), point);
+		return new MemberDto.Member_Read(name, email, phone, joinday, totalpurchase, grade.name(), role.name(), point);
 	}
 	
 	//계정 블록걸때
@@ -59,9 +54,10 @@ public class Member {
 		this.loginFailCount=0;
 	}
 	
+	//내정보에서 업데이트되는것들
 	public void update(String email, String phone_number, String encodedPassword) {
 	    this.email = email;
-	    this.phone_number = phone_number;
+	    this.phone = phone_number;
 	    this.password = encodedPassword; 
 	}
 }

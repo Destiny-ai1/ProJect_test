@@ -1,7 +1,6 @@
 package com.example.demo.member;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import com.example.demo.enums.Grade;
 import com.example.demo.enums.Role;
@@ -23,10 +22,10 @@ private MemberDto() {}
 		private String name;
 		@Email
 		private String email;
-		private String phone_number;
-		
+		private String phone;
+	
 		public Member toEntity(String encodedPassword) {
-			return new Member(username.toLowerCase(), encodedPassword, name, email, phone_number, LocalDateTime.now(), 0, Grade.Bronze, null, null, Role.user, 0);
+			return new Member(username.toLowerCase(), encodedPassword, name, email, phone, LocalDate.now(), 0, Grade.Bronze, null, null, Role.user, 0);
 		}
 	}
 	//회원정보에서 바꿀수있는 정보
@@ -36,7 +35,8 @@ private MemberDto() {}
 		private String newPassword;
 		@Email
 		private String email;
-		private String phone_number;
+		private String phone;
+		private int point;
 	}
 	
 	//회원정보를 출력할때 나오는것들
@@ -46,7 +46,7 @@ private MemberDto() {}
 		private String name;
 		@Email
 		private String email;
-		private String phone_number;
+		private String phone;
 		private LocalDate joinday;
 		private int totalpurchase;
 		private String grade;
