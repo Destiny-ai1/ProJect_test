@@ -18,7 +18,6 @@ drop table payment;
 drop table review;
 
 drop sequence item_seq;
-drop sequence image_seq;
 
 PURGE RECYCLEBIN;
 
@@ -56,8 +55,8 @@ create table item (
     item_irum varchar2(50 CHAR),                            -- 상품 이름
     item_info varchar2(100 CHAR),                           -- 상품 정보
     item_price number(10),                                  -- 상품 가격
-    item_jango number(5),                                   -- 재고 수량
-    item_sell_qty number(5),                                -- 판매된 상품의 수량
+    item_jadgo number(2),                                   -- 재고 수량
+    item_sell_qty number(2),                                -- 판매된 상품의 수량
     add_good_cnt number(7),                                 -- 별점합계
     review_ea number(7),                                    -- 리뷰 갯수
     constraint item_pk_item_no primary Key(item_no),
@@ -70,12 +69,11 @@ GRANT SELECT ON item_seq TO c##winter_shop;					-- 아이템 테이블 시퀀스
 SELECT sequence_name FROM user_sequences WHERE sequence_name = 'ITEM_SEQ';	-- 아이템 시퀀스 생성여부 검색
 
 --상품 이미지
-create table image (
+create table item_image (
     image_no number(5),                                     -- 상품 이미지 번호
     item_no number(10),                                     -- 상품 번호 (외래 키로 참조)
     image_name varchar2(200 char),                          -- 상품 이미지 이름
     constraint image_pk_image_no primary key(image_no),
-    constraint fk_image_item foreign key (item_no) references item (item_no)
 );
 
 --장바구니

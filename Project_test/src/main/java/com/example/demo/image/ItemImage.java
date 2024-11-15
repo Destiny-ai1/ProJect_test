@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ItemImage {
-	private Long imageNo;
-	private Long itemNo;
-	private String imageName;
+    private Long imageNo;    // imageNo는 자동 생성되므로, 객체 생성 시 반드시 포함될 필요 없음
+    private int itemNo;      // 아이템 번호
+    private String imageName; // 이미지 파일 이름
 }

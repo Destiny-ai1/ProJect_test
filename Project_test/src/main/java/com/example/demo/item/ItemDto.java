@@ -18,7 +18,7 @@ public class ItemDto {
 		private String itemIrum;
 		private String itemInfo;
 		private Long itemPrice;
-		private String image;
+		private String item_image;
 	}
 	
 	@Data
@@ -32,7 +32,7 @@ public class ItemDto {
 	    private Long addGoodCnt;
 	    private Long reviewEa;
 	    private Long cno;
-	    private List<String> image;
+	    private List<String> images;
 	}
 	
 	@Data
@@ -51,10 +51,16 @@ public class ItemDto {
 		private Long reviewEa;
 		private Long cno;
 		
-		private List<MultipartFile> image;
+		private List<MultipartFile> images;
 		
 		public Item toEntity() {
 			return new Item(null, itemIrum, itemInfo, itemPrice, itemJango, itemSellQty, addGoodCnt, reviewEa, cno);
 		}
+	}
+	
+	@Data
+	public static class Pnos {
+		@NotNull(message="상품을 선택하세요")
+		private List<Long> pnos;
 	}
 }

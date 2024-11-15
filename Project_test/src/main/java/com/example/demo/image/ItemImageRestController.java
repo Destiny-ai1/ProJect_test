@@ -19,24 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-public class ImageRestController {
-	@Value("${itemimage.upload.path}")
-	private String imageFolder;
-	@Value("${itemimage.url}")
-	private String imageUrl;
-	
+public class ItemImageRestController {	
 	@PostMapping("/api/images")
 	public ResponseEntity<?> itemImageUpload(MultipartFile upload) {
 		String originalFileName = upload.getOriginalFilename();
 		String extension = FilenameUtils.getExtension(originalFileName);
 		String saveImageName = UUID.randomUUID() + "." + extension;
 		
-		File file = new File(imageFolder + saveImageName);
-		
-		// 경로가 없으면 생성
-	    if (!file.getParentFile().exists()) {
-	        file.getParentFile().mkdirs();  // 경로 생성
-	    }
+		File file = new File(ItemImageSaveLoad.IMAGE_URL + saveImageName);
 		
 		try {
 			upload.transferTo(file);
@@ -46,15 +36,15 @@ public class ImageRestController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패");
 		}
 		
-		String address = imageUrl + saveImageName;
+		String address = ItemImageSaveLoad.IMAGE_URL + saveImageName;
 		Map<String, Object> map = Map.of("uploaded",1,"url",address,"filename", saveImageName);
 		return ResponseEntity.ok(map);
 	}
 	
 	@GetMapping("/api/images")
-	public ResponseEntity<byte[]> viewImage(String imagename) {
+	public ResponseEntity<byte[]> viewImage(String imageName) {
 		try {
-			Path imagePath = Paths.get(imageFolder + imagename);
+			Path imagePath = Paths.get(ItemImageSaveLoad.IMAGE_FOLDER + imageName);
 			byte[] imageBytes = Files.readAllBytes(imagePath);
 			String mimeType = Files.probeContentType(imagePath);
 			MediaType mediaType = MediaType.parseMediaType(mimeType);

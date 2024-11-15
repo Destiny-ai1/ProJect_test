@@ -2,6 +2,7 @@ package com.example.demo.item;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 @Mapper
@@ -10,16 +11,16 @@ public interface ItemDao {
     public Integer save(Item item);
     
     // 아이템을 리스트로 선택
-    @Select("SELECT item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, add_good_cnt, review_ea, cno, "
-            + "#{imageUrl} || (SELECT image_name FROM image pi WHERE item.item_no = pi.item_no AND pi.image_no = 0) AS image "
-            + "FROM item")
+    @Select("select item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, add_good_cnt, review_ea, cno, "
+            + "#{imageUrl} || (select image_name from item_image ii where it.item_no = ii.item_no and ii.image_no = 0) as image "
+            + "from item it")
     public List<ItemDto.ItemList> findAll(String imageUrl);
-    
+
     // 상품 번호로 찾기
     public ItemDto.Read findById(Long itemNo, String imageUrl);
     
     // 상품에 해당하는 가격 찾기
-    @Select("select price from item where item_no=#{item_no} and rownum=1")
+    @Select("select item_price from item where item_no=#{item_no} and rownum=1")
     public Integer findPriceByPno(Long itemNo);
     
     // 잔고가 1개 이상인 상품은 주문 가능
