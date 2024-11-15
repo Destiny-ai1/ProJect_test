@@ -32,5 +32,5 @@ public class Order {
     // 회원 사용자 이름
     private String memberUsername;
     // 우편 번호
-    private Long postNo;
+    private Long addressNo;
 }

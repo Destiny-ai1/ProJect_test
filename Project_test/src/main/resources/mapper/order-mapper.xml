@@ -30,7 +30,7 @@
     </delete>
 
     <!-- 주문 조회를 위한 OrderReadResultMap -->
-    <resultMap id="OrderReadResultMap" type="com.example.demo.order.OrderDto.Read">
+    <resultMap id="OrderReadResultMap" type="com.example.demo.order.OrderDto$Read">
         <id property="orderNo" column="order_no" />
         <result property="orderDate" column="order_date" />
         <result property="totalPrice" column="total_price" />
@@ -44,7 +44,7 @@
     </resultMap>
 
     <!-- 주문 목록 조회를 위한 OrderListResultMap -->
-    <resultMap id="OrderListResultMap" type="com.example.demo.order.OrderDto.OrderList">
+    <resultMap id="OrderListResultMap" type="com.example.demo.order.OrderDto$OrderList">
         <id property="orderNo" column="order_no" />
         <result property="orderDate" column="order_date" />
         <result property="orderStatus" column="order_status" />

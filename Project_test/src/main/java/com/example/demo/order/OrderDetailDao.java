@@ -13,11 +13,11 @@ public interface OrderDetailDao {
     int save(OrderDetail orderDetail);
 
     // 주문 번호로 주문 상세 정보 조회
-    @Select("SELECT * FROM orders_detail WHERE order_no = #{orderNo}")
+    //@Select("SELECT * FROM orders_detail WHERE order_no = #{orderNo}")
     List<OrderDetail> findByOrderNo(@Param("orderNo") Long orderNo);
 
     // 주문 상세 정보 업데이트
-    @Update("UPDATE orders_detail SET item_name = #{itemName}, image = #{image}, detail_ea = #{detailEa}, price = #{price}, review_written = #{reviewWritten} WHERE order_no = #{orderNo} AND item_no = #{itemNo}")
+    //@Update("UPDATE orders_detail SET item_name = #{itemName}, image = #{image}, detail_ea = #{detailEa}, price = #{price}, review_written = #{reviewWritten} WHERE order_no = #{orderNo} AND item_no = #{itemNo}")
     int update(OrderDetail orderDetail);
 
     // 주문 번호로 주문 상세 정보 삭제

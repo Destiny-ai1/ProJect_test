@@ -26,7 +26,7 @@ public class OrderDto {
         @NotEmpty // 회원의 사용자 이름은 비어있을 수 없음
         private String memberUsername;
         @NotNull // 우편 번호는 null일 수 없음
-        private Long postNo;
+        private Long addressNo;
         private List<OrderDetailDto> orderDetails; // 주문 상세 항목 리스트
 
         // DTO를 엔티티로 변환하는 메소드
@@ -39,7 +39,7 @@ public class OrderDto {
                     .usedPoint(usedPoint)
                     .actPayment(actPayment)
                     .memberUsername(memberUsername)
-                    .postNo(postNo)
+                    .addressNo(addressNo)
                     .build();
         }
     }
@@ -67,7 +67,7 @@ public class OrderDto {
         private int usedPoint; // 사용된 포인트
         private int actPayment; // 실제 결제 금액
         private String memberUsername; // 회원의 사용자 이름
-        private Long postNo; // 우편 번호
+        private Long addressNo; // 우편 번호
         private List<OrderDetailDto> orderDetails; // 주문 상세 항목 리스트
     }
 
