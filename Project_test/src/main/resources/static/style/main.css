@@ -1,4 +1,4 @@
-/*html너비등*/
+/* main.css */
 * {
   padding: 0;
   margin: 0;
@@ -36,4 +36,91 @@ section {
   background-color: #f1f1f1;
   min-height: 800px;
   padding: 10px;
+}
+
+/* 헤더와 네비게이션 스타일 */
+.navbar {
+  background-color: rgba(0, 0, 0, 0.7); /* 반투명 배경 */
+  color: white;
+  z-index: 1000;
+  position: relative;
+}
+
+.fixed-image {
+  position: relative;
+  top: 0;
+  width: 100%;
+  height: calc(50vh); /* 화면 높이의 50% */
+  background-image: url('https://cdn.actionhub.com/wp-content/uploads/2019/02/Screen-Shot-2019-02-15-at-10.51.34-AM.png');
+  background-size: cover; /* 이미지를 전체 영역에 맞춤 */
+  background-position: center; /* 이미지 중앙 정렬 */
+  margin-top: 20px; /* 네비게이션 바와 이미지 사이 간격 */
+}
+
+.content {
+  margin-top: 20px; /* 고정 이미지 아래 간격 */
+  padding: 20px;
+}
+
+/* 네비게이터 스타일 */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.fixed-menu {
+  position: fixed;
+  top: 50px; /* 헤더 높이에 맞춰서 */
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.8); /* 배경색 반투명으로 설정 */
+  color: black;
+  z-index: 1000;
+  padding: 5px 0;
+  text-align: center;
+  margin: auto;
+  left: 0;
+  right: 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.fixed-menu .dropdown {
+  display: inline-block;
+  margin: 0 100px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.8);
+  min-width: 200px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  padding: 12px 16px;
+  z-index: 1;
+  border-radius: 5px;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.fixed-menu .dropdown:hover {
+  background-color: #b9eeff;
+  border: 2px solid #000;
+}
+
+.custom-button {
+  border: none;
+  background: none;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 12px 24px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.custom-button:hover {
+  background-color: #b9eeff;
 }
