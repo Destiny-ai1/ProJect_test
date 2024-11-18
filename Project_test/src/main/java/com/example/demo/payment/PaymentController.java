@@ -1,17 +1,15 @@
 package com.example.demo.payment;
 
 import java.util.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.example.demo.exception.FailException;
-
+import org.springframework.ui.Model;
 import jakarta.validation.Valid;
+import com.example.demo.exception.FailException;
 
 @Controller
 public class PaymentController { // 결제 관련 요청을 처리하는 컨트롤러 클래스
@@ -34,7 +32,7 @@ public class PaymentController { // 결제 관련 요청을 처리하는 컨트�
             return new ModelAndView("payment/add").addObject("errors", br.getAllErrors()); // 오류 메시지를 포함한 뷰 반환
         }
         paymentService.addPayment(dto); // 결제 정보 추가
-        return new ModelAndView("redirect:/payment/list"); // 결제 목록으로 리디렉션
+        return new ModelAndView("redirect:/list"); // 결제 목록으로 리디렉션
     }
 
     // 결제 목록 조회 메소드
@@ -61,7 +59,7 @@ public class PaymentController { // 결제 관련 요청을 처리하는 컨트�
             return new ModelAndView("payment/update").addObject("errors", br.getAllErrors()); // 오류 메시지를 포함한 뷰 반환
         }
         paymentService.updatePayment(dto); // 결제 정보 업데이트
-        return new ModelAndView("redirect:/payment/list"); // 결제 목록으로 리디렉션
+        return new ModelAndView("redirect:/list"); // 결제 목록으로 리디렉션
     }
 
     // 결제 정보 삭제 요청 처리 메소드
@@ -69,7 +67,30 @@ public class PaymentController { // 결제 관련 요청을 처리하는 컨트�
     @GetMapping("/payment/delete")
     public ModelAndView deletePayment(@RequestParam Long orderNo) {
         paymentService.removePayment(orderNo); // 결제 정보 삭제
-        return new ModelAndView("redirect:/payment/list"); // 결제 목록으로 리디렉션
+        return new ModelAndView("redirect:/list"); // 결제 목록으로 리디렉션
+    }
+
+    // 결제 확인 페이지를 반환하는 메소드
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/payment/confirm")
+    public String paymentPage() {
+        return "payment/confirm"; // 결제 페이지 뷰 반환
+    }
+
+    // 결제 요청을 처리하는 메소드
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/payment/confirm")
+    public String confirmPayment(@Valid PaymentDto.Create dto, BindingResult br, Model model) {
+        if (br.hasErrors()) { // 입력 데이터에 오류가 있는 경우
+            return "payment/confirm"; // 오류 발생 시 다시 해당 폼을 반환
+        }
+        paymentService.addPayment(dto); // 결제 정보 추가
+
+        // 결제 완료 정보를 모델에 추가
+        model.addAttribute("orderNo", dto.getOrderNo());
+        model.addAttribute("totalAmount", dto.getPointAdd()); // 예시로 포인트 사용 금액을 추가함
+
+        return "payment/confirm"; // 결제 완료 페이지로 이동
     }
 
     // 예외 처리 핸들러

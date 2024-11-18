@@ -32,7 +32,7 @@
     </delete>
 
     <!-- 결제 조회를 위한 PaymentReadResultMap -->
-    <resultMap id="PaymentReadResultMap" type="com.example.demo.payment.PaymentDto.Read">
+    <resultMap id="PaymentReadResultMap" type="com.example.demo.payment.PaymentDto$Read">
         <id property="orderNo" column="order_no" />
         <result property="payMethod" column="pay_method" />
         <result property="pointAdd" column="point_add" />
