@@ -6,14 +6,14 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 @Mapper
-public interface ItemDao {	
-	// item 목록 insert
+public interface ItemDao {    
+    // item 목록 insert
     public Integer save(Item item);
-    
+
     // 아이템을 리스트로 선택
-    @Select("select item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, add_good_cnt, review_ea, cno, "
-            + "#{imageUrl} || (select image_name from item_image ii where it.item_no = ii.item_no and ii.image_no = 0) as image "
-            + "from item it")
+    @Select("SELECT item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, add_good_cnt, review_ea, cno, "
+            + "#{imageUrl} || (SELECT image_name FROM item_image ii WHERE it.item_no = ii.item_no AND ROWNUM = 1) AS item_image "
+            + "FROM item it")
     public List<ItemDto.ItemList> findAll(String imageUrl);
 
     // 상품 번호로 찾기

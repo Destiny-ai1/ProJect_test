@@ -17,7 +17,7 @@ public class ItemDto {
 		private Long itemNo;
 		private String itemIrum;
 		private String itemInfo;
-		private Long itemPrice;
+		private Integer itemPrice;
 		private String item_image;
 	}
 	
@@ -26,12 +26,12 @@ public class ItemDto {
 	    private Long itemNo;
 	    private String itemIrum;
 	    private String itemInfo;
-	    private Long itemPrice;
-	    private Long itemJango;
-	    private Long itemSellQty;
-	    private Long addGoodCnt;
-	    private Long reviewEa;
-	    private Long cno;
+	    private Integer itemPrice;
+	    private Integer itemJango;
+	    private Integer itemSellQty;
+	    private Integer addGoodCnt;
+	    private Integer reviewEa;
+	    private Integer cno;
 	    private List<String> images;
 	}
 	
@@ -43,13 +43,13 @@ public class ItemDto {
 		@NotEmpty(message="제품 정보를 입력하세요")
 		private String itemInfo;
 		@DecimalMin(value="1000", message="가격은 1000원이상이어야합니다")
-		private Long itemPrice;
+		private Integer itemPrice;
 		@DecimalMin(value="1", message="잔고는 1개이상이어야 합니다")
-		private Long itemJango;
-		private Long itemSellQty;
-		private Long addGoodCnt;
-		private Long reviewEa;
-		private Long cno;
+		private Integer itemJango;
+		private Integer itemSellQty;
+		private Integer addGoodCnt;
+		private Integer reviewEa;
+		private Integer cno;
 		
 		private List<MultipartFile> images;
 		

@@ -14,10 +14,10 @@ public class Item {
 	public Long itemNo;
 	public String itemIrum;
 	public String itemInfo;
-	public Long itemPrice;
-	public Long itemJango;
-	public Long itemSellQty;
-	public Long addGoodCnt;
-	public Long reviewEa;
-	public Long cno;
+	public Integer itemPrice;
+	public Integer itemJango;
+	public Integer itemSellQty;
+	public Integer addGoodCnt;
+	public Integer reviewEa;
+	public Integer cno;
 }

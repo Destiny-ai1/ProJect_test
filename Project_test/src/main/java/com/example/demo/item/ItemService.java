@@ -17,10 +17,10 @@ import com.example.demo.category.CategoryDao;
 import com.example.demo.image.ItemImage;
 import com.example.demo.image.ItemImageDao;
 import com.example.demo.image.ItemImageSaveLoad;
+import com.example.demo.item.ItemDto.ItemList;
 
 @Service
 public class ItemService {
-
     @Autowired
     private ItemDao itemDao;
     @Autowired
@@ -28,18 +28,13 @@ public class ItemService {
     @Autowired
     private ItemImageDao imageDao;
 
-    // 생성자 주입
-    public ItemService(ItemDao itemDao) {
-        this.itemDao = itemDao;
-    }
-
     // 카테고리 대분류
     public List<Map> findMajorCategory() {
         return categoryDao.findMajorCategory();
     }
 
     // 아이템 리스트
-    public List<ItemDto.ItemList> findAll() {
+    public List<ItemList> findAll() {
         return itemDao.findAll(ItemImageSaveLoad.IMAGE_URL);
     }
 
@@ -56,21 +51,15 @@ public class ItemService {
             throw new RuntimeException("상품 저장 실패: itemNo가 생성되지 않았습니다.");
         }
 
-        // 2. itemNo가 부모 테이블에 존재하는지 확인
-        if (itemDao.getItemNameById(itemNo) == null) {
-            throw new RuntimeException("상품 정보가 제대로 저장되지 않았습니다. itemNo: " + itemNo);
-        }
-
+        // 2. 상품에 대한 이미지 저장
         List<MultipartFile> images = dto.getImages();  // 이미지 목록
-
-        // 이미지가 없으면 빈 리스트를 사용
         if (images == null || images.isEmpty()) {
             images = new ArrayList<>();
         }
 
-        // 3. 상품에 대한 이미지 저장
-        for (int i = 0; i < images.size(); i++) {
-            MultipartFile imageFile = images.get(i);
+        // 3. 이미지를 `item_image` 테이블에 저장
+        for (long i = 0; i < images.size(); i++) {
+            MultipartFile imageFile = images.get((int)i);
             if (imageFile.isEmpty()) {
                 continue;  // 이미지 파일이 비어있으면 건너뛰기
             }
@@ -84,11 +73,10 @@ public class ItemService {
             try {
                 // 이미지 파일을 실제 디스크에 저장
                 imageFile.transferTo(file);
-
-                // 이미지 정보를 DB에 저장
-                imageDao.save(new ItemImage(itemNo, i, saveFilename));  // itemNo를 사용하여 이미지 저장
-                System.out.println("이미지 DB 저장: " + saveFilename);  // DB 저장 로그 출력
-
+                
+                // item_no를 사용하여 item_image 테이블에 이미지 저장
+                ItemImage itemImage = new ItemImage(null, itemNo, saveFilename); // imageNo는 null로 설정 (자동 생성됨)
+                imageDao.save(itemImage);  // item_image에 이미지 저장
             } catch (IOException e) {
                 // 예외 처리: 파일 저장에 실패한 경우
                 e.printStackTrace();

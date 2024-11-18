@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,6 @@ import jakarta.validation.Valid;
 
 @Controller
 public class ItemController {
-
     @Autowired
     private ItemService service;
 
@@ -62,10 +62,7 @@ public class ItemController {
     @ExceptionHandler(ConstraintViolationException.class)
     public ModelAndView CVEHandler(ConstraintViolationException e, RedirectAttributes ra) {
         // 입력 검증 예외 처리
-        String message = e.getConstraintViolations().stream()
-                        .findFirst()
-                        .get()
-                        .getMessage();  // 첫 번째 검증 오류 메시지를 추출
+        String message = e.getConstraintViolations().stream().findFirst().get().getMessage();  // 첫 번째 검증 오류 메시지를 추출
         ra.addFlashAttribute("message", message);  // 메시지 리다이렉트 속성에 추가
         return new ModelAndView("redirect:/item/add");  // 상품 추가 페이지로 리다이렉트
     }

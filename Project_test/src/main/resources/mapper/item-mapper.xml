@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.item.ItemDao">
-
     <!-- ItemDao save 메서드 (item 저장) -->
     <insert id="save" useGeneratedKeys="true" keyProperty="itemNo">
         <selectKey keyProperty="itemNo" order="BEFORE" resultType="long">
@@ -33,24 +32,28 @@
         <result property="reviewEa" column="review_ea" />
         <result property="cno" column="cno" />
         
-        <!-- 이미지 정보 (이미지 리스트) -->
-        <collection property="images" javaType="java.util.List" ofType="com.example.demo.image.ItemImage">
-            <result column="item_image" property="filename"/>
+        <!-- 여러 개의 이미지 URL을 List<String>으로 반환 -->
+        <collection property="images" javaType="java.util.List" ofType="string">
+            <result column="item_images" />
         </collection>
     </resultMap>
-    
-    <!-- 상품 정보 조회 -->
+
+    <!-- 상품 정보 조회 (여러 이미지를 반환) -->
     <select id="findById" resultMap="joinMap">
-        select i.*, #{imageUrl} || it.item_irum as image
-        from item it 
-        join item_image im on it.item_no = im.item_no
-        where it.item_no = #{itemNo}
+        SELECT it.item_no,
+               it.item_irum,
+               it.item_info,
+               it.item_price,
+               it.item_jango,
+               it.item_sell_qty,
+               it.add_good_cnt,
+               it.review_ea,
+               it.cno,
+               LISTAGG('/api/images?imagename=' || im.image_name, ',') 
+                   WITHIN GROUP (ORDER BY im.image_no) AS item_images
+        FROM item it
+        LEFT JOIN item_image im ON it.item_no = im.item_no
+        WHERE it.item_no = #{item_no}
+        GROUP BY it.item_no, it.item_irum, it.item_info, it.item_price, it.item_jango, it.item_sell_qty, it.add_good_cnt, it.review_ea, it.cno
     </select>
-
-    <!-- ItemImage 저장 -->
-    <insert id="saveImage" parameterType="com.example.demo.image.ItemImage">
-        INSERT INTO item_image (image_no, item_no, filename)
-        VALUES (#{imageNo, jdbcType=BIGINT}, #{itemNo, jdbcType=BIGINT}, #{filename, jdbcType=VARCHAR})
-    </insert>
-
 </mapper>
