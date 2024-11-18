@@ -133,7 +133,8 @@ public class MemberController {
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/member/update")
 	public ModelAndView update(@Valid MemberDto.Member_update dto, BindingResult br, Principal principal) {
-		memberService.update(dto, principal.getName());
+		String loginId = principal.getName();
+		memberService.member_update(dto,loginId);
 		return new ModelAndView("redirect:/member/readme");
 	}
 	

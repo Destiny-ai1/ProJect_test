@@ -24,14 +24,25 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 			Authentication authentication) throws IOException, ServletException {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
-		memberDao.login_success_Reset(username);
+		memberDao.loginSuccessReset(username);
+		
+		// 세션에서 이전에 가려던 URL을 가져옴
+        HttpSession session = request.getSession();
+        String redirectUrl = (String) session.getAttribute("redirectUrl");
 		
 		if(password.length()==20) {
-			HttpSession session = request.getSession();
 			session.setAttribute("message", "임시비밀번호로 로그인했습니다. 비밀번호를 변경하세요");
 			response.sendRedirect("/member/update-password");
-		} else 
-			response.sendRedirect("/");
+		} 
+		
+		else {
+			if (redirectUrl != null) {
+                session.removeAttribute("redirectUrl");  						// 세션에서 URL 제거
+                response.sendRedirect(redirectUrl);
+            } else {
+                response.sendRedirect("/");
+            }
+		}
 	}
 }
 

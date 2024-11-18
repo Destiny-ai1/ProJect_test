@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.enums.Grade;
 import com.example.demo.enums.PasswordChange;
 import com.example.demo.exception.FailException;
 
@@ -119,51 +120,55 @@ public class MemberService {
 	//회원이 물건구매후 구매금액의 5%포인트적립 및 등급 상승 및 총구매금액 업데이트
 	@Transactional
     public int updateMemberPurchase(String loginId, int purchaseAmount) {
-        // 현재 포인트, 총 구매금액, 등급을 조회
-        int currentPoints = memberDao.userpoint(loginId);						//기존포인트 조회
-        int currentTotalPurchase = memberDao.totalPurchase(loginId);			//기존 회원의 총구매금액 조회
-
-        // 포인트 계산 (구매금액의 5%)
-        int pointsToAdd = (int) (purchaseAmount * 0.05);
-        int updatedPoints = currentPoints + pointsToAdd;
+        // 현재 포인트, 총 구매금액 조회
+		Integer currentTotalPurchase = memberDao.gettotalPurchase(loginId);			//기존 회원의 총구매금액 조회
+		if (currentTotalPurchase == null) {
+	        currentTotalPurchase = 0;
+	    }
+		
+        Integer currentPoints = memberDao.userpoint(loginId);						//기존포인트 조회
+        if (currentPoints == null) {
+            currentPoints = 0;
+        }
+        
+        int pointsToAdd = (int) (purchaseAmount * 0.05);							// 포인트 계산 (구매금액의 5%)
+        int updatedPoints = currentPoints + pointsToAdd;							//기존포인트+구매금액 계산된 포인트
 
         // 총 구매 금액 업데이트
-        int updatedTotalPurchase = currentTotalPurchase + purchaseAmount;
+        int updatedTotalPurchase = currentTotalPurchase + purchaseAmount;		//기존구매금액+구매금액
 
-        // 등급 계산
-        Grade newGrade = determineGrade(updatedTotalPurchase);
+        Grade newGrade = updateGrade(updatedTotalPurchase);						// 등급 계산
 
         // 데이터베이스 업데이트 (포인트, 총 구매금액, 등급)
-        memberDao.updateMemberInfo(loginId, updatedPoints, updatedTotalPurchase, newGrade);
+        memberDao.Update_Point(loginId, updatedPoints, updatedTotalPurchase, newGrade);
 
         return updatedPoints;  // 업데이트된 포인트 반환
     }
 
-    private Grade determineGrade(int totalPurchase) {
+    private Grade updateGrade(int totalPurchase) {
         if (totalPurchase >= 1_000_000) {
-            return Grade.DIAMOND;
+            return Grade.Diamond;
         } else if (totalPurchase >= 500_000) {
-            return Grade.GOLD;
+            return Grade.Gold;
         } else if (totalPurchase >= 300_000) {
-            return Grade.SILVER;
+            return Grade.Silver;
         } else {
-            return Grade.BRONZE;
-        }						//최종 포인트
+            return Grade.Bronze;
+        }											//최종 등급
 	}
 	
 	//회원정보에서 업데이트 처리
-	public void update(@Valid MemberDto.Member_update dto, String loginId) {
-		Member member = memberDao.findById(loginId).orElseThrow(()-> new FailException("Member not found"));
-	    // encoder를 사용해서 비밀번호를 암호화
-	    String encodedPassword = encoder.encode(dto.getNewPassword());
-	    // 이메일, 전화번호, 암호화된 비밀번호를 업데이트
-	    member.update(dto.getEmail(), dto.getPhone_number(), encodedPassword);
+	public void member_update(@Valid MemberDto.Member_update dto,String loginId ) {
+	    // 이메일, 전화번호,
+		if (dto.getEmail() != null || dto.getPhone() != null) {
+	        memberDao.Member_update(loginId,dto.getEmail(), dto.getPhone());
+	    }	
 	}
 	
 	//회원 탈퇴할때
-		public void delete(String loginId) {
-			Member member = memberDao.findById(loginId).get();
-			memberDao.delete(member);
+	@Transactional
+	public void delete(String loginId) {
+		memberDao.Memberdelete(loginId);
 	}
 
 }

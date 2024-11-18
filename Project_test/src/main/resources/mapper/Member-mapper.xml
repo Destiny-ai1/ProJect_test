@@ -48,17 +48,30 @@
     </update>
 	
 	<!-- 회원 포인트 조회 -->
-    <select id="userpoint" parameterType="map">
-        select point from member where username = #{username}
+    <select id="userpoint" resultType="java.lang.Integer">
+        select coalesce(point, 0) from member where username = #{username}
     </select>
     
-	<!-- 회원 포인트 업데이트 -->
+    <!--회원의 총 구매금액조회-->
+    <select id="gettotalPurchase" resultType="java.lang.Integer">
+    select  coalesce(totalpurchase, 0) from member where username= #{username}
+    </select>
+    
+    <!--회원의 현재 등급 조회-->
+    <select id ="getGrade" parameterType="map">
+    select grade from member where username= #{username}
+    </select>
+    
+	<!-- 구매금액에따라 회원의 등급,포인트,총구매금액 업데이트 -->
     <update id="Update_Point" parameterType="map">
-        update member set point = point + #{points} where username = #{username}
+        update member set point = #{point}, totalpurchase = #{totalPurchase}, Grade = #{Grade} where username = #{username}
     </update>
-
-
-
+	
+	<!--로그인실패시 회원의 아이디만 조회할때-->
+	<select id="findById" resultType="com.example.demo.member.Member">
+		select username from member where username=#{username}
+	</select>
+	
     <!-- 로그인 실패 시 카운트 증가 및 계정 블럭 -->
     <update id="memberLoginFailAndBlock" parameterType="string">
         update member set login_fail_count = login_fail_count + 1,
@@ -68,6 +81,20 @@
     <!-- 로그인 성공 시 실패 카운트 초기화 -->
     <update id="loginSuccessReset" parameterType="string">
         update member set login_fail_count = 0 where username = #{username}
+    </update>
+    
+    <!--회원정보 업데이트되는 것들 동적 처리-->
+    <update id="Member_update">
+    	update member <set>
+        <if test="email != null">
+            email = #{email},
+        </if>
+        
+        <if test="phone != null">
+            phone = #{phone},
+        </if>
+    </set>
+    where username = #{username} and rownum = 1
     </update>
 
     <!-- 회원 탈퇴 -->

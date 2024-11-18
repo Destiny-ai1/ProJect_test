@@ -18,6 +18,7 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @ToString
+@Builder
 public class Member {
 	@Id
 	private String username;
@@ -26,12 +27,12 @@ public class Member {
 	private String email;
 	private String phone;
 	private LocalDate joinday;
-	private int totalpurchase;
+	private Integer totalpurchase=0;
 	private Grade grade;
 	private Integer loginFailCount;
-	private Boolean enabled;
+	private Boolean enabled=false;
 	private Role role;
-	private int point;
+	private Integer point=0;
 	
 	//바꿀 비밀번호
 	public void changePassword(String password) {
@@ -43,17 +44,17 @@ public class Member {
 		return new MemberDto.Member_Read(name, email, phone, joinday, totalpurchase, grade.name(), role.name(), point);
 	}
 	
-	//계정 블록걸때
-	public void Member_Block() {
-		this.enabled= false;
-		this.loginFailCount= 5;
-	}
-	
 	//로그인 실패횟수 올라가는 카운트
 	public void Member_login_Fail_Count() {
 		this.loginFailCount=0;
 	}
 	
+	//계정 블록걸때
+	public void Member_Block() {
+		this.enabled= false;
+		this.loginFailCount= 5;
+	}
+
 	//내정보에서 업데이트되는것들
 	public void update(String email, String phone_number, String encodedPassword) {
 	    this.email = email;
