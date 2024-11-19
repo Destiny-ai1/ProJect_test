@@ -25,7 +25,7 @@ private MemberDto() {}
 		private String phone;
 	
 		public Member toEntity(String encodedPassword) {
-			return new Member(username.toLowerCase(), encodedPassword, name, email, phone, LocalDate.now(), 0, Grade.Bronze, null, null, Role.user, 0);
+			return new Member(username.toLowerCase(), encodedPassword, name, email, phone, LocalDate.now(), 0, Grade.Bronze, 0, true, Role.user, 0);
 		}
 	}
 	

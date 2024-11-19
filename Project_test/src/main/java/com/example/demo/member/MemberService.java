@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.enums.Grade;
 import com.example.demo.enums.PasswordChange;
-import com.example.demo.exception.FailException;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -32,14 +31,24 @@ public class MemberService {
 	
 	//회원가입
 	public void join(MemberDto.Member_Create dto) {
-		// 1. 비밀번호를 암호화
-		String encodedPassword = encoder.encode(dto.getPassword());
-		
-		// 2. dto를 멤버로 변환
-		Member member = dto.toEntity(encodedPassword);
-		
-		// 3. Member를 DB에도 저장
-		memberDao.save(member);  
+		try {
+	        // 1. 비밀번호를 암호화
+	        String encodedPassword = encoder.encode(dto.getPassword());
+	        System.out.println("비밀번호 암호화 완료: " + encodedPassword);
+	        
+	        // 2. dto를 멤버로 변환
+	        System.out.println("DTO 데이터: " + dto);
+	        Member member = dto.toEntity(encodedPassword);
+	        System.out.println("Member 객체로 변환: " + member);
+	        
+	        // 3. Member를 DB에 저장
+	        memberDao.save(member);
+	        System.out.println("DB 저장 완료: " + member.getUsername());
+	    } catch(Exception e) {
+	        // 예외 출력
+	        e.printStackTrace();
+	        System.out.println("회원가입 중 오류 발생: " + e.getMessage());
+	    }
 	}
 	
 	//중복인지 아닌지 확인후 아이디 사용가능 

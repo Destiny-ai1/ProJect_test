@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 
@@ -22,7 +21,6 @@ public interface BoardDao {
 	@Update("update board set read_cnt=read_cnt+1 where bno=#{bno}")
 	public void increaseReadCnt(@Param("bno")Long bno);
 	
-	@Select("select count(*) from board")
 	public int Count();
 
 	public List<BoardDto.BoardList> findAll(int startRowNum, int endRowNum);

@@ -2,6 +2,7 @@ package com.example.demo.board;
 
 import java.security.Principal;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -18,12 +19,13 @@ import jakarta.validation.Valid;
 
 @Controller
 public class BoardController {
+	@Autowired
 	public BoardService boardService;
 	
 	//메인 페이지로 보내기
 	@GetMapping("/")
 	public ModelAndView Main() {
-		return new ModelAndView("/");
+		return new ModelAndView("index");
 	}
 	
 	//글 작성하기위해 로그인한 사람만 글작성으로 간다
