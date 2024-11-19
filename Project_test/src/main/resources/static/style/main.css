@@ -6,6 +6,18 @@
   font-family: "Nanum Gothic", sans-serif;
 }
 
+.fixed-menu {
+  position: relative; /* 기존의 fixed에서 relative로 변경하여 고정되지 않도록 함 */
+  top: 0; /* top 속성 제거 */
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: black;
+  z-index: 1000;
+  padding: 5px 0;
+  text-align: center;
+  margin: 0 auto;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 #app {
   width: 100%; /* 전체 화면 너비로 설정 */
   margin: 0 auto;
@@ -27,10 +39,6 @@ nav {
   border: 1px solid skyblue;
 }
 
-main {
-  display: flex;
-  width: 100%; /* main 요소도 전체 너비로 확장 */
-}
 
 section {
   background-color: #f1f1f1;
@@ -124,3 +132,4 @@ body {
 .custom-button:hover {
   background-color: #b9eeff;
 }
+
