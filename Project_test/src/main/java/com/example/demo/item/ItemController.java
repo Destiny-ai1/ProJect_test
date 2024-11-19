@@ -26,7 +26,8 @@ public class ItemController {
     // 상품 리스트 메인에 출력
     @GetMapping("/")
     public ModelAndView list(Principal p) {
-        List<ItemDto.ItemList> result = service.findAll(); // 상품 목록 조회
+    	String imageUrl = "/api/images?imagename=";
+        List<ItemDto.ItemList> result = service.findAll(imageUrl); // 상품 목록 조회
         return new ModelAndView("item/list").addObject("result", result); // list.html에 결과 전달
     }
 

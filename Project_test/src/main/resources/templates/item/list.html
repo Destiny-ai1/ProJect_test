@@ -20,7 +20,7 @@
 						<div class="card h-100">
 							<a th:href="'/item/read?pno=' + ${item.itemNo}">
 								<!-- 상품 이미지 출력 -->
-								<img th:src="@{'/api/images?imagename=' + ${item.item_image}}" class="card-img-top" alt="상품 이미지">
+								<img th:src="@{${item.itemImage}}" class="card-img-top" alt="상품 이미지">
 							</a>
 							<div class="card-body">
 								<p class="card-title" th:text="${item.itemIrum}" style="text-overflow: ellipsis;"></p>

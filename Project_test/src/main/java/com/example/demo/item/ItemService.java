@@ -32,11 +32,16 @@ public class ItemService {
     public List<Map> findMajorCategory() {
         return categoryDao.findMajorCategory();
     }
-
     // 아이템 리스트
-    public List<ItemList> findAll() {
-        return itemDao.findAll(ItemImageSaveLoad.IMAGE_URL);
+    public List<ItemDto.ItemList> findAll(String imageUrl) {
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            // imageUrl이 null이거나 빈 문자열이면 기본 URL을 설정
+            imageUrl = "/default/images/";  // 기본 이미지 URL을 설정 (예시)
+        }
+        // 이제 imageUrl을 사용해서 Dao를 호출
+        return itemDao.findAll(imageUrl);
     }
+
 
     // 상품 생성 서비스 (트랜잭션 처리 추가)
     @Transactional

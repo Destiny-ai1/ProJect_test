@@ -18,7 +18,7 @@ public class ItemDto {
 		private String itemIrum;
 		private String itemInfo;
 		private Integer itemPrice;
-		private String item_image;
+		private String itemImage;
 	}
 	
 	@Data
