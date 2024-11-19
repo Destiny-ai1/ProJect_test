@@ -1,59 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.item.ItemDao">
-    <!-- ItemDao save 메서드 (item 저장) -->
-    <insert id="save" useGeneratedKeys="true" keyProperty="itemNo">
-        <selectKey keyProperty="itemNo" order="BEFORE" resultType="long">
-            select ITEM_SEQ.nextval from dual
-        </selectKey>
-        insert into item(item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, add_good_cnt, review_ea, cno)
-        values(
-            #{itemNo, jdbcType=NUMERIC}, 
-            #{itemIrum, jdbcType=VARCHAR}, 
-            #{itemInfo, jdbcType=VARCHAR}, 
-            #{itemPrice, jdbcType=NUMERIC}, 
-            #{itemJango, jdbcType=NUMERIC}, 
-            #{itemSellQty, jdbcType=INTEGER}, 
-            #{addGoodCnt, jdbcType=INTEGER}, 
-            #{reviewEa, jdbcType=INTEGER}, 
-            #{cno, jdbcType=INTEGER}
-        )
-    </insert>
+	<!-- ItemDao save 메서드 (item 저장) -->
+	<insert id="save" useGeneratedKeys="true" keyProperty="itemNo">
+		<selectKey keyProperty="itemNo" order="BEFORE"
+			resultType="long">
+			select ITEM_SEQ.nextval from dual
+		</selectKey>
+		insert into item(item_no, item_irum, item_info, item_price,
+		item_jango, item_sell_qty, add_good_cnt, review_ea, cno)
+		values(
+		#{itemNo, jdbcType=NUMERIC},
+		#{itemIrum, jdbcType=VARCHAR},
+		#{itemInfo, jdbcType=VARCHAR},
+		#{itemPrice, jdbcType=NUMERIC},
+		#{itemJango, jdbcType=NUMERIC},
+		#{itemSellQty, jdbcType=INTEGER},
+		#{addGoodCnt, jdbcType=INTEGER},
+		#{reviewEa, jdbcType=INTEGER},
+		#{cno, jdbcType=INTEGER}
+		)
+	</insert>
 
-    <!-- ItemDto (Item 정보) -->
-    <resultMap id="joinMap" type="com.example.demo.item.ItemDto$Read">
-        <id property="itemNo" column="item_no" />
-        <result property="itemIrum" column="item_irum" />
-        <result property="itemInfo" column="item_info" />
-        <result property="itemPrice" column="item_price" />
-        <result property="itemJango" column="item_jango" />
-        <result property="itemSellQty" column="item_sell_qty" />
-        <result property="addGoodCnt" column="add_good_cnt" />
-        <result property="reviewEa" column="review_ea" />
-        <result property="cno" column="cno" />
-        
-        <!-- 여러 개의 이미지 URL을 List<String>으로 반환 -->
-        <collection property="images" javaType="java.util.List" ofType="string">
-            <result column="item_images" />
-        </collection>
-    </resultMap>
+	<!-- ItemDto (Item 정보) -->
+	<resultMap id="joinMap"
+		type="com.example.demo.item.ItemDto$Read">
+		<id property="itemNo" column="item_no" />
+		<result property="itemIrum" column="item_irum" />
+		<result property="itemInfo" column="item_info" />
+		<result property="itemPrice" column="item_price" />
+		<result property="itemJango" column="item_jango" />
+		<result property="itemSellQty" column="item_sell_qty" />
+		<result property="addGoodCnt" column="add_good_cnt" />
+		<result property="reviewEa" column="review_ea" />
+		<result property="cno" column="cno" />
 
-    <!-- 상품 정보 조회 (여러 이미지를 반환) -->
-    <select id="findById" resultMap="joinMap">
-        SELECT it.item_no,
-               it.item_irum,
-               it.item_info,
-               it.item_price,
-               it.item_jango,
-               it.item_sell_qty,
-               it.add_good_cnt,
-               it.review_ea,
-               it.cno,
-               LISTAGG('/api/images?imagename=' || im.image_name, ',') 
-                   WITHIN GROUP (ORDER BY im.image_no) AS item_images
-        FROM item it
-        LEFT JOIN item_image im ON it.item_no = im.item_no
-        WHERE it.item_no = #{item_no}
-        GROUP BY it.item_no, it.item_irum, it.item_info, it.item_price, it.item_jango, it.item_sell_qty, it.add_good_cnt, it.review_ea, it.cno
-    </select>
+		<!-- 여러 개의 이미지 URL을 List<String>으로 반환 -->
+		<collection property="images" javaType="java.util.List"
+			ofType="string">
+			<result column="item_images" />
+		</collection>
+	</resultMap>
+
+	<!-- 상품 정보 조회 (여러 이미지를 반환) -->
+	<select id="findById" resultMap="joinMap">
+		SELECT it.*,
+		#{imageUrl} || im.image_name as item_images
+		FROM item it
+		LEFT JOIN item_image im
+		ON it.item_no = im.item_no
+		WHERE it.item_no = #{itemNo}
+	</select>
+
 </mapper>

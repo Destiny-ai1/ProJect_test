@@ -1,75 +1,89 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-<meta charset="UTF-8">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="/style/main.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<style>
-	#info {
-		min-height: 600px;
-		background-color: #eee;	
-	}
-		
-	.thumbnail {
-		cursor: pointer;
-	}
-	.choice {
-		border: 3px solid red;
-	}
-</style>
-<script>
-	$(document).ready(function() {
-		const _csrf = '[[${_csrf.token}]]';
-		
-		$('.thumbnail:first-of-type').addClass("choice");
-		
-		$('.thumbnail').click(function() {
-			$('.thumbnail').removeClass("choice");
-			$(this).addClass("choice");
-			$('#image').attr('src', $(this).attr('src'));
-		});
-		
-		$('#add-cart').click(function() {
-			const pno = '[[${result.pno}]]';
-			$.ajax({
-				url: '/api/carts',
-				method: 'post',
-				data: {pno, _csrf},
-				success() {
-					alert("장바구니에 상품을 담았습니다");
-				}, error() {
-					alert("상품을 담을 수 없습니다");
-				}
-			})
-		});		
-	});
-</script>	
-<title>Insert title here</title>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/style/main.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style>
+        #info {
+            min-height: 600px;
+            background-color: #eee;
+        }
+
+        .thumbnail {
+            cursor: pointer;
+        }
+
+        .choice {
+            border: 3px solid red;
+        }
+    </style>
+    <script>
+        $(document).ready(function() {
+            const _csrf = '[[${_csrf.token}]]'; // CSRF 토큰
+            $('.thumbnail:first-of-type').addClass("choice");
+
+            $('.thumbnail').click(function() {
+                $('.thumbnail').removeClass("choice");
+                $(this).addClass("choice");
+                $('#image').attr('src', $(this).attr('src'));
+            });
+
+            $('#add-cart').click(function() {
+                const pno = '[[${result.itemNo}]]';
+                $.ajax({
+                    url: '/api/carts',
+                    method: 'post',
+                    data: {pno, _csrf},  // CSRF 토큰을 요청 데이터에 추가
+                    success() {
+                        alert("장바구니에 상품을 담았습니다");
+                    }, error() {
+                        alert("상품을 담을 수 없습니다");
+                    }
+                });
+            });
+        });
+    </script>
+    <title>상품 상세</title>
 </head>
 <body>
-	<div id="app">
-		<header th:replace="~{/fragment/header.html}"> </header>
-		<nav th:replace="~{/fragment/nav.html}"></nav>
-		<section>
-			<div class="mb-3">
-				<img id="image" style="height:250px;" th:src="${result.images[0]}">
-			</div>
-			<div>
-				<img th:each="image:${result.images}" th:src="${image}" style="height:100px;" class="thumbnail">
-			</div>
-			<div th:text="${result.vendor} + ' ' + ${result.name} + '(' + ${result.price} + '원)'">
-			</div>
-			<div id="info" th:utext="${result.info}"></div>
-			<div sec:authorize="hasRole('ROLE_USER') or hasRole('ROLE_SOCIAL')">
-				<button class="btn btn-danger" id="add-cart">장바구니 담기</button>
-			</div>
-			<div sec:authorize="isAnonymous()">
-				<button class="btn btn-secondary" disabled>장바구니 담기를 위해 로그인</button>
-			</div>
-		</section>
-		<footer th:replace="~{/fragment/footer.html}"> </footer>
-	</div>		
+    <div id="app">
+        <header th:replace="~{/fragment/header.html}"></header>
+        <nav th:replace="~{/fragment/nav.html}"></nav>
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            <!-- 상품 이미지 출력 -->
+                            <img id="image" style="height:250px;"
+                                 th:src="@{${result.images != null and result.images.size() > 0 ? '/api/images?imagename=' + result.images[0] : '/api/images?imagename=normal/default-image.jpg'}}"
+                                 alt="상품 이미지">
+                        </div>
+                        <div>
+                            <!-- 썸네일 이미지 출력 -->
+                            <div class="d-flex">
+                                <span th:each="image : ${result.images}">
+                                    <img th:src="@{${image != null ? '/api/images?imagename=' + image : '/api/images?imagename=normal/default-image.jpg'}}"
+                                         class="thumbnail" style="height: 100px; margin-right: 10px;">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <h3 th:text="${result.itemIrum}"></h3>
+                        <h4 th:text="${result.itemPrice + '원'}"></h4>
+                        <p id="info" th:utext="${result.itemInfo}"></p>
+                        <div sec:authorize="hasRole('ROLE_USER') or hasRole('ROLE_SOCIAL')">
+                            <button class="btn btn-danger" id="add-cart">장바구니 담기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer th:replace="~{/fragment/footer.html}"> </footer>
+    </div>			
 </body>
 </html>

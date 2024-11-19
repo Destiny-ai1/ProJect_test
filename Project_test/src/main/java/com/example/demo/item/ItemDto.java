@@ -32,8 +32,11 @@ public class ItemDto {
 	    private Integer addGoodCnt;
 	    private Integer reviewEa;
 	    private Integer cno;
+	    
+	    // 이미지를 담을 리스트
 	    private List<String> images;
 	}
+
 	
 	@Data
 	public static class Create {

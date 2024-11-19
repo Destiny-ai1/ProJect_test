@@ -17,7 +17,6 @@ import com.example.demo.category.CategoryDao;
 import com.example.demo.image.ItemImage;
 import com.example.demo.image.ItemImageDao;
 import com.example.demo.image.ItemImageSaveLoad;
-import com.example.demo.item.ItemDto.ItemList;
 
 @Service
 public class ItemService {
@@ -32,6 +31,7 @@ public class ItemService {
     public List<Map> findMajorCategory() {
         return categoryDao.findMajorCategory();
     }
+
     // 아이템 리스트
     public List<ItemDto.ItemList> findAll(String imageUrl) {
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
@@ -42,14 +42,13 @@ public class ItemService {
         return itemDao.findAll(imageUrl);
     }
 
-
     // 상품 생성 서비스 (트랜잭션 처리 추가)
     @Transactional
     public void save(ItemDto.Create dto) {
         // 1. 상품 정보를 DB에 저장
         Item item = dto.toEntity();  // ItemDto.Create를 Item으로 변환
         itemDao.save(item);          // item을 DB에 저장
-        
+
         // itemNo를 가져옵니다. (아이템이 저장된 후 itemNo가 생성되어야 합니다)
         Long itemNo = item.getItemNo();
         if (itemNo == null) {
@@ -64,7 +63,7 @@ public class ItemService {
 
         // 3. 이미지를 `item_image` 테이블에 저장
         for (long i = 0; i < images.size(); i++) {
-            MultipartFile imageFile = images.get((int)i);
+            MultipartFile imageFile = images.get((int) i);
             if (imageFile.isEmpty()) {
                 continue;  // 이미지 파일이 비어있으면 건너뛰기
             }
@@ -78,7 +77,7 @@ public class ItemService {
             try {
                 // 이미지 파일을 실제 디스크에 저장
                 imageFile.transferTo(file);
-                
+
                 // item_no를 사용하여 item_image 테이블에 이미지 저장
                 ItemImage itemImage = new ItemImage(null, itemNo, saveFilename); // imageNo는 null로 설정 (자동 생성됨)
                 imageDao.save(itemImage);  // item_image에 이미지 저장
@@ -96,7 +95,10 @@ public class ItemService {
     }
 
     // 상품 번호로 상품 읽기
-    public ItemDto.Read read(Long itemNo) {
-        return itemDao.findById(itemNo, ItemImageSaveLoad.IMAGE_URL);
+    public ItemDto.Read read(Long itemNo, String imgUrl) {
+        if (imgUrl == null || imgUrl.trim().isEmpty()) {
+            imgUrl = "/default/images/";  // 기본 이미지 URL 설정
+        }
+        return itemDao.findById(itemNo, imgUrl);
     }
 }

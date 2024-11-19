@@ -18,7 +18,7 @@
 					<!-- 상품 리스트 출력 -->
 					<div class="col-lg-3 col-md-4 col-sm-6 mb-4" th:each="item : ${result}">
 						<div class="card h-100">
-							<a th:href="'/item/read?pno=' + ${item.itemNo}">
+							<a th:href="'/item/read?itemNo=' + ${item.itemNo}">
 								<!-- 상품 이미지 출력 -->
 								<img th:src="@{${item.itemImage}}" class="card-img-top" alt="상품 이미지">
 							</a>

@@ -21,13 +21,13 @@ import jakarta.validation.Valid;
 @Controller
 public class ItemController {
     @Autowired
-    private ItemService service;
+    private ItemService itemService;
 
     // 상품 리스트 메인에 출력
     @GetMapping("/")
     public ModelAndView list(Principal p) {
     	String imageUrl = "/api/images?imagename=";
-        List<ItemDto.ItemList> result = service.findAll(imageUrl); // 상품 목록 조회
+        List<ItemDto.ItemList> result = itemService.findAll(imageUrl); // 상품 목록 조회
         return new ModelAndView("item/list").addObject("result", result); // list.html에 결과 전달
     }
 
@@ -35,7 +35,7 @@ public class ItemController {
     @Secured("ROLE_ADMIN")  // 관리자만 접근 가능
     @GetMapping("/item/add")
     public ModelAndView addItem() {
-        List<Map> majorCategory = service.findMajorCategory();
+        List<Map> majorCategory = itemService.findMajorCategory();
         return new ModelAndView("item/add").addObject("category", majorCategory); // 카테고리 추가
     }
 
@@ -48,17 +48,17 @@ public class ItemController {
             return new ModelAndView("item/add").addObject("errors", br.getAllErrors());
         }
 
-        service.save(dto);
+        itemService.save(dto);
         return new ModelAndView("redirect:/"); // 상품 리스트로 리다이렉트
     }
 
     // 상품 상세 정보 조회
     @GetMapping("/item/read")
     public ModelAndView read(Long itemNo, String imageUrl) {
-        ItemDto.Read result = service.read(itemNo);  // 상품 상세 정보 조회
+        ItemDto.Read result = itemService.read(itemNo, imageUrl);  // 상품 상세 정보 조회
         return new ModelAndView("item/read").addObject("result", result);
     }
-
+    
     // 예외 처리: ConstraintViolationException (입력 검증 오류 처리)
     @ExceptionHandler(ConstraintViolationException.class)
     public ModelAndView CVEHandler(ConstraintViolationException e, RedirectAttributes ra) {
