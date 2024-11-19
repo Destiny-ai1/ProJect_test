@@ -32,6 +32,7 @@ public class BoardController {
 	public ModelAndView ckEditor사용() {
 		return new ModelAndView("board/write");
 	}
+	
 	//글의 유효성을 검사하고 게시글을 데이터로 저장하고, 게시글을쓴데로 보낸다
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/board/write")

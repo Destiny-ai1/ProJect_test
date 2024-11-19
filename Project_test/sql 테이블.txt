@@ -49,37 +49,32 @@ create table category(
     constraint category_fk_parent foreign key (pno) references category (cno)
 );
 
+--상품
 create table item (
     item_no number(10),                                     -- 상품 고유 번호 (primary Key)
     item_irum varchar2(50 CHAR),                            -- 상품 이름
-    item_info clob,                                         -- 상품 정보
+    item_info varchar2(100 CHAR),                           -- 상품 정보
     item_price number(10),                                  -- 상품 가격
-    item_jango number(5),                         -- 재고 수량
-    item_sell_qty number(5),                      -- 판매된 상품의 수량
-    add_good_cnt number(7),                       -- 별점합계
-    review_ea number(7),                          -- 리뷰 갯수
+    item_jadgo number(2),                                   -- 재고 수량
+    item_sell_qty number(2),                                -- 판매된 상품의 수량
+    add_good_cnt number(7),                                 -- 별점합계
+    review_ea number(7),                                    -- 리뷰 갯수
     constraint item_pk_item_no primary Key(item_no),
     cno number(5),                                          -- 카테고리 ID (외래 키)
     constraint fk_item_category foreign key (cno) references category (cno) -- 카테고리와의 관계
 );
 
-create sequence item_seq;
-GRANT SELECT ON item_seq TO c##winter_shop;
-SELECT sequence_name FROM user_sequences WHERE sequence_name = 'ITEM_SEQ';
-
+create sequence item_seq;									-- 아이템 테이블 시퀀스 생성
+GRANT SELECT ON item_seq TO c##winter_shop;					-- 아이템 테이블 시퀀스를 user아이디에 권한부여
+SELECT sequence_name FROM user_sequences WHERE sequence_name = 'ITEM_SEQ';	-- 아이템 시퀀스 생성여부 검색
 
 --상품 이미지
 create table item_image (
-    image_no number(5),                                      -- 상품 이미지 번호
-    item_no number(10),                                      -- 상품 번호 (외래 키로 참조)
-    image_name varchar2(200 char),                           -- 상품 이미지 이름
-    constraint image_pk_image_no primary key(image_no),      -- 기본 키: image_no
-    constraint fk_item_no foreign key(item_no) references item(item_no) -- 외래 키
+    image_no number(5),                                     -- 상품 이미지 번호
+    item_no number(10),                                     -- 상품 번호 (외래 키로 참조)
+    image_name varchar2(200 char),                          -- 상품 이미지 이름
+    constraint image_pk_image_no primary key(image_no),
 );
-
-create sequence item_image_seq;                              -- 시퀀스 생성
-GRANT SELECT ON item_image_seq TO c##winter_shop;           -- 권한 부여
-SELECT sequence_name FROM user_sequences;
 
 --장바구니
 create table cart(
@@ -115,12 +110,21 @@ create table board(
     write_time date,                                            -- 작성시간
     read_cnt number(7),                                         -- 조회수
     board_password number(6),                                   -- 글 비밀번호
-    comments varchar2(100 char),                                -- 댓글
+    board_delete number(1),                                		-- 글 삭제
     username VARCHAR2(50 CHAR),                                 -- 회원 ID (외래 키)
     cno number(5),												-- 카테고리 번호(외래 키)
     constraint pk_board_bno primary key(bno),
     constraint fk_board_username foreign key (username) references member (username),
     constraint fk_board_cno foreign key (cno) references category (cno)
+);
+
+create sequence board_seq;										--board 시퀀스 생성
+
+--고객센터 글읽은 회원 저장
+create table board_read(
+	username varchar2(20 char),									--회원 아이디
+	bno number(7)												--글 번호
+	constraint pk_board_read primary key(username,bno)	
 );
 
 --주문
@@ -186,4 +190,13 @@ create table review(
     constraint review_fk_order_no foreign key (order_no) references orders (order_no)
 );
 
+--댓글 추가
+create table comments(
+	comments_cno number(7),										--댓글 번호
+	comments_content varchar2(200),								--댓글 내용
+	comments_writer varchar2(20),								--댓글 내용
+	comments_write_time date,									--댓글 작성시간
+	bno number(7),												--글의 번호(외래키)
+	constraint comments_pk_comments_cno primary key(comments_cno)
+);
 select * from tab;

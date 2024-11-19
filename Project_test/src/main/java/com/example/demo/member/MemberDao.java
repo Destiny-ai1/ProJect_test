@@ -63,7 +63,30 @@ public interface MemberDao {
 	
 	//회원이 내정보에서 업데이트가능한것들
 	public void Member_update(String username,String email, String phone);
-
+	
+	//로그인했거나 남이작성한글인지 확인
+	public boolean existsByBnoAndloginId(Long bno, String loginId);
+	
+	//조회수가 올라간 내역을 중복 방지를위해 저장한다
+	public void read_save(String loginId, Long bno);
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public String  Memberdelete(String loginId);
+
+
+	
 	
 }

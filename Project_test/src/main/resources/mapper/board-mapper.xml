@@ -1,59 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.board.boardDao">
-
-	<!-- 전체 게시물 조회 -->
-    <select id="findAll" resultType="com.example.demo.board.BoardDto$BoardList">
-        <![CDATA[
-            select * from (
-                select rownum as rnum, b.* from (
-                    select bno, title, writer, to_char(write_time, 'yyyy-mm-dd hh24:mi:ss') as writeTime, read_cnt 
-                    from board
-                ) b
-                where rownum <= #{endRowNum}
-            )
-            where rnum >= #{startRowNum}
-        ]]>
-    </select>
-    
+<mapper namespace="com.example.demo.board.BoardDao">
     <!-- 게시물 저장 -->
     <insert id="save" parameterType="com.example.demo.board.Board">
-        insert into board(bno, title, content, writer, write_time, read_cnt, is_deleted)
-        values(#{bno}, #{title}, #{content}, #{writer}, sysdate, 0, 0)
+    	<selectKey order="BEFORE" resultType="long" keyProperty="bno">
+    		select board_seq.nextval from dual
+    	</selectKey>
+       insert into board (
+        bno, title, content, writer, write_time, read_cnt, board_password, board_delete, username, cno)
+    	values (#{bno}, #{title}, #{content}, #{writer}, sysdate, #{read_Cnt}, #{password}, #{board_delete}, #{username}, #{cno})
     </insert>
-
-    <!-- 게시물 조회용 resultMap 설정 -->
-    <resultMap id="findByIdMap" type="com.example.demo.board.BoardDto$BoardRead">
-        <id column="bno" property="bno" />
-        <result column="title" property="title"/>
-        <result column="content" property="content"/>
-        <result column="writer" property="writer"/>
-        <result column="writeTime" property="writeTime"/>
-        <result column="read_cnt" property="readCnt"/>
-        <result column="is_deleted" property="isDeleted"/>
-    </resultMap>
-
-    <!-- ID로 게시물 조회 -->
-    <select id="findById" resultMap="findByIdMap">
-        select b.bno, b.title, b.content, b.writer, to_char(b.write_time, 'yyyy-mm-dd hh24:mi:ss') as writeTime,
-        b.read_cnt, b.is_deleted
-        from board b where b.bno = #{bno}
-    </select>
-
-    <!-- 게시물 업데이트 -->
-    <update id="update">
-        update board
-        <set>
-            <if test="title != null">title = #{title},</if>
-            <if test="content != null">content = #{content},</if>
-            <if test="readCnt != null">read_cnt = read_cnt + 1,</if>
-        </set>
-        where bno = #{bno}
-    </update>
-
-    <!-- ID로 게시물 삭제 -->
-    <delete id="deleteByBno">
-        update board set is_deleted = 1 where bno = #{bno}
-    </delete>
-
+	
+	<!--게시글을 조회하는거-->
+	<select id="findById" parameterType="long" resultType="com.example.demo.board.BoardDto$BoardRead">
+    select b.bno, b.title, b.content, b.writer, TO_CHAR(b.write_time, 'YYYY-MM-DD HH24:MI:SS') AS writeTime, nvl(b.read_cnt, 0) as read_cnt, b.board_password, b.board_delete, b.username, b.cno
+    from board b where b.bno = #{bno}
+	</select>
+	
 </mapper>

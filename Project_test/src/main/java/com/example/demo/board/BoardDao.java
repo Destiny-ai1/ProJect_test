@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
@@ -12,12 +13,14 @@ import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface BoardDao {
+	//게시한글을 저장
 	public int save(Board board);
-
+	
+	//고객센터 공지사항+FAQ+Q&A를 조회
 	public Optional<BoardDto.BoardRead> findById(Long bno);
 	
-	@Update("update board set read_cnt=read_cnt+1 where bno=#{bno} and rownum=1")
-	public void increaseReadCnt(Long bno);
+	@Update("update board set read_cnt=read_cnt+1 where bno=#{bno}")
+	public void increaseReadCnt(@Param("bno")Long bno);
 	
 	@Select("select count(*) from board")
 	public int Count();

@@ -96,8 +96,18 @@
     </set>
     where username = #{username} and rownum = 1
     </update>
-
-    <!-- 회원 탈퇴 -->
+    
+    <!-- 로그인했거나 남이 작성한 글인지 확인 -->
+    <select id="existsByBnoAndloginId" parameterType="map" resultType="boolean">
+        select case when count(*) > 0 then 1 else 0 end from board_read where username = #{loginId} and bno = #{bno}
+    </select>
+    
+    <insert id="read_save" parameterType="map">
+    insert into board_read (username, bno) values (#{loginId}, #{bno})
+	</insert>
+	
+	
+    <!-- 회원 탈퇴(미작업) -->
     <delete id="delete" parameterType="com.example.demo.member.Member">
         delete from member where username = #{username}
     </delete>

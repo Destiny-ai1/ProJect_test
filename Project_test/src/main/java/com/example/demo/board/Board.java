@@ -19,9 +19,9 @@ public class Board {
 	private String writer;             								// 작성자 이름 또는 ID
 	private String content;            								// 글 내용
 	private LocalDateTime writeTime;   								// 작성 시간
-    private Integer readCnt;           								// 조회수
+    private Integer read_Cnt;           							// 조회수
     private Integer Password;       								// 비밀글 비밀번호
-    private String comments;           								// 댓글
+    private boolean board_delete;           						// 글 삭제
     private String username;           								// 작성자 ID (외래 키, member 테이블 참조)
     private Integer cno;               								// 카테고리 번호 (외래 키, category 테이블 참조)
 }
