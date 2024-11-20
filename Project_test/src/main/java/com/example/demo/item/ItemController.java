@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,13 +25,12 @@ public class ItemController {
     // 상품 리스트 메인에 출력
     @GetMapping("/")
     public ModelAndView list(Principal p) {
-    	String imageUrl = "/api/images?imagename=";
+        String imageUrl = "/api/images?imagename=";
         List<ItemDto.ItemList> result = itemService.findAll(imageUrl); // 상품 목록 조회
         return new ModelAndView("item/list").addObject("result", result); // list.html에 결과 전달
     }
 
     // 관리자의 아이템 추가 이동
-    @Secured("ROLE_ADMIN")  // 관리자만 접근 가능
     @GetMapping("/item/add")
     public ModelAndView addItem() {
         List<Map> majorCategory = itemService.findMajorCategory();
@@ -40,14 +38,8 @@ public class ItemController {
     }
 
     // 관리자의 상품 추가 처리
-    @Secured("ROLE_ADMIN")  // 관리자만 접근 가능
     @PostMapping("/item/add")
     public ModelAndView addItem(@Valid ItemDto.Create dto, BindingResult br) {
-        if (br.hasErrors()) {
-            // 유효성 검증 실패 시 처리
-            return new ModelAndView("item/add").addObject("errors", br.getAllErrors());
-        }
-
         itemService.save(dto);
         return new ModelAndView("redirect:/"); // 상품 리스트로 리다이렉트
     }
@@ -56,6 +48,12 @@ public class ItemController {
     @GetMapping("/item/read")
     public ModelAndView read(Long itemNo, String imageUrl) {
         ItemDto.Read result = itemService.read(itemNo, imageUrl);  // 상품 상세 정보 조회
+        
+        // 상품이 없다면 에러 페이지로 리다이렉트
+        if (result == null) {
+            return new ModelAndView("redirect:/item/add"); // 상품이 없으면 아이템 추가 페이지로 리다이렉트
+        }
+
         return new ModelAndView("item/read").addObject("result", result);
     }
     

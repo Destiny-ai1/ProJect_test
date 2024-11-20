@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class ItemImageRestController {    
-    // 이미지 업로드 처리
 	@PostMapping("/api/images")
 	public ResponseEntity<?> itemImageUpload(MultipartFile upload) {
 	    String originalFileName = upload.getOriginalFilename();
@@ -32,7 +31,7 @@ public class ItemImageRestController {
 	    File file = new File(ItemImageSaveLoad.IMAGE_FOLDER + saveImageName);
 	    try {
 	        upload.transferTo(file);
-	        System.out.println("파일 저장 경로: " + file.getAbsolutePath());  // 파일 저장 경로 출력
+	        System.out.println("파일 저장 경로: " + file.getAbsolutePath());
 	    } catch (IllegalStateException | IOException e) {
 	        e.printStackTrace();
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패");
@@ -44,46 +43,36 @@ public class ItemImageRestController {
 	    return ResponseEntity.ok(map);
 	}
 
-	// 이미지 조회 (byte[] 반환 방식)
-	@GetMapping("/api/images")
-	public ResponseEntity<byte[]> viewImage(@RequestParam("imagename") String imageName) {
-	    // 이미지 파일명이 비어있는 경우 기본 이미지 경로로 설정
-	    if (imageName == null || imageName.isEmpty()) {
-	        imageName = "normal/default-image.jpg"; // 기본 이미지 경로
-	    }
 
-	    try {
-	        // 실제 파일 경로
-	        Path imagePath = Paths.get(ItemImageSaveLoad.IMAGE_FOLDER + imageName);
+    @GetMapping("/api/images")
+    public ResponseEntity<byte[]> viewImage(@RequestParam("imagename") String imageName) {
+        if (imageName == null || imageName.isEmpty()) {
+            imageName = "normal/default-image.jpg"; // 기본 이미지 경로
+        }
 
-	        // 파일이 존재하는지 확인
-	        if (Files.notExists(imagePath)) {
-	            // 파일이 존재하지 않으면 기본 이미지 사용
-	            imagePath = Paths.get(ItemImageSaveLoad.IMAGE_FOLDER + "normal/default-image.jpg");
-	        }
+        try {
+            // URL 디코딩 처리: URL에서 전달된 파일 이름이 URL 인코딩되어 있을 수 있음
+            String decodedImageName = java.net.URLDecoder.decode(imageName, "UTF-8");
+            
+            // 경로를 안전하게 결합 (기본 경로 + 이미지 이름)
+            Path imagePath = Paths.get(ItemImageSaveLoad.IMAGE_FOLDER + decodedImageName);
+            
+            // 이미지 파일이 없으면 기본 이미지로 대체
+            if (Files.notExists(imagePath)) {
+                imagePath = Paths.get(ItemImageSaveLoad.IMAGE_FOLDER + "normal/default-image.jpg");
+            }
 
-	        // 이미지 읽기
-	        byte[] imageBytes = Files.readAllBytes(imagePath);
+            byte[] imageBytes = Files.readAllBytes(imagePath);
 
-	        // mime 타입 확인
-	        String mimeType = Files.probeContentType(imagePath);
-	        MediaType mediaType = MediaType.parseMediaType(mimeType);
+            // MIME 타입을 추출하고 MediaType으로 변환
+            String mimeType = Files.probeContentType(imagePath);
+            MediaType mediaType = MediaType.parseMediaType(mimeType);
 
-	        return ResponseEntity.status(HttpStatus.OK).contentType(mediaType).body(imageBytes);
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-	    }
-	}
+            return ResponseEntity.status(HttpStatus.OK).contentType(mediaType).body(imageBytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
-	// 이미지 조회 (FileSystemResource 반환 방식) - 경로 제공
-	@GetMapping("/api/images/file")
-	public ResponseEntity<FileSystemResource> getImage(@RequestParam("imagename") String imagename) {
-	    File imageFile = new File(ItemImageSaveLoad.IMAGE_FOLDER + imagename);
-	    if (imageFile.exists()) {
-	        return new ResponseEntity<>(new FileSystemResource(imageFile), HttpStatus.OK);
-	    } else {
-	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	    }
-	}
 }

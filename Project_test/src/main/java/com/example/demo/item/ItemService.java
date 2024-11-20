@@ -27,45 +27,38 @@ public class ItemService {
     @Autowired
     private ItemImageDao imageDao;
 
-    // 카테고리 대분류
     public List<Map> findMajorCategory() {
         return categoryDao.findMajorCategory();
     }
 
-    // 아이템 리스트
     public List<ItemDto.ItemList> findAll(String imageUrl) {
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
-            // imageUrl이 null이거나 빈 문자열이면 기본 URL을 설정
             imageUrl = "/default/images/";  // 기본 이미지 URL을 설정 (예시)
         }
-        // 이제 imageUrl을 사용해서 Dao를 호출
         return itemDao.findAll(imageUrl);
     }
 
-    // 상품 생성 서비스 (트랜잭션 처리 추가)
     @Transactional
     public void save(ItemDto.Create dto) {
         // 1. 상품 정보를 DB에 저장
-        Item item = dto.toEntity();  // ItemDto.Create를 Item으로 변환
-        itemDao.save(item);          // item을 DB에 저장
+        Item item = dto.toEntity();
+        itemDao.save(item);
 
-        // itemNo를 가져옵니다. (아이템이 저장된 후 itemNo가 생성되어야 합니다)
         Long itemNo = item.getItemNo();
         if (itemNo == null) {
             throw new RuntimeException("상품 저장 실패: itemNo가 생성되지 않았습니다.");
         }
 
-        // 2. 상품에 대한 이미지 저장
-        List<MultipartFile> images = dto.getImages();  // 이미지 목록
+        // 2. 이미지 저장
+        List<MultipartFile> images = dto.getItemImages();
         if (images == null || images.isEmpty()) {
             images = new ArrayList<>();
         }
 
-        // 3. 이미지를 `item_image` 테이블에 저장
         for (long i = 0; i < images.size(); i++) {
             MultipartFile imageFile = images.get((int) i);
             if (imageFile.isEmpty()) {
-                continue;  // 이미지 파일이 비어있으면 건너뛰기
+                continue;
             }
 
             // 파일 확장자 추출
@@ -78,27 +71,31 @@ public class ItemService {
                 // 이미지 파일을 실제 디스크에 저장
                 imageFile.transferTo(file);
 
-                // item_no를 사용하여 item_image 테이블에 이미지 저장
-                ItemImage itemImage = new ItemImage(null, itemNo, saveFilename); // imageNo는 null로 설정 (자동 생성됨)
-                imageDao.save(itemImage);  // item_image에 이미지 저장
+                // item_image 테이블에 이미지 저장
+                ItemImage itemImage = new ItemImage(null, itemNo, saveFilename);
+                imageDao.save(itemImage);
             } catch (IOException e) {
-                // 예외 처리: 파일 저장에 실패한 경우
                 e.printStackTrace();
-                throw new RuntimeException("이미지 저장 중 오류 발생", e);  // 예외를 던져 트랜잭션 롤백
+                throw new RuntimeException("이미지 저장 중 오류 발생", e);
             }
         }
     }
 
-    // 상품 번호를 이용하여 상품 이름을 조회
-    public String getItemNameById(Long itemNo) {
-        return itemDao.getItemNameById(itemNo);
-    }
-
-    // 상품 번호로 상품 읽기
-    public ItemDto.Read read(Long itemNo, String imgUrl) {
-        if (imgUrl == null || imgUrl.trim().isEmpty()) {
-            imgUrl = "/default/images/";  // 기본 이미지 URL 설정
+ // 상품 상세 조회
+    public ItemDto.Read read(Long itemNo, String imageUrl) {
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            imageUrl = "/api/images?imagename=";  // 기본 이미지 URL
         }
-        return itemDao.findById(itemNo, imgUrl);
+
+        // DB에서 상품 정보를 조회하며, 이미지 URL도 함께 가져옵니다.
+        ItemDto.Read itemDto = itemDao.findById(itemNo, imageUrl);
+
+        // 만약 아이템에 이미지가 없다면 기본 이미지 경로 설정
+        if (itemDto != null && (itemDto.getItemImages() == null || itemDto.getItemImages().isEmpty())) {
+            itemDto.setItemImages(List.of("normal/default-image.jpg"));
+        }
+
+        return itemDto;
     }
 }
+

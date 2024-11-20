@@ -12,7 +12,7 @@ public interface ItemDao {
 
     // 아이템을 리스트로 선택
     @Select("SELECT item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, add_good_cnt, review_ea, cno, "
-            + "#{imageUrl} || (SELECT image_name FROM item_image ii WHERE it.item_no = ii.item_no AND ROWNUM = 1) AS item_image "
+            + "   #{imageUrl} || COALESCE((SELECT ii.image_name FROM item_image ii WHERE it.item_no = ii.item_no AND ROWNUM = 1), 'normal/default-image.jpg') AS item_image "
             + "FROM item it")
     public List<ItemDto.ItemList> findAll(@Param("imageUrl") String imageUrl);
 

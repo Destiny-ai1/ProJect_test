@@ -34,7 +34,7 @@ public class ItemDto {
 	    private Integer cno;
 	    
 	    // 이미지를 담을 리스트
-	    private List<String> images;
+	    private List<String> itemImages;
 	}
 
 	
@@ -54,7 +54,7 @@ public class ItemDto {
 		private Integer reviewEa;
 		private Integer cno;
 		
-		private List<MultipartFile> images;
+		private List<MultipartFile> itemImages;
 		
 		public Item toEntity() {
 			return new Item(null, itemIrum, itemInfo, itemPrice, itemJango, itemSellQty, addGoodCnt, reviewEa, cno);
