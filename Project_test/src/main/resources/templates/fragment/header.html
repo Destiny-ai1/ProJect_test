@@ -30,7 +30,18 @@
             </ul>
         </div>
     </nav>
-
+<script>
+			// 로그아웃 처리
+			$('#logout').click(function() {
+				const token = '[[${_csrf.token}]]';
+				const html = `
+					<form action="/member/logout" method="post">
+						<input type='hidden' name='_csrf' value='${token}'>
+					</form>
+				`;
+				$(html).appendTo($('body')).submit();
+			});
+		</script>
     <!-- 네비게이션 바와 간격을 둔 이미지 -->
     <div class="fixed-image"></div>
     
