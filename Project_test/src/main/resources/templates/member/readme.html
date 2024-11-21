@@ -14,14 +14,7 @@
         <nav th:replace="~{/fragment/nav.html}"></nav>
         <main>
             <section>
-                <form action="/member/update" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="_csrf" th:value="${_csrf.token}">
-                    
-                    <div class="mb-3 mt-3">
-                        <label for="username" class="form-label">아이디:</label>
-                        <input type="text" class="form-control" id="username" name="username" th:value="${result.username}" readonly>
-                    </div>
-
+            <form>
                     <div class="mb-3 mt-3">
                         <label for="name" class="form-label">이름:</label>
                         <input type="text" class="form-control" id="name" name="name" th:value="${result.name}">
@@ -36,11 +29,6 @@
                         <label for="phone" class="form-label">전화번호:</label>
                         <input type="tel" class="form-control" id="phone" name="phone" th:value="${result.phone}">
                     </div>
-
-                    <div class="mb-3 mt-3">
-                        <label for="birthday" class="form-label">생일:</label>
-                        <input type="date" class="form-control" id="birthday" name="birthday" th:value="${result.birthday}">
-                    </div>
                     
                     <div class="mb-3 mt-3">
                         <label for="new-password" class="form-label">비밀번호:</label>
@@ -49,9 +37,9 @@
                     
                     <div class="mb-3 mt-3">
                         <label for="joinday" class="form-label">가입정보:</label>
-                        <p th:text="${result.joinday} + ' (' + ${result.days} + '일)'"></p>
+                        <p th:text="${result.joinday}"></p>
                     </div>
-
+                    
                     <button id="update" class="btn btn-success">변경</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <button type="button" id="delete" class="btn btn-danger">삭제</button>
                 </form>
