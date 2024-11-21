@@ -130,25 +130,6 @@ body {
                 </p>
             </div>
         </div>
-        
-        <p class="nav-item">
-			<a class="nav-link" href="/item/add">상품추가</a>
-		</p>>
     </div>
-    
-    <table>
-    <tr>
-        <th>아이템 번호</th>
-        <th>아이템 이름</th>
-        <th>아이템 가격</th>
-        <th>이미지</th>
-    </tr>
-    <tr th:each="item : ${items}">
-        <td th:text="${item.itemNo}"></td>
-        <td th:text="${item.itemIrum}"></td>
-        <td th:text="${item.itemPrice}"></td>
-        <td><img th:src="@{/api/images?imagename=${item.itemImage}}" alt="아이템 이미지"></td>
-    </tr>
-</table>
 </body>
 </html>

@@ -70,6 +70,22 @@
     </div>
     
     <script>
+        function passwordCheck(passwordId) {
+            const password = document.getElementById(passwordId).value;
+            const passwordMsg = document.getElementById('password-msg');
+            
+            if (password.length === 0) {
+                passwordMsg.textContent = '비밀번호를 입력해주세요.';
+                return false;
+            } else if (password.length < 6) {
+                passwordMsg.textContent = '비밀번호는 최소 6자리입니다.';
+                return false;
+            } else {
+                passwordMsg.textContent = '';
+                return true;
+            }
+        }
+
         $('#profile').change(loadProfile);
         $('#username').blur(async () => await usernameCheck());
         
