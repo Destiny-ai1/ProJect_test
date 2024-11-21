@@ -53,10 +53,10 @@ public interface MemberDao {
 	public void Update_Point(String username,@Param("point")int Point,@Param("totalPurchase") int totalPurchase,@Param("Grade") Grade Grade);
 	
 	//로그인 실패핸들러에쓰이는 회원에대해 아이디만조회할때
-	public Member findById(String username);
+	Member findById(String username);
 	
 	//로그인실패시 5회가 되면 계정이 블럭
-	public Integer memberLoginFailAndBlock(String username);
+	Integer memberLoginFailAndBlock(String username);
 		
 	//로그인에 성공시 실패카운트 초기화
 	public int loginSuccessReset(String username);
@@ -69,7 +69,6 @@ public interface MemberDao {
 	
 	//조회수가 올라간 내역을 중복 방지를위해 저장한다
 	public void read_save(String loginId, Long bno);
-	
 	
 	
 	

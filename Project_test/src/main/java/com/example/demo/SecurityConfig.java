@@ -1,6 +1,5 @@
 package com.example.demo;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +12,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.example.demo.security.LoginFailureHandler;
 import com.example.demo.security.LoginSuccessHandler;
 import com.example.demo.security.MyEntryPoint;
-
 
 @Configuration
 @EnableWebSecurity 														// 웹 보안 설정 활성화
@@ -30,22 +28,25 @@ public class SecurityConfig {
     private MyEntryPoint myEntryPoint;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(c -> c.ignoringRequestMatchers("/api/boards/image"));
-        
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {        
+        // 로그인 설정
         http.formLogin(c -> c.loginPage("/member/login")
                 .loginProcessingUrl("/member/login")
                 .successHandler(successHandler)
                 .failureHandler(failureHandler));
                 
+        // 로그아웃 설정
         http.logout(c -> c.logoutUrl("/member/logout").logoutSuccessUrl("/"));
+        
+        // 인증 실패 처리
         http.exceptionHandling(c -> c.authenticationEntryPoint(myEntryPoint));
         
+        // 세션 관리 설정
         http.sessionManagement(c -> c
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // 필요할 때만 세션 생성
-                .maximumSessions(1)                                      // 한 사용자당 최대 1개 세션 허용
-                .maxSessionsPreventsLogin(false));                       // 새로운 로그인이 기존 세션을 대체
-            
-            return http.build();
-        }
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) 		// 항상 세션 생성
+                .maximumSessions(1)                                      	// 한 사용자당 최대 1개 세션 허용
+                .maxSessionsPreventsLogin(false));                       	// 새로운 로그인이 기존 세션을 대체
+        
+        return http.build();
+    }
 }

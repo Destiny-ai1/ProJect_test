@@ -67,9 +67,9 @@
         update member set point = #{point}, totalpurchase = #{totalPurchase}, Grade = #{Grade} where username = #{username}
     </update>
 	
-	<!--로그인실패시 회원의 아이디만 조회할때-->
+	<!--로그인실패와 성공시 불러오는것-->
 	<select id="findById" resultType="com.example.demo.member.Member">
-		select username from member where username=#{username}
+		select username, password, login_fail_count, enabled, role from member where username = #{username}
 	</select>
 	
     <!-- 로그인 실패 시 카운트 증가 및 계정 블럭 -->
@@ -102,6 +102,7 @@
         select case when count(*) > 0 then 1 else 0 end from board_read where username = #{loginId} and bno = #{bno}
     </select>
     
+    <!--로그인한상태면 글을 읽은 조회수를 저장시킨다-->
     <insert id="read_save" parameterType="map">
     insert into board_read (username, bno) values (#{loginId}, #{bno})
 	</insert>

@@ -98,16 +98,18 @@ public class MemberService {
 	
 	//내정보 불러올때
 	public MemberDto.Member_Read 내정보보기(String loginId, String password) {
-		if(!비밀번호확인(password, loginId)) { throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");}
 		MemberDto.Member_Read memberInfo = memberDao.UserDetails(loginId);
+		if(!비밀번호확인(password, loginId)) { throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");}
         return memberInfo;
 	}
 	
 	//비밀번호 확인
 	public boolean 비밀번호확인(String password, String loginId) {
 		String encodedPassword = memberDao.UserDetailspassword(loginId);
-		return encoder.matches(password, encodedPassword);
+		boolean matches = encoder.matches(password, encodedPassword);
+		return matches;
 	}
+
 	
 	//비밀번호 바꾸기
 	@Transactional

@@ -8,10 +8,10 @@
     	</selectKey>
        insert into board (
         bno, title, content, writer, write_time, read_cnt, board_password, board_delete, username, cno)
-    	values (#{bno}, #{title}, #{content}, #{writer}, sysdate, #{read_Cnt}, #{password}, #{board_delete}, #{username}, #{cno})
+    	values (#{bno}, #{title}, #{content}, #{writer}, sysdate, #{readCnt}, #{password}, #{board_delete}, #{username}, #{cno})
     </insert>
 	
-	<!--검색으로 게시글을 조회하는거-->
+	<!--고객센터 리스트-->
 	<select id="findById" parameterType="long" resultType="com.example.demo.board.BoardDto$BoardRead">
     select b.bno, b.title, b.content, b.writer, TO_CHAR(b.write_time, 'YYYY-MM-DD HH24:MI:SS') AS writeTime, nvl(b.read_cnt, 0) as read_cnt, b.board_password, b.board_delete, b.username, b.cno
     from board b where b.bno = #{bno}
@@ -33,4 +33,6 @@
         where rnum>#{startRowNum}
     ]]>
 	</select>
+	
+	
 </mapper>

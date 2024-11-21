@@ -60,7 +60,7 @@ public class BoardDto {
         private String writer; 									// 작성자
         private String content; 								// 내용
         private String writeTime; 								// 작성 시간
-        private Integer read_Cnt = 0; 							// 조회수
+        private Integer readCnt = 0; 							// 조회수
         private Integer password; 								// 비밀글 비밀번호 (Q&A에서 비밀글 여부 확인)
         private String comments; // 댓글
         private boolean board_delete;           								// 글 삭제
@@ -70,10 +70,10 @@ public class BoardDto {
         }
 
         public void ReadCnt() {
-            if (read_Cnt == null) {
-                read_Cnt = 0;
+            if (readCnt == null) {
+                readCnt = 0;
             }
-            this.read_Cnt++;
+            this.readCnt++;
         }
     }
 

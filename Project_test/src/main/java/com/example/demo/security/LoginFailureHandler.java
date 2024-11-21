@@ -26,16 +26,19 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 			AuthenticationException exception) throws IOException, ServletException {
 		// 사용자 요청에서 아이디를 꺼낸다
 		String username = request.getParameter("username");
+		
 		// 아이디를 가지고 사용자 정보를 가져온다(로그인 실패횟수 증가 + 계정 블록 을 확인할려고)
 		Member member  = memberDao.findById(username);
 		// 사용자 정보를 저장하는 세션을 꺼내자
 		HttpSession session = request.getSession();
 		
 		if (member == null) {
+			
             session.setAttribute("message", "가입되어 있지 않은 사용자입니다.");
         } 
 		
 		else {
+		
             session.setAttribute("message", "비밀번호가 틀렸습니다.");
 		
         if (!member.getEnabled()) {
@@ -43,12 +46,12 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
             } 
         
         else if (member.getLoginFailCount() == 4) {
-                member.Member_Block();
+        		memberDao.memberLoginFailAndBlock(username);
                 session.setAttribute("message", "로그인 5회 실패로 계정이 블록되었습니다. 관리자에게 연락하세요.");
             } 
         
         else {
-                member.Member_login_Fail_Count();
+        		memberDao.memberLoginFailAndBlock(username);
                 session.setAttribute("message", "로그인에 " + member.getLoginFailCount() + "회 실패했습니다.");
             }
         }
