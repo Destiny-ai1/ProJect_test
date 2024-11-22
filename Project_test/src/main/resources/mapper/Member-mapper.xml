@@ -27,9 +27,14 @@
     update member set password = #{password} where username = #{username}
 	</update>
 	
+	<resultMap id="memberResultMap" type="com.example.demo.member.MemberDto$Member_Read">
+    	<result column="totalpurchase" property="totalpurchase" javaType="java.lang.Integer"/>
+    	<result column="grade" property="grade" javaType="String"/>
+	</resultMap>
+	
 	<!-- 회원 정보 불러올때 -->
-    <select id="UserDetails" parameterType="String" resultType="com.example.demo.member.MemberDto$Member_Read">
-        select name,email,phone,joinday,totalpurchase,grade,role,point from member where username = #{username}
+    <select id="UserDetails" parameterType="String" resultMap="memberResultMap">
+        select username,name,email,phone,joinday,totalpurchase,grade,role,point from member where username = #{username}
     </select>
     
     <!-- 회원 정보를 불러올때 password 입력받기 -->

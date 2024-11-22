@@ -104,7 +104,7 @@ public class MemberController {
 	    }
 
 	    // 실패 시 메시지 추가
-	    ra.addFlashAttribute("message", "비밀번호를 확인하세요.");
+	    ra.addFlashAttribute("message", "비밀번호를 틀렸습니다.");
 	    return new ModelAndView("redirect:/member/check-password");
 	}
 
@@ -112,9 +112,13 @@ public class MemberController {
 	//비밀번호 확인이 됬으면 내정보페이지로 보내기
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/member/readme")
-	public ModelAndView readme(Principal principal) {
+	public ModelAndView readme(HttpSession session,Principal principal) {
+		//세션에 저장된값확인
+		if (session.getAttribute("checkPassword") == null) {
+	        return new ModelAndView("redirect:/member/check-password");
+	    }
 	    // 서비스에서 비밀번호 확인 후 정보 조회
-	    MemberDto.Member_Read dto = memberService.내정보보기(principal.getName(), "입력된 비밀번호"); 		// 비밀번호 입력받은 값
+		MemberDto.Member_Read dto = memberService.내정보보기(principal.getName()); 		// 비밀번호 입력받은 값
 	    return new ModelAndView("member/readme").addObject("result", dto);
 	}
 	

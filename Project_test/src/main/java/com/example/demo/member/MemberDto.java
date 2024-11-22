@@ -14,14 +14,18 @@ public class MemberDto {
 private MemberDto() {}
 	
 	//계정 생성할때 필수로 받을값
-	@NotEmpty
 	@Data
 	public static class Member_Create{
+		@NotEmpty
 		private String username;
+		@NotEmpty
 		private String password;
+		@NotEmpty
 		private String name;
+		@NotEmpty
 		@Email
 		private String email;
+		@NotEmpty
 		private String phone;
 	
 		public Member toEntity(String encodedPassword) {
@@ -44,13 +48,14 @@ private MemberDto() {}
 	@Data
 	@AllArgsConstructor
 	public static class Member_Read{
+		private String username;				//조회를위해서 있어야되는거고 html에서 출력안함
 		private String name;					//고정값
 		@Email
 		private String email;					
-		private String phone;					
+		private String phone;
 		private LocalDate joinday;				//변경불가능
-		private int totalpurchase;				//변경다른곳에서 처리함
-		private String grade;					//변경다른곳에서 처리함		
+		private Integer totalpurchase;			//변경다른곳에서 처리함	
+		private String grade;					//변경다른곳에서 처리함	
 		private String role;					//변경불가
 		private int point;						//변경다른곳에서 처리함
 	}
