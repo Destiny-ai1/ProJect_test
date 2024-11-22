@@ -17,8 +17,10 @@ import com.example.demo.category.CategoryDao;
 import com.example.demo.image.ItemImage;
 import com.example.demo.image.ItemImageDao;
 import com.example.demo.image.ItemImageSaveLoad;
+import com.example.demo.item.ItemDto.ItemList;
 
 @Service
+@Transactional
 public class ItemService {
     @Autowired
     private ItemDao itemDao;
@@ -96,6 +98,14 @@ public class ItemService {
         }
 
         return itemDto;
+    }
+
+ // 카테고리 번호에 해당하는 상품들을 조회하는 메서드
+    public List<ItemDto.ItemList> findItemsByCategory(Long cno, String imageUrl) {
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            imageUrl = "/api/images?imagename=";  // 기본 이미지 URL 설정
+        }
+        return itemDao.findItemsByCategory(cno, imageUrl);  // DAO 호출
     }
 }
 

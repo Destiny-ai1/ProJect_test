@@ -10,60 +10,66 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 public class ItemDto {
-	private ItemDto() { }
-	
-	@Data
-	public static class ItemList {
-		private Long itemNo;
-		private String itemIrum;
-		private String itemInfo;
-		private Integer itemPrice;
-		private String itemImage;
-	}
-	
-	@Data
-	public static class Read {
-	    private Long itemNo;
-	    private String itemIrum;
-	    private String itemInfo;
-	    private Integer itemPrice;
-	    private Integer itemJango;
-	    private Integer itemSellQty;
-	    private Integer addGoodCnt;
-	    private Integer reviewEa;
-	    private Integer cno;
-	    
-	    // 이미지를 담을 리스트
-	    private List<String> itemImages;
-	}
+    private ItemDto() { }
 
-	
-	@Data
-	public static class Create {
-		private Long itemNo;
-		@NotEmpty(message="제품명을 입력하세요")
-		private String itemIrum;
-		@NotEmpty(message="제품 정보를 입력하세요")
-		private String itemInfo;
-		@DecimalMin(value="1000", message="가격은 1000원이상이어야합니다")
-		private Integer itemPrice;
-		@DecimalMin(value="1", message="잔고는 1개이상이어야 합니다")
-		private Integer itemJango;
-		private Integer itemSellQty;
-		private Integer addGoodCnt;
-		private Integer reviewEa;
-		private Integer cno;
-		
-		private List<MultipartFile> itemImages;
-		
-		public Item toEntity() {
-			return new Item(null, itemIrum, itemInfo, itemPrice, itemJango, itemSellQty, addGoodCnt, reviewEa, cno);
-		}
-	}
-	
-	@Data
-	public static class Pnos {
-		@NotNull(message="상품을 선택하세요")
-		private List<Long> pnos;
-	}
+    // 상품 목록을 위한 DTO (카테고리 번호 포함)
+    @Data
+    public static class ItemList {
+        private Long itemNo;      // 상품 번호
+        private String itemIrum;  // 상품명
+        private String itemInfo;  // 상품 정보
+        private Integer itemPrice; // 가격
+        private Integer itemJango;
+        private String itemImage; // 이미지 URL
+        private Long cno;         // 카테고리 번호 (cno 추가)
+    }
+
+    // 상품 상세 정보를 위한 DTO (카테고리 번호 포함)
+    @Data
+    public static class Read {
+        private Long itemNo;       // 상품 번호
+        private String itemIrum;   // 상품명
+        private String itemInfo;   // 상품 정보
+        private Integer itemPrice; // 가격
+        private Integer itemJango; // 잔고
+        private Integer itemSellQty; // 판매 수량
+        private Integer addGoodCnt; // 좋아요 수
+        private Integer reviewEa;   // 리뷰 수
+        private Integer cno;        // 카테고리 번호 (cno 추가)
+
+        // 이미지를 담을 리스트
+        private List<String> itemImages; 
+    }
+
+    // 상품 생성/수정 요청 DTO
+    @Data
+    public static class Create {
+        private Long itemNo;        // 상품 번호
+        @NotEmpty(message="제품명을 입력하세요")
+        private String itemIrum;    // 상품명
+        @NotEmpty(message="제품 정보를 입력하세요")
+        private String itemInfo;    // 상품 정보
+        @DecimalMin(value="1000", message="가격은 1000원이상이어야합니다")
+        private Integer itemPrice;  // 가격
+        @DecimalMin(value="1", message="잔고는 1개이상이어야 합니다")
+        private Integer itemJango;  // 잔고
+        private Integer itemSellQty; // 판매 수량
+        private Integer addGoodCnt; // 좋아요 수
+        private Integer reviewEa;   // 리뷰 수
+        private Integer cno;        // 카테고리 번호 (cno 추가)
+
+        private List<MultipartFile> itemImages; // 이미지 파일 리스트
+
+        // Entity 객체로 변환
+        public Item toEntity() {
+            return new Item(null, itemIrum, itemInfo, itemPrice, itemJango, itemSellQty, addGoodCnt, reviewEa, cno);
+        }
+    }
+
+    // 선택된 카테고리 번호를 위한 DTO
+    @Data
+    public static class Pnos {
+        @NotNull(message="상품을 선택하세요")
+        private List<Long> pnos; // 여러 카테고리를 선택할 수 있도록
+    }
 }

@@ -6,6 +6,9 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.item.ItemDto;
+import com.example.demo.item.ItemService;
+
 @Service
 public class CategoryService {
 	@Autowired
@@ -13,5 +16,9 @@ public class CategoryService {
 	
 	public List<Map> findChildCategoryByParent(Long cno) {
 		return categoryDao.findChildCategoryByParent(cno);
+	}
+
+	public List<Map> findCategoryByParentCno(Long cno) {
+		return categoryDao.findCategoryByParentCno(cno);
 	}
 }

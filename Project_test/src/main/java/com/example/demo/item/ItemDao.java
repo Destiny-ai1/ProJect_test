@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import com.example.demo.item.ItemDto.ItemList;
+
 @Mapper
 public interface ItemDao {
     // item 목록 insert
@@ -30,4 +32,7 @@ public interface ItemDao {
     // 상품번호로 장바구니의 상품이름 찾기
     @Select("select * from item where item_no = #{itemNo}")
     public String getItemNameById(Long itemNo);
+
+    // 카테고리 번호에 해당하는 상품들을 조회하는 메서드
+	public List<ItemList> findItemsByCategory(Long cno, String imageUrl);
 }
