@@ -41,7 +41,7 @@ public class Member {
 	
 	//회원정보를 읽어오기
 	public MemberDto.Member_Read MyDetail(String loginId){
-		return new MemberDto.Member_Read(name, email, phone, joinday, totalpurchase, grade.name(), role.name(), point);
+		return new MemberDto.Member_Read(username,name, email, phone, joinday, totalpurchase, grade.name(), role.name(), point);
 	}
 	
 	//로그인 실패횟수 올라가는 카운트
