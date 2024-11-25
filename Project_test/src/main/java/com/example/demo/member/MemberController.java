@@ -41,9 +41,9 @@ public class MemberController {
 	
 	//회원찾기 아이디,비밀번호 찾기페이지로 이동
 	@PreAuthorize("isAnonymous()")
-	@GetMapping("/member/find")
+	@GetMapping("/member/find2")
 	public ModelAndView find() {
-		return new ModelAndView("member/find");
+		return new ModelAndView("member/find2");
 	}
 	
 	//로그인 페이지로 이동

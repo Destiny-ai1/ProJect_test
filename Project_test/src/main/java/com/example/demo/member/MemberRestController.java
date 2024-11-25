@@ -37,9 +37,11 @@ public class MemberRestController {
 	@GetMapping("/members/username")
 	public ResponseEntity<?> Find_Id(@RequestParam String name, @RequestParam String email) {
 		Optional<String> result = memberService.Idfind(name,email);
-		if(result.isEmpty())
-			return ResponseEntity.status(409).body("일치하는 아이디가 없습니다. 다시 확인해주세요");
-		return ResponseEntity.ok("회원님의 아이디는"+result.get()+"입니다");
+		if (result == null || result.isEmpty()) {  										// result가 null인 경우를 대비하여 체크
+	        return ResponseEntity.status(409).body("일치하는 아이디가 없습니다. 다시 확인해주세요");
+	    }
+	    // 이메일로 아이디를 전송하였음을 알리는 메시지로 변경
+	    return ResponseEntity.ok("가입하신 이메일로 아이디를 전송하였습니다. 메일을 확인해주세요.");
 	}
 	
 	//임시비밀번호 받아와서 리셋시키기

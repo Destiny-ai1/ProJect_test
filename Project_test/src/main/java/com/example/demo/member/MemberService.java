@@ -63,12 +63,13 @@ public class MemberService {
         params.put("name", name);
         params.put("email", email);
         Optional<String> username = memberDao.findByIdUsernameByEmail(params);
+        
         username.ifPresent(user->{
         	String subject = "아이디 찾기 결과";
             String content = "회원님의 아이디는 " + user + " 입니다.";
             mailSend.MailSend(email, subject, content);
         });
-        return null;
+        return username;
 	}
 	
 	@Transactional

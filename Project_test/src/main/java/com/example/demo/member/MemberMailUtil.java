@@ -1,7 +1,6 @@
 package com.example.demo.member;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +14,7 @@ public class MemberMailUtil {
 	@Autowired
 	private JavaMailSender mailSender;
 	//발신자 이메일 주소
-	private String Admin = "admin@naver.com";
+	private String Admin = "we8534@gmail.com";
 	
 	public void MailSend(String loginId, String title, String content) {  
 		MimeMessage message = mailSender.createMimeMessage();
