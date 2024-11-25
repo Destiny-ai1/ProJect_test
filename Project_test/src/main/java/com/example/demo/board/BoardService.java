@@ -2,7 +2,9 @@ package com.example.demo.board;
 
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +36,7 @@ public class BoardService {
 	
 	//고객센터 공지사항+FAQ+Q&A를 조회할때
 	@Transactional
-	public BoardDto.BoardRead Board_senter(Long bno,String loginId) {
+	public BoardDto.BoardRead Board_senter(Long bno,String loginId, String name) {
 		//DB에 저장되어있는글인지 먼저확인
 		BoardDto.BoardRead dto=boardDao.findById(bno).orElseThrow(()-> new FailException("글을 찾을수 없습니다."));
 		//0.삭제된 글이라면 내용을 삭제된 글이라고 변경
@@ -43,10 +45,10 @@ public class BoardService {
 		}
 		
 		// 비로그인이거나 내가 작성한 글이면 조회수 변경 없음
-		if(loginId==null || dto.getWriter().equals(loginId))
+		if(loginId==null || dto.getWriter().equals(name))
 			return dto;
 			
-		// 로그인을 했거나,남이 작성한글인경우 조회수 증가시키고 중복을 방지하기위해 저장한다
+		// 로그인을 했거나,남이 작성한글인경우 조회수 증가시키고 내가작성한글이면 조회수 증가안시키고 중복을 방지하기위해 저장한다
 		boolean ReadCheck= readDao.existsByBnoAndloginId(bno,loginId);
 		if(!ReadCheck) {
 			readDao.read_save(loginId, bno);
@@ -64,7 +66,7 @@ public class BoardService {
 	@Value("5")
 	private int Block_Size;
 	
-	public BoardDto.BoardPage findall(Integer pageno){
+	public BoardDto.BoardPage findall(Integer pageno ,String cno){
 		int CountOfBoard= boardDao.Count();									//전체 게시물 갯수
 		int NumberOfPage= (CountOfBoard-1)/10+1;							//전체 나오는 페이지수 계산
 		
@@ -80,7 +82,13 @@ public class BoardService {
 		
 		int startRowNum = (pageno-1)* Page_Size + 1;						//현재 페이지의 시작하는 번호
 		int endRowNum = startRowNum + Page_Size -1;							//현재 페이지의 마지막 번호
-		List<BoardDto.BoardList> boards = boardDao.findAll(startRowNum, endRowNum);				//처음부터 마지막까지 사이에있는 게시물 조회
+		
+		Map<String, Object> params = new HashMap<>();
+		params.put("cno", cno);	
+        params.put("startRowNum", startRowNum);
+        params.put("endRowNum", endRowNum);
+        
+		List<BoardDto.BoardList> boards = boardDao.findAll(params);				//처음부터 마지막까지 사이에있는 게시물 조회
 		
 		return new BoardDto.BoardPage(back, start ,end , next, pageno, boards);
 	}

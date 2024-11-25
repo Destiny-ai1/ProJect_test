@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.comment.CommentDao">
+	<!-- 댓글 저장 -->
+    <insert id="save" parameterType="map">
+        insert into comments (comment_cno, comment_content, comment_writer, comment_write_time, bno)
+        values (comment_seq.nextval, #{content}, #{writer}, sysdate, #{bno})
+    </insert>
+    
+    <!-- 게시글 번호로 댓글 목록 조회 -->
+    <select id="findByBno" resultType="com.example.demo.comment.CommentDto$Read">
+        select comment_cno as cno, comment_content as content, comment_writer as writer, to_char(comment_write_time, 'YYYY-MM-DD HH24:MI:SS') as writeTime, 
+        bno from comments where bno = #{bno} order by comment_write_time desc
+    </select>
+    
+    <!-- 특정 댓글 삭제 -->
+    <delete id="delete" parameterType="map">
+    delete from comments where comment_cno = #{cno} and comment_writer = #{loginId}
+	</delete>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+

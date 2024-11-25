@@ -10,29 +10,64 @@
         bno, title, content, writer, write_time, read_cnt, board_password, board_delete, username, cno)
     	values (#{bno}, #{title}, #{content}, #{writer}, sysdate, #{readCnt}, #{password}, #{board_delete}, #{username}, #{cno})
     </insert>
+    
+	<!-- 게시글 조회 (댓글 포함) -->
+	<select id="findById" resultMap="BoardAndCommentsMap">
+        select b.bno, b.title, b.content, b.writer, to_char(b.write_time, 'YYYY-MM-DD HH24:MI:SS') as writeTime, 
+            nvl(b.read_cnt, 0) as readCnt, b.board_password, b.board_delete, b.username, b.cno, c.cname, 
+            c.comment_cno, c.comment_content, c.comment_writer, to_char(c.comment_write_time, 'YYYY-MM-DD HH24:MI:SS') as comment_writeTime
+        from board b 
+        left join comments c on b.bno = c.bno
+        left join category c on b.cno = c.cno
+        where b.bno = #{bno} and b.board_delete = 0
+        order by c.comment_write_time desc
+    </select>
 	
-	<!--고객센터 리스트-->
-	<select id="findById" parameterType="long" resultType="com.example.demo.board.BoardDto$BoardRead">
-    select b.bno, b.title, b.content, b.writer, TO_CHAR(b.write_time, 'YYYY-MM-DD HH24:MI:SS') AS writeTime, nvl(b.read_cnt, 0) as read_cnt, b.board_password, b.board_delete, b.username, b.cno
-    from board b where b.bno = #{bno}
-	</select>
-	
-	<!-- 전체 게시물 수 조회 -->
-    <select id="Count" resultType="int">
-        select count(*) from board
+	<!-- 전체 카테고리별 조회수 -->
+    <select id="Count" parameterType="map" resultType="int">
+        select count(*) from board where board_delete = 0
+        <if test="cno != null"> and cno = #{cno, jdbcType=INTEGER} </if>
     </select>
 
     <!-- 특정 범위의 게시물 조회 -->
-    <select id="findAll" resultType="com.example.demo.board.BoardDto$BoardList">
-    <![CDATA[select * from
-    (select  rownum as rnum,b.*from
-                (select /*+ index_desc(board board_pk_bno)*/
-                bno, title , writer, to_char(write_time, 'yyyy-mm-dd hh24:mi:ss') as writeTime, read_cnt from board) b
-            where rownum<#{endRowNum}
-        )
-        where rnum>#{startRowNum}
-    ]]>
+	<select id="findAll" parameterType="map" resultType="com.example.demo.board.BoardDto$BoardList">
+    	<![CDATA[
+    	select * from (
+        	select rownum as rnum, b.*, c.cname from (
+            	select /*+ index_desc(board board_pk_bno) */
+                	bno, title, writer, to_char(write_time, 'yyyy-mm-dd hh24:mi:ss') as writeTime, read_cnt, cno
+            	from board where 1=1]]>
+    	<if test="cno != null"> and cno = #{cno} </if>
+    	<![CDATA[
+            	order by write_time desc
+        	) b
+        	left join category c on b.cno = c.cno
+        	where rownum < #{endRowNum, jdbcType=INTEGER}
+    	)
+    	where rnum > #{startRowNum, jdbcType=INTEGER}
+    	]]>
 	</select>
+
 	
-	
+	<!-- 게시글과 댓글 출력 -->
+	<resultMap id="BoardAndCommentsMap" type="com.example.demo.board.BoardDto$BoardRead">
+        <id column="bno" property="bno"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="writer" property="writer"/>
+        <result column="writeTime" property="writeTime"/>
+        <result column="readCnt" property="readCnt"/>
+        <result column="board_password" property="Password"/>
+        <result column="board_delete" property="board_delete"/>
+        <result column="cno" property="cno"/>
+        <result column="cname" property="cname"/>
+        
+        <!-- 댓글 출력 -->
+        <collection property="comments" javaType="java.util.List" ofType="com.example.demo.comment.CommentDto$Read">
+            <id column="comment_cno" property="cno"/>
+            <result column="comment_writer" property="writer"/>
+            <result column="comment_content" property="content"/>
+            <result column="comment_writeTime" property="writeTime"/>
+        </collection>
+    </resultMap>
 </mapper>

@@ -31,7 +31,7 @@ create table member (
     email varchar2(30 CHAR),                                -- 회원의 이메일 주소
     phone varchar2(20 char),                                -- 회원의 전화번호
     joinday date,                                           -- 회원 가입일
-    totalpurchase number(10),                           	-- 회원의 총 구매 금액
+    totalpurchase number(10, 2),                            -- 회원의 총 구매 금액
     grade varchar2(10 CHAR),                                -- 회원 등급 (예: 일반, VIP)
     login_fail_Count number(1),                             -- 로그인 실패 횟수
     enabled number(1),                                      -- 계정 활성화 상태 (1: 활성, 0: 비활성)
@@ -192,15 +192,11 @@ create table review(
 
 --댓글 추가
 create table comments(
-	comments_cno number(7),										--댓글 번호
-	comments_content varchar2(200),								--댓글 내용
-	comments_writer varchar2(20),								--댓글 내용
-	comments_write_time date,									--댓글 작성시간
+	comment_cno number(7),										--댓글 번호
+	comment_content varchar2(200),								--댓글 내용
+	comment_writer varchar2(20),								--댓글 내용
+	comment_write_time date,									--댓글 작성시간
 	bno number(7),												--글의 번호(외래키)
-	constraint comments_pk_comments_cno primary key(comments_cno)
+	constraint comments_pk_comments_cno primary key(comment_cno)
 );
-
-create sequence comments_seq;									--댓글에대한 시퀀스
-
-
 select * from tab;

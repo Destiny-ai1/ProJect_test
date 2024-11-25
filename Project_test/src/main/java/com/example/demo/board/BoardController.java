@@ -31,37 +31,37 @@ public class BoardController {
 	//글 작성하기위해 로그인한 사람만 글작성으로 간다
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/board/write")
-	public ModelAndView ckEditor사용() {
+	public ModelAndView 글작성GET() {
 		return new ModelAndView("board/write");
 	}
 	
 	//글의 유효성을 검사하고 게시글을 데이터로 저장하고, 게시글을쓴데로 보낸다
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/board/write")
-	public ModelAndView ckEditor작성(@Valid BoardDto.Create dto, BindingResult br, Principal principal) {
+	public ModelAndView 글작성POST(@Valid BoardDto.Create dto, BindingResult br, Principal principal) {
 		Long bno = boardService.write(dto, principal.getName());
 		return new ModelAndView("redirect:/board/read?bno=" + bno);
 	}
 	
 	//게시글을 읽을때
 	@GetMapping("/board/read")
-	public ModelAndView read(Long bno, Principal principal) {
+	public ModelAndView read(Long bno,String name, Principal principal) {
 		String loginId = principal==null? null : principal.getName();		//로그인하지않았으면 null로 인식
-		BoardDto.BoardRead dto = boardService.Board_senter(bno, loginId);
+		BoardDto.BoardRead dto = boardService.Board_senter(bno, loginId, name);
 		return new ModelAndView("board/read").addObject("result", dto);
 	}
 	
 	//게시글목록 페이지로 이동하며 해당페이지의 번호에 맞는 게시글인 확인하고 데이터를 전달
 	@GetMapping("/board/list")
-	public ModelAndView list(@RequestParam(defaultValue="1") Integer pageno) {
-		return new ModelAndView("board/list").addObject("result", boardService.findall(pageno));
+	public ModelAndView list(@RequestParam(defaultValue="1") Integer pageno, String cno) {
+		return new ModelAndView("board/list").addObject("result", boardService.findall(pageno,cno));
 	}
 	
 	//게시글을 수정할때 기존 데이터를 그대로 가져온다
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/board/update")
-	public ModelAndView update(Long bno) {
-		BoardDto.BoardRead dto = boardService.Board_senter(bno, null);
+	public ModelAndView update(Long bno,String name) {
+		BoardDto.BoardRead dto = boardService.Board_senter(bno, null,name);
 		return new ModelAndView("board/update").addObject("result", dto);
 	}
 	
