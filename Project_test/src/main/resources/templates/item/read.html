@@ -70,6 +70,13 @@
 					<div class="col-lg-6">
 						<h3 th:text="${result.itemIrum}"></h3>
 						<h4 th:text="${result.itemPrice + '원'}"></h4>
+						
+						<!-- 재고 상태 메시지 표시 -->
+  						<div th:if="${result.stockMessage != null}">
+       					   <p th:text="${result.stockMessage}" class="text-danger"></p>
+   						</div>
+						
+						
 						<p id="info" th:utext="${result.itemInfo}"></p>
 						<div
 							sec:authorize="hasRole('ROLE_USER') or hasRole('ROLE_SOCIAL')">

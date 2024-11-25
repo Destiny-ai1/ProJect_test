@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,14 +52,14 @@ public class ItemController {
 	// 상품 상세 정보 페이지 이동
 	@GetMapping("/item/read")
 	public ModelAndView read(Long itemNo, String imageUrl) {
-		ItemDto.Read result = itemService.read(itemNo, imageUrl); // 상품 상세 정보 조회
+	    ItemDto.Read result = itemService.read(itemNo, imageUrl); // 상품 상세 정보 조회
 
-		// 상품이 없다면 에러 페이지로 리다이렉트
-		if (result == null) {
-			return new ModelAndView("redirect:/item/add"); // 상품이 없으면 아이템 추가 페이지로 리다이렉트
-		}
+	    // 상품이 없다면 에러 페이지로 리다이렉트
+	    if (result == null) {
+	        return new ModelAndView("redirect:/item/add"); // 상품이 없으면 아이템 추가 페이지로 리다이렉트
+	    }
 
-		return new ModelAndView("item/read").addObject("result", result);
+	    return new ModelAndView("item/read").addObject("result", result); // 상품 상세 정보와 재고 메시지 전달
 	}
 
 	@GetMapping("/category/{cno}/items")
@@ -70,7 +71,6 @@ public class ItemController {
 	    return new ModelAndView("item/test/list") // "item/test/testfiled"는 해당하는 Thymeleaf 템플릿 경로
 	            .addObject("categoryResult", categoryResult); // 모델에 결과를 담아서 뷰로 전달
 	}
-
 
 	// 예외 처리: ConstraintViolationException (입력 검증 오류 처리)
 	@ExceptionHandler(ConstraintViolationException.class)

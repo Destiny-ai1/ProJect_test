@@ -24,7 +24,7 @@
 <script>
 	$(document).ready(function() {
 		const message = '[[${message}]]';
-		if(message!='') {
+		if(message != '') {
 			Swal.fire({
 				icon: "error",
 				title: "서버 메시지",
@@ -36,27 +36,26 @@
 <script>
 $(document).ready(function() {
 	$('#add').click(function() {
-		if($("#small").val()==null) {
+		if($("#small").val() == null) {
 			alert("소분류를 선택하세요");
 			// return false;
 		}
 		
 		let allEmpty = true
 		for(const image of $('.images')) {
-			if(image.files.length>0) {
+			if(image.files.length > 0) {
 				allEmpty = false;
 				break;
 			}
 		}
-		if(allEmpty==true) {
+		if(allEmpty == true) {
 			alert("이미지를 선택하세요");
 			// return false;
 		}
 		$('#add-form').submit();
 	});
 	
-	
-	// 대분류 선택 후 소분류 로드
+	// 대분류 선택 후 중간분류, 소분류 로드
 	$('#major').change(async function() {
 	    const cno = $('#major').val();  // 선택된 대분류의 cno 값 가져오기
 	    console.log('선택된 대분류 cno:', cno);  // 대분류 cno 확인
@@ -68,7 +67,44 @@ $(document).ready(function() {
 	    }
 
 	    try {
-	        // 대분류에 해당하는 소분류 카테고리 받아오기
+	        // 대분류에 해당하는 중간분류 카테고리 받아오기
+	        const result = await $.ajax(`/api/categories?cno=${cno}`);
+	        console.log('받아온 중간분류 데이터:', result);  // 받아온 중간분류 데이터 확인
+
+	        // 중간분류 카테고리 로드
+	        const $intermediate = $('#intermediate');
+	        $intermediate.empty();  // 기존 중간분류 목록 초기화
+	        $(`<option selected disabled>중간분류를 선택하세요</option>`).appendTo($intermediate);  // 기본 메시지 추가
+
+	        if (Array.isArray(result) && result.length > 0) {
+	            result.forEach(c => {
+	                if (c.CNO && c.CNAME) {  // 'CNO'와 'CNAME'을 사용
+	                    $(`<option value='${c.CNO}'>${c.CNAME}</option>`).appendTo($intermediate);
+	                } else {
+	                    console.error('잘못된 데이터:', c);
+	                }
+	            });
+	        } else {
+	            console.log('중간분류 데이터가 없습니다.');
+	        }
+	    } catch (err) {
+	        console.error('중간분류 데이터 로드 실패:', err);
+	    }
+	});
+
+	// 중간분류 선택 후 소분류 로드
+	$('#intermediate').change(async function() {
+	    const cno = $('#intermediate').val();  // 선택된 중간분류의 cno 값 가져오기
+	    console.log('선택된 중간분류 cno:', cno);  // 중간분류 cno 확인
+
+	    // cno 값이 없거나 선택되지 않은 경우, 처리하지 않고 종료
+	    if (!cno) {
+	        console.error('중간분류 cno 값이 없습니다. 선택된 값을 확인해주세요.');
+	        return;  // 중단하고 더 이상 진행하지 않음
+	    }
+
+	    try {
+	        // 중간분류에 해당하는 소분류 카테고리 받아오기
 	        const result = await $.ajax(`/api/categories?cno=${cno}`);
 	        console.log('받아온 소분류 데이터:', result);  // 받아온 소분류 데이터 확인
 
@@ -77,12 +113,9 @@ $(document).ready(function() {
 	        $small.empty();  // 기존 소분류 목록 초기화
 	        $(`<option selected disabled>소분류를 선택하세요</option>`).appendTo($small);  // 기본 메시지 추가
 
-	        // 데이터가 있는지 체크
 	        if (Array.isArray(result) && result.length > 0) {
-	            // 소분류 데이터가 있을 경우
 	            result.forEach(c => {
 	                if (c.CNO && c.CNAME) {  // 'CNO'와 'CNAME'을 사용
-	                    // c.CNO와 c.CNAME이 존재하는 경우만 추가
 	                    $(`<option value='${c.CNO}'>${c.CNAME}</option>`).appendTo($small);
 	                } else {
 	                    console.error('잘못된 데이터:', c);
@@ -95,7 +128,7 @@ $(document).ready(function() {
 	        console.error('소분류 데이터 로드 실패:', err);
 	    }
 	});
-});	
+});
 </script>
 <script>
 	// ckeditor 초기화 함수
@@ -129,14 +162,17 @@ $(document).ready(function() {
 						<option disabled selected>대분류 선택</option>
 						<option th:each="m:${category}" th:text="${m.CNAME}" th:value="${m.CNO}"></option>
 					</select>
+					<select id="intermediate" class="form-select">
+						<option disabled selected>중간분류 선택</option>
+					</select>
 					<select id="small" class="form-select" name="cno">
-						<option disabled selected>대분류부터 선택</option>
+						<option disabled selected>소분류 선택</option>
 					</select>
 				</div>
 				<div class="mb-3 mt-3">
-					<input type="file" name="itemImages" class="images form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
-					<input type="file" name="itemImages" class="images form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
-					<input type="file" name="itemImages" class="images form-control"  accept=".jpg,.jpeg,.png,.gif,.webp">
+					<input type="file" name="itemImages" class="images form-control" accept=".jpg,.jpeg,.png,.gif,.webp">
+					<input type="file" name="itemImages" class="images form-control" accept=".jpg,.jpeg,.png,.gif,.webp">
+					<input type="file" name="itemImages" class="images form-control" accept=".jpg,.jpeg,.png,.gif,.webp">
 				</div>
 				<div class="mb-3 mt-3">
 					<label for="name" class="form-label">제품명:</label> 
