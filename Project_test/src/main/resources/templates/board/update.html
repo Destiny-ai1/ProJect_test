@@ -7,72 +7,79 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
-<title>Insert title here</title>
+<title>게시글 변경</title>
 </head>
 <body>
-	<div id="app">
-		<header th:replace="~{/fragment/header.html}"> </header>
-		<nav th:replace="~{/fragment/nav.html}"></nav>
-		<main>
-			<section>
-				<div class="mb-3 mt-3">
-    			<label for="title" class="form-label">제목:</label>
-    			<input type="text" class="form-control" id="title" placeholder="제목 입력..." name="title" th:value="${result.title}">
-  			</div>
-				<div id="content" th:utext="${result.content}"></div>
-				<div class="d-grid mb-3 mt-3">
- 					<button type="button" class="btn btn-outline-primary btn-block" id="update">변경</button>
-				</div>
-				<button type="button" class="btn btn-danger" id="delete">삭제</button>
-			</section>
-		</main>
-		<footer th:replace="~{/fragment/footer.html}"> </footer>
-	</div>			
-	<script>
-		async function initEditor() {
-			try {
-				editor = await ClassicEditor.create(document.querySelector('#content'), {
-					ckfinder: {
-						uploadUrl: '/api/boards/image'
-					}
-				});
-				console.log('editor 초기화');
-			} catch (error) {
-				console.error('editor 생성 오류', error);
-			}
-		}
-			
-		initEditor();
-	</script>	
-	<script>
-		$('#update').click(function() {
-			const bno = '[[${result.bno}]]';
-			const title = $('#title').val();
-			const content = editor.getData();
-			const token = '[[${_csrf.token}]]';
-			const form = `
-				<form action='/board/update' method='post'>
-					<input type='hidden' name='bno' value='${bno}'>
-					<input type='hidden' name='title' value='${title}'>
-					<input type='hidden' name='content' value='${content}'>
-					<input type='hidden' name='_csrf' value='${token}'>
-				</form>
-			`;
-			$(form).appendTo($('body')).submit();
-		})
-	</script>	
-	<script>
-		$('#delete').click(function() {
-			const bno = '[[${result.bno}]]';
-			const token = '[[${_csrf.token}]]';
-			const form = `
-				<form action='/board/delete' method='post'>
-					<input type='hidden' name='bno' value='${bno}'>
-					<input type='hidden' name='_csrf' value='${token}'>
-				</form>
-			`;
-			$(form).appendTo($('body')).submit();
-		})
-	</script>	
+    <div id="app">
+        <header th:replace="~{/fragment/header.html}"> </header>
+        <nav th:replace="~{/fragment/nav.html}"></nav>
+        <main>
+            <section>
+                <div class="mb-3 mt-3">
+                    <label for="title" class="form-label">제목:</label>
+                    <input type="text" class="form-control" id="title" placeholder="제목 입력..." name="title" th:value="${result.title}">
+                </div>
+                <div id="content" th:utext="${result.content}"></div>
+                <div class="mb-3 mt-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="secret" name="secret" th:checked="${result.secret}">
+                        <label class="form-check-label" for="secret">비밀글로 전환</label>
+                    </div>
+                </div>
+                <div class="d-grid mb-3 mt-3">
+                    <button type="button" class="btn btn-outline-primary btn-block" id="update">변경</button>
+                </div>
+                <button type="button" class="btn btn-danger" id="delete">삭제</button>
+            </section>
+        </main>
+        <footer th:replace="~{/fragment/footer.html}"> </footer>
+    </div>          
+    <script>
+        async function initEditor() {
+            try {
+                editor = await ClassicEditor.create(document.querySelector('#content'), {
+                    ckfinder: {
+                        uploadUrl: '/api/boards/image'
+                    }
+                });
+                console.log('editor 초기화');
+            } catch (error) {
+                console.error('editor 생성 오류', error);
+            }
+        }
+        initEditor();
+    </script>    
+    <script>
+        $('#update').click(function() {
+            const bno = '[[${result.bno}]]';
+            const title = $('#title').val();
+            const content = editor.getData();
+            const secret = $('#secret').is(':checked') ? 1 : 0;
+            const token = '[[${_csrf.token}]]';
+            const form = `
+                <form action='/board/update' method='post'>
+                    <input type='hidden' name='bno' value='${bno}'>
+                    <input type='hidden' name='title' value='${title}'>
+                    <input type='hidden' name='content' value='${content}'>
+                    <input type='hidden' name='secret' value='${secret}'>
+                    <input type='hidden' name='_csrf' value='${token}'>
+                </form>
+            `;
+            $(form).appendTo($('body')).submit();
+        });
+    </script>  
+    <script>
+        $('#delete').click(function() {
+            const bno = '[[${result.bno}]]';
+            const token = '[[${_csrf.token}]]';
+            const form = `
+                <form action='/board/delete' method='post'>
+                    <input type='hidden' name='bno' value='${bno}'>
+                    <input type='hidden' name='_csrf' value='${token}'>
+                </form>
+            `;
+            $(form).appendTo($('body')).submit();
+        });
+    </script>  
 </body>
 </html>
