@@ -1,10 +1,13 @@
 package com.example.demo.item;
 
 import java.util.List;
+
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import com.example.demo.image.ItemImage;
 import com.example.demo.item.ItemDto.ItemList;
 
 @Mapper
@@ -29,10 +32,25 @@ public interface ItemDao {
     @Select("select case when item_jango>#{count} then 1 else 0 end from item where item_no=#{item_no} and rownum=1")
     public Boolean availabelToOrder(Long itemNo, Integer count);
     
-    // 상품번호로 장바구니의 상품이름 찾기
-    @Select("select * from item where item_no = #{itemNo}")
-    public String getItemNameById(Long itemNo);
+    // 상품 번호가 일치하는 상품의 이미지정보 삭제
+    @Delete("delete from item_image where item_no = #{itemNo}")
+    public Integer deleteItemImageByItemNo(Long itemNo);
+    
+    // 상품 번호가 일치하는 상품의 정보 삭제
+    @Delete("delete from item where item_no = #{itemNo}")
+    public Integer deleteItemByItemNo(Long itemNo);
+    
+    // itemNo로 이미지 목록을 조회
+    @Select("select * from item_image where item_no = #{itemNo}")
+    public List<ItemImage> findByItemNo(Long itemNo);
+    
+    // itemNo에 해당하는 모든 이미지를 삭제
+    @Delete("delet from item_image where item_no = #{itemNo}")
+    public void deleteByItemNo(Long itemNo);
 
     // 카테고리 번호에 해당하는 상품들을 조회하는 메서드
 	public List<ItemList> findItemsByCategory(Long cno, String imageUrl);
+    
+	// 상품별 평균 평점 조회
+    public double findAverageReviewScore(Long itemNo);
 }

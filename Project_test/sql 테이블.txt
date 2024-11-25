@@ -184,10 +184,10 @@ create table review(
     review_writer varchar2(20 char),                            --리뷰 작성자
     review_good_cnt number(7),                                  --리뷰 별점
     username varchar2(50 char),                                 -- 회원 ID (외래 키, member 테이블 참조)
-    order_no number(20),                                        -- 주문번호 (외래 키, orders 테이블 참조)
+    item_number(20),                                       		-- 상품번호 (외래 키, item 테이블 참조)
     constraint review_pk_review_no primary key (review_no),
     constraint review_fk_username foreign key (username) references member (username),
-    constraint review_fk_order_no foreign key (order_no) references orders (order_no)
+    constraint review_fk_item_no2 foreign key (item_no) references item (item_no)
 );
 
 --댓글 추가

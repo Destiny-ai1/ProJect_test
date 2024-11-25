@@ -17,7 +17,6 @@ import com.example.demo.category.CategoryDao;
 import com.example.demo.image.ItemImage;
 import com.example.demo.image.ItemImageDao;
 import com.example.demo.image.ItemImageSaveLoad;
-import com.example.demo.item.ItemDto.ItemList;
 
 @Service
 @Transactional
@@ -82,6 +81,35 @@ public class ItemService {
             }
         }
     }
+    
+    // 상품 번호에 해당하는 이미지 정보 삭제
+    // 상품 정보 삭제
+    @Transactional
+    public boolean deleteItem(Long itemNo) {
+        // 1. 상품에 관련된 이미지들 조회 (item_image 테이블에서 해당 itemNo로 이미지 찾기)
+        List<ItemImage> itemImages = itemDao.findByItemNo(itemNo);  // imageDao가 아니라 itemDao에서 findByItemNo 호출
+
+        // 2. 이미지 파일 시스템에서 삭제
+        for (ItemImage itemImage : itemImages) {
+            String imagePath = ItemImageSaveLoad.IMAGE_FOLDER + itemImage.getImageName();
+            File imageFile = new File(imagePath);
+
+            if (imageFile.exists()) {
+                boolean isDeleted = imageFile.delete();  // 실제 파일 삭제
+                if (!isDeleted) {
+                    throw new RuntimeException("이미지 파일 삭제 실패: " + imagePath);
+                }
+            }
+        }
+
+        // 3. DB에서 이미지 정보 삭제 (item_image 테이블에서 해당 itemNo에 맞는 이미지 삭제)
+        itemDao.deleteItemImageByItemNo(itemNo);  // imageDao가 아니라 itemDao의 deleteItemImageByItemNo 호출
+
+        // 4. 상품 정보 삭제
+        itemDao.deleteItemByItemNo(itemNo);  // 상품 삭제 (상품 테이블에서 itemNo로 삭제)
+
+        return true;  // 삭제 성공 시 true 반환
+    }
 
  // 상품 상세 조회
     public ItemDto.Read read(Long itemNo, String imageUrl) {
@@ -97,15 +125,24 @@ public class ItemService {
             itemDto.setItemImages(List.of("normal/default-image.jpg"));
         }
 
+        // 재고가 10 미만인 경우 남은 수량 메시지 설정
+        if (itemDto != null && itemDto.getItemJango() != null && itemDto.getItemJango() < 10) {
+            itemDto.setStockMessage("남은 상품 수량: " + itemDto.getItemJango());
+        } else if (itemDto != null) {
+            itemDto.setStockMessage(null);
+        }
+
         return itemDto;
     }
 
- // 카테고리 번호에 해당하는 상품들을 조회하는 메서드
+    // 카테고리 번호에 해당하는 상품들을 조회하는 메서드
     public List<ItemDto.ItemList> findItemsByCategory(Long cno, String imageUrl) {
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
             imageUrl = "/api/images?imagename=";  // 기본 이미지 URL 설정
         }
         return itemDao.findItemsByCategory(cno, imageUrl);  // DAO 호출
     }
+    
+    // 상품의 재고가 변동되면 db의 재고도 그에 맞게 변경
 }
 

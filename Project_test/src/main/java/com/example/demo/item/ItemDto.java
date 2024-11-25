@@ -19,7 +19,8 @@ public class ItemDto {
         private String itemIrum;  // 상품명
         private String itemInfo;  // 상품 정보
         private Integer itemPrice; // 가격
-        private Integer itemJango;
+        private Integer itemJango;	// 상품 재고
+        private Long reviewEa;		// 리뷰 갯수
         private String itemImage; // 이미지 URL
         private Long cno;         // 카테고리 번호 (cno 추가)
     }
@@ -36,9 +37,10 @@ public class ItemDto {
         private Integer addGoodCnt; // 좋아요 수
         private Integer reviewEa;   // 리뷰 수
         private Integer cno;        // 카테고리 번호 (cno 추가)
-
         // 이미지를 담을 리스트
-        private List<String> itemImages; 
+        private List<String> itemImages;
+        // 재고 상태 메시지
+		private String stockMessage; 
     }
 
     // 상품 생성/수정 요청 DTO
