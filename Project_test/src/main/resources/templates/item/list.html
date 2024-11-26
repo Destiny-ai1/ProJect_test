@@ -26,6 +26,11 @@
                             <div class="card-body">
                                 <p class="card-title" th:text="${item.itemIrum}" style="text-overflow: ellipsis;"></p>
                                 <h5 class="card-text" th:text="${item.itemPrice + '원'}"></h5>
+
+                                <!-- 평균 평점 출력 -->
+                                <p class="card-text">
+                                    평균 평점: <span th:text="${item.avgRating != null ? item.avgRating : '평점 없음'}"></span>
+                                </p>
                             </div>
 
                             <!-- 삭제 버튼 -->

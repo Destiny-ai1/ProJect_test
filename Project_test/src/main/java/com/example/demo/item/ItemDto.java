@@ -23,6 +23,7 @@ public class ItemDto {
         private Long reviewEa;		// 리뷰 갯수
         private String itemImage; // 이미지 URL
         private Long cno;         // 카테고리 번호 (cno 추가)
+        private Double avgRating;	// 리뷰 평균 평점
     }
 
     // 상품 상세 정보를 위한 DTO (카테고리 번호 포함)
@@ -41,6 +42,7 @@ public class ItemDto {
         private List<String> itemImages;
         // 재고 상태 메시지
 		private String stockMessage; 
+		private Double avgRating; // 평균 평점 추가
     }
 
     // 상품 생성/수정 요청 DTO

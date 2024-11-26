@@ -1,36 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.category.CategoryDao">
+
+	<!-- 대분류, 중간분류, 소분류를 매핑하는 ResultMap -->
 	<resultMap type="com.example.demo.category.CategoryDto" id="findAll">
-		<id property="cno" column="gcno" />
-		<result property="cname" column="gcname" />
-		<collection property="children" javaType="java.util.ArrayList" resultMap="mapForParent" />
+		<id property="cno" column="tcno" />
+		<result property="cname" column="tcname" />
+		<collection property="children" javaType="java.util.ArrayList" resultMap="mapForIntermediate" />
 	</resultMap>
-	<resultMap type="com.example.demo.category.CategoryDto" id="mapForParent">
-		<id property="cno" column="pcno" />
-		<result property="cname" column="pcname" />
+
+	<!-- 중간분류를 매핑하는 ResultMap -->
+	<resultMap type="com.example.demo.category.CategoryDto" id="mapForIntermediate">
+		<id property="cno" column="icno" />
+		<result property="cname" column="icname" />
 		<collection property="children" javaType="java.util.ArrayList" resultMap="mapForChild" />
 	</resultMap>
+
+	<!-- 소분류를 매핑하는 ResultMap -->
 	<resultMap type="com.example.demo.category.CategoryDto" id="mapForChild">
 		<id property="cno" column="ccno" />
 		<result property="cname" column="ccname" />
 	</resultMap>
+
+	<!-- 대분류, 중간분류, 소분류를 조회하는 SQL -->
 	<select id="findAll" resultMap="findAll">
-		select g.cno gcno, g.cname gcname, p.cno pcno, p.cname pcname, c.cno ccno, c.cname ccname from category g 
-		join category p on p.pno = g.cno 
-		join category c on c.pno = p.cno
-		where g.pno is null	
+		select
+			t.cno as tcno, t.cname as tcname,
+			i.cno as icno, i.cname as icname,
+			c.cno as ccno, c.cname as ccname
+		from category t
+		left join category i on i.pno = t.cno
+		left join category c on c.pno = i.cno
+		where t.pno is null
 	</select>
+
+	<!-- 특정 대분류에 해당하는 중간분류와 소분류를 조회하는 SQL -->
+	<select id="findCategoryByParentCno" resultMap="findAll">
+		select
+			t.cno as tcno, t.cname as tcname,
+			i.cno as icno, i.cname as icname,
+			c.cno as ccno, c.cname as ccname
+		from category t
+		left join category i on i.pno = t.cno
+		left join category c on c.pno = i.cno
+		where t.pno is null and t.cno = #{cno}
+	</select>
+
 </mapper>
-
-
-
-
-
-
-
-
-
-
-
-

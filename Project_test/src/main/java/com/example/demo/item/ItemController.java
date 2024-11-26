@@ -51,16 +51,16 @@ public class ItemController {
 
 	// 상품 상세 정보 페이지 이동
 	@GetMapping("/item/read")
-	public ModelAndView read(Long itemNo, String imageUrl) {
-	    ItemDto.Read result = itemService.read(itemNo, imageUrl); // 상품 상세 정보 조회
+    public ModelAndView read(Long itemNo, String imageUrl) {
+        ItemDto.Read result = itemService.read(itemNo, imageUrl); // 상품 상세 정보 조회
 
-	    // 상품이 없다면 에러 페이지로 리다이렉트
-	    if (result == null) {
-	        return new ModelAndView("redirect:/item/add"); // 상품이 없으면 아이템 추가 페이지로 리다이렉트
-	    }
+        // 상품이 없다면 에러 페이지로 리다이렉트
+        if (result == null) {
+            return new ModelAndView("redirect:/item/add"); // 상품이 없으면 아이템 추가 페이지로 리다이렉트
+        }
 
-	    return new ModelAndView("item/read").addObject("result", result); // 상품 상세 정보와 재고 메시지 전달
-	}
+        return new ModelAndView("item/read").addObject("result", result); // 상품 상세 정보와 재고 메시지 전달
+    }
 
 	@GetMapping("/category/{cno}/items")
 	public ModelAndView getItemsByCategory(@PathVariable Long cno, @RequestParam(required = false) String imageUrl) {

@@ -27,4 +27,6 @@ public class Item {
 	public Integer addGoodCnt;
 	public Integer reviewEa;
 	public Integer cno;
+	
+	
 }

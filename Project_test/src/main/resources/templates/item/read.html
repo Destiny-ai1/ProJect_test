@@ -71,6 +71,13 @@
 						<h3 th:text="${result.itemIrum}"></h3>
 						<h4 th:text="${result.itemPrice + '원'}"></h4>
 						
+						<!-- 평균 평점 출력 -->
+                        <div th:if="${result.avgRating != null}">
+                            <p><strong>평균 평점:</strong> 
+                                <span th:if="${result.avgRating != null}" th:text="${result.avgRating}"></span>
+                            </p>
+                        </div>
+						
 						<!-- 재고 상태 메시지 표시 -->
   						<div th:if="${result.stockMessage != null}">
        					   <p th:text="${result.stockMessage}" class="text-danger"></p>

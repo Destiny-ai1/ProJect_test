@@ -52,5 +52,5 @@ public interface ItemDao {
 	public List<ItemList> findItemsByCategory(Long cno, String imageUrl);
     
 	// 상품별 평균 평점 조회
-    public double findAverageReviewScore(Long itemNo);
+    public Double findAverageRatingByItemNo(Long itemNo);
 }
