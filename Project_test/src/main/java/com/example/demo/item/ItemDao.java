@@ -16,10 +16,12 @@ public interface ItemDao {
     public Integer save(Item item);
 
     // 아이템을 리스트로 선택
-    @Select("SELECT item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, add_good_cnt, review_ea, cno, "
+    @Select("SELECT item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, item_size, review_ea, cno, "
             + "   #{imageUrl} || COALESCE((SELECT ii.image_name FROM item_image ii WHERE it.item_no = ii.item_no AND ROWNUM = 1), 'normal/default-image.jpg') AS item_image "
-            + "FROM item it")
+            + "FROM item it "
+            + "ORDER BY it.item_no ASC")  // itemNo 기준 오름차순 정렬
     public List<ItemDto.ItemList> findAll(@Param("imageUrl") String imageUrl);
+
 
     // 상품 번호로 찾기
     public ItemDto.Read findById(Long itemNo, String imageUrl);

@@ -20,6 +20,7 @@ public class ItemDto {
         private String itemInfo;  // 상품 정보
         private Integer itemPrice; // 가격
         private Integer itemJango;	// 상품 재고
+        private Integer itemSellQty; // 상품 판매수
         private Long reviewEa;		// 리뷰 갯수
         private String itemImage; // 이미지 URL
         private Long cno;         // 카테고리 번호 (cno 추가)
@@ -35,7 +36,7 @@ public class ItemDto {
         private Integer itemPrice; // 가격
         private Integer itemJango; // 잔고
         private Integer itemSellQty; // 판매 수량
-        private Integer addGoodCnt; // 좋아요 수
+        private String  itemSize; // 좋아요 수
         private Integer reviewEa;   // 리뷰 수
         private Integer cno;        // 카테고리 번호 (cno 추가)
         // 이미지를 담을 리스트
@@ -58,7 +59,7 @@ public class ItemDto {
         @DecimalMin(value="1", message="잔고는 1개이상이어야 합니다")
         private Integer itemJango;  // 잔고
         private Integer itemSellQty; // 판매 수량
-        private Integer addGoodCnt; // 좋아요 수
+        private String itemSize; // 좋아요 수
         private Integer reviewEa;   // 리뷰 수
         private Integer cno;        // 카테고리 번호 (cno 추가)
 
@@ -66,7 +67,7 @@ public class ItemDto {
 
         // Entity 객체로 변환
         public Item toEntity() {
-            return new Item(null, itemIrum, itemInfo, itemPrice, itemJango, itemSellQty, addGoodCnt, reviewEa, cno);
+            return new Item(null, itemIrum, itemInfo, itemPrice, itemJango, itemSellQty, itemSize, reviewEa, cno);
         }
     }
 

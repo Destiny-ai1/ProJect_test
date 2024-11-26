@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// 카테고리 엔티티
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor

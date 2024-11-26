@@ -14,10 +14,12 @@ public class CategoryService {
 	@Autowired
 	private CategoryDao categoryDao;
 	
+	// 부모 cno를 이용하여 자식 카테고리 검색
 	public List<Map> findChildCategoryByParent(Long cno) {
 		return categoryDao.findChildCategoryByParent(cno);
 	}
-
+	
+	// 부모 cno를 이용하여 카테고리 검색
 	public List<Map> findCategoryByParentCno(Long cno) {
 		return categoryDao.findCategoryByParentCno(cno);
 	}

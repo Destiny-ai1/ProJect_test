@@ -28,11 +28,13 @@ public class ItemService {
 	private CategoryDao categoryDao;
 	@Autowired
 	private ItemImageDao imageDao;
-
+	
+	// 카테고리 대분류 검색
 	public List<Map> findMajorCategory() {
 		return categoryDao.findMajorCategory();
 	}
-
+	
+	// 전체 상품 검색
 	public List<ItemDto.ItemList> findAll(String imageUrl) {
 	    if (imageUrl == null || imageUrl.trim().isEmpty()) {
 	        imageUrl = "/default/images/"; // 기본 이미지 URL을 설정 (예시)
@@ -48,7 +50,8 @@ public class ItemService {
 
 	    return items;
 	}
-
+	
+	// 추가할 상품 정보를 저장
 	@Transactional
 	public void save(ItemDto.Create dto) {
 		// 1. 상품 정보를 DB에 저장

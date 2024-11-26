@@ -20,11 +20,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-public class ItemImageRestController {    
+public class ItemImageRestController { 
+	// 이미지 저장
 	@PostMapping("/api/images")
 	public ResponseEntity<?> itemImageUpload(MultipartFile upload) {
+		// 기존 파일 이름
 	    String originalFileName = upload.getOriginalFilename();
+	    // 확장자명 설정
 	    String extension = FilenameUtils.getExtension(originalFileName);
+	    // 랜덤한 이름으로 이미지 저장
 	    String saveImageName = UUID.randomUUID() + "." + extension;
 
 	    // 실제 저장할 경로
@@ -43,7 +47,7 @@ public class ItemImageRestController {
 	    return ResponseEntity.ok(map);
 	}
 
-
+	// 저장한 이미지 적절히 노출
     @GetMapping("/api/images")
     public ResponseEntity<byte[]> viewImage(@RequestParam("imagename") String imageName) {
         if (imageName == null || imageName.isEmpty()) {
