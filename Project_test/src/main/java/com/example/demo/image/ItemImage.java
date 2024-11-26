@@ -3,6 +3,7 @@ package com.example.demo.image;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+// 상품 이미지 엔티티
 @Getter
 @AllArgsConstructor
 public class ItemImage {

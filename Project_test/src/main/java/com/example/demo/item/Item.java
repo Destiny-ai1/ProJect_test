@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// 상품 엔티티
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,7 +25,7 @@ public class Item {
 	public Integer itemPrice;
 	public Integer itemJango;
 	public Integer itemSellQty;
-	public Integer addGoodCnt;
+	public String itemSize;
 	public Integer reviewEa;
 	public Integer cno;
 	

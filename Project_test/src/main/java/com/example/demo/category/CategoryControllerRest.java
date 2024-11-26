@@ -16,6 +16,7 @@ public class CategoryControllerRest {
 	@Autowired
 	private CategoryService categoryService;
 	
+	// 상품 추가시 카테고리 분류
 	@GetMapping("/categories")
 	public ResponseEntity<List<Map>> findChildCategoryByParent(@RequestParam Long cno) {
 		return ResponseEntity.ok(categoryService.findChildCategoryByParent(cno));

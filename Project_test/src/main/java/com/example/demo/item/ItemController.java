@@ -36,6 +36,7 @@ public class ItemController {
 	}
 
 	// 관리자의 상품 추가 페이지 이동
+	// ★★★★ 관리자만 가능하게 보안 추가 필요 ★★★★
 	@GetMapping("/item/add")
 	public ModelAndView addItem() {
 		List<Map> majorCategory = itemService.findMajorCategory();
@@ -43,6 +44,7 @@ public class ItemController {
 	}
 
 	// 관리자의 상품 추가 후 루트페이지로 이동
+	// ★★★★ 관리자만 가능하게 보안 추가 필요 ★★★★
 	@PostMapping("/item/add")
 	public ModelAndView addItem(@Valid ItemDto.Create dto, BindingResult br) {
 		itemService.save(dto);
@@ -58,17 +60,17 @@ public class ItemController {
         if (result == null) {
             return new ModelAndView("redirect:/item/add"); // 상품이 없으면 아이템 추가 페이지로 리다이렉트
         }
-
         return new ModelAndView("item/read").addObject("result", result); // 상품 상세 정보와 재고 메시지 전달
     }
-
+	
+	// 하위 카테고리에 해당하는 상품페이지로 이동
 	@GetMapping("/category/{cno}/items")
 	public ModelAndView getItemsByCategory(@PathVariable Long cno, @RequestParam(required = false) String imageUrl) {
 	    // 서비스 호출하여 카테고리 번호에 해당하는 상품들 조회
 	    List<ItemDto.ItemList> categoryResult = itemService.findItemsByCategory(cno, imageUrl);
 
 	    // 조회한 결과를 ModelAndView로 반환
-	    return new ModelAndView("item/test/list") // "item/test/testfiled"는 해당하는 Thymeleaf 템플릿 경로
+	    return new ModelAndView("item/miniCategory/list") // "item/test/testfiled"는 해당하는 Thymeleaf 템플릿 경로
 	            .addObject("categoryResult", categoryResult); // 모델에 결과를 담아서 뷰로 전달
 	}
 
