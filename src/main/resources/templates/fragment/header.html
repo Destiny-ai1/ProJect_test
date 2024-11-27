@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Header with Fixed Background Image</title>
+    <style>
+/* 헤더 스타일 */
+header.site-header {
+	height: 50px;
+	line-height: 50px;
+	text-align: center;
+	margin: 10px 0;
+	border: 1px solid gray;
+	letter-spacing: 1em;
+	background-color: #f8f8f8;
+	color: #333;
+}
+
+/* 고정 이미지 스타일 */
+.fixed-image {
+	position: relative;
+	top: 0;
+	width: 100%;
+	height: calc(50vh); /* 화면 높이의 50% */
+	background-image:
+		url('https://cdn.actionhub.com/wp-content/uploads/2019/02/Screen-Shot-2019-02-15-at-10.51.34-AM.png');
+	background-size: cover; /* 이미지를 전체 영역에 맞춤 */
+	background-position: center; /* 이미지 중앙 정렬 */
+	margin-top: 20px; /* 네비게이션 바와 이미지 사이 간격 */
+}
+
+/* 네비게이션 스타일 */
+.navbar {
+	background-color: #333;
+	color: white;
+	z-index: 1000;
+	position: relative;
+	padding: 10px 20px;
+}
+
+.navbar .nav-link {
+	color: white;
+	text-decoration: none;
+	padding: 10px;
+	transition: color 0.3s;
+}
+
+.navbar .nav-link:hover {
+	color: #ddd;
+}
+
+/* 드롭다운 스타일 */
+.dropdown-content {
+	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	background-color: white;
+	box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+	border-radius: 5px;
+	overflow: hidden;
+	z-index: 1000;
+}
+
+.dropdown-content a {
+	display: block;
+	padding: 10px 15px;
+	color: #333;
+	text-decoration: none;
+	font-size: 14px;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-content a:hover {
+	background-color: #f9f9f9;
+}
+
+.dropdown:hover .dropdown-content {
+	display: block;
+}
+</style>
+</head>
+<body>
+<header id="header">쇼핑몰</header>
+<script>
+    document.getElementById("header").addEventListener("click", function() {
+        window.location.href = "/";
+    });
+</script>
+    <!-- 상단 네비게이션 바 -->
+    <nav class="navbar navbar-expand-sm navbar-dark">
+        <div class="collapse navbar-collapse justify-content-end" id="mynavbar">
+            <ul class="navbar-nav" sec:authorize="isAnonymous()">
+                <li class="nav-item"><a class="nav-link" href="/member/login">로그인</a></li>
+                 <li class="nav-item"><a class="nav-link" href="/member/readme">내정보</a></li>
+                <li class="nav-item"><a class="nav-link" href="/member/join">회원가입</a></li>
+                <li class="nav-item dropdown"><a
+					class="nav-link dropdown-button" href="#">고객센터</a>
+					<div class="dropdown-content">
+						<a href="/board/list?cno=qa">Q&A</a> <a
+							href="/board/list?cno=notice">공지사항</a>
+					</div></li>
+					<li class="nav-item"><a class="nav-link" href="/cart/cart-view">장바구니</a></li>
+            </ul>
+            <ul class="navbar-nav" sec:authorize="isAuthenticated()">
+                <li class="nav-item"><a class="nav-link" href="#" id="logout">로그아웃</a></li>
+                <li class="nav-item"><a class="nav-link" href="/member/readme">내정보</a></li>
+                <li class="nav-item dropdown"><a
+					class="nav-link dropdown-button" href="#">고객센터</a>
+					<div class="dropdown-content">
+						<a href="/board/list?cno=qa">Q&A</a> <a
+							href="/board/list?cno=notice">공지사항</a>
+					</div></li>
+                <li class="nav-item"><a class="nav-link" href="/cart/cart-view">장바구니</a></li>
+                <li class="nav-item"><a class="nav-link" href="/order/list">주문목록</a></li>
+                <li sec:authorize="hasRole('ROLE_ADMIN')" class="nav-item">
+               		<a class="nav-link" href="/board/write">글쓰기</a>
+                    <a class="nav-link" href="/product/add">상품추가</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+<script>
+			// 로그아웃 처리
+			$('#logout').click(function() {
+				const token = '[[${_csrf.token}]]';
+				const html = `
+					<form action="/member/logout" method="post">
+						<input type='hidden' name='_csrf' value='${token}'>
+					</form>
+				`;
+				$(html).appendTo($('body')).submit();
+			});
+		</script>
+    <!-- 네비게이션 바와 간격을 둔 이미지 -->
+    <div class="fixed-image"></div>
+    
+
+</body>
+</html>
