@@ -21,6 +21,6 @@ public class OrderDetail {
     private String image;
     private int detailEa;
     private int price;
-    private char reviewWritten;
+    private String reviewWritten;
    
 }

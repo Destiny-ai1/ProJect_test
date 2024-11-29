@@ -11,74 +11,76 @@
 <title>주문 상세 및 결제 페이지</title>
 </head>
 <body>
-	<div id="app">
-		<header th:replace="~{/fragment/header.html}"> </header>
-		<nav th:replace="~{/fragment/nav.html}"></nav>
-		<main>
-			<section class="container mt-5">
-				<h1 class="mb-4">주문 상세 및 결제 페이지</h1>
+    <div id="app">
+        <header th:replace="~{/fragment/header.html}"> </header>
+        <nav th:replace="~{/fragment/nav.html}"></nav>
+        <main>
+            <section class="container mt-5">
+                <h1 class="mb-4">주문 상세 및 결제 페이지</h1>
 
-				<!-- 주문 정보가 없는 경우 표시하는 메시지 -->
-	            <div th:if="${orders == null || #lists.isEmpty(orders)}">
-	                <p>주문 정보가 없습니다.</p>
-	            </div>
+                <!-- 주문 정보가 없는 경우 표시하는 메시지 -->
+                <div th:if="${orders == null || #lists.isEmpty(orders)}">
+                    <p>주문 정보가 없습니다.</p>
+                </div>
 
-				<!-- 주문 목록이 있는 경우 테이블로 출력 -->
+                <!-- 주문 목록이 있는 경우 테이블로 출력 -->
 				<div th:if="${orders != null && !#lists.isEmpty(orders)}" class="card mb-3">
-					<div class="card-header">주문 정보</div>
-					<div class="card-body">
-							<table class="table table-bordered">
-			                    <thead>
-			                        <tr>
-			                            <th>주문 번호</th>
-			                            <th>주문 날짜</th>
-			                            <th>주문 상태</th>
-			                            <th>총 가격</th>
-			                            <th>사용 포인트</th>
-			                            <th>실제 결제 금액</th>
-			                        </tr>
-			                    </thead>
-			                    <tbody>
-			                        <tr th:each="order : ${orders}">
-			                            <td th:text="${order.orderNo}"></td>
-			                            <td th:text="${order.orderDate}"></td>
-			                            <td th:text="${order.orderStatus}"></td>
-			                            <td th:text="${order.totalPrice}"></td>
-			                            <td th:text="${order.usedPoint}"></td>
-			                            <td th:text="${order.actPayment}"></td>
-			                        </tr>
-			                    </tbody>
-                			</table>
-            		</div>
-
-					<!-- 주문 상세 항목 -->
-					<div th:if="${result != null and result.orderDetails != null and !#lists.isEmpty(result.orderDetails)}" class="card mb-3">
-    					<div class="card-header">주문 상세 항목</div>
-						<div class="card-body">
-							<table class="table table-bordered">
-								<thead>
-									<tr>
-										<th>상품 번호</th>
-										<th>이미지</th>
-										<th>상품 이름</th>
-										<th>수량</th>
-										<th>가격</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr th:each="detail : ${result.orderDetails}">
-										<td th:text="${detail.itemNo}"></td>
-										<td><img th:src="${detail.image}" alt="상품 이미지" style="width: 100px;"></td>
-										<td th:text="${detail.itemName}"></td>
-										<td th:text="${detail.detailEa}"></td>
-										<td th:text="${detail.price}"></td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-
-					<!-- 배송지 정보 -->
+				    <div class="card-header">주문 정보</div>
+				    <div class="card-body">
+				        <table class="table table-bordered">
+				            <thead>
+				                <tr>
+				                    <th>주문 번호</th>
+				                    <th>주문 날짜</th>
+				                    <th>주문 상태</th>
+				                    <th>총 가격</th>
+				                    <th>사용 포인트</th>
+				                    <th>실제 결제 금액</th>
+				                </tr>
+				            </thead>
+				            <tbody>
+				                <tr th:each="order : ${orders}">
+				                    <td th:text="${order?.orderNo != null ? order.orderNo : 'N/A'}"></td>
+				                    <td th:text="${order?.orderDate != null ? order.orderDate : 'N/A'}"></td>
+				                    <td th:text="${order?.orderStatus != null ? order.orderStatus : 'N/A'}"></td>
+				                    <td th:text="${order?.totalPrice != null ? order.totalPrice : 0}"></td>
+				                    <td th:text="${order?.usedPoint != null ? order.usedPoint : 0}"></td>
+				                    <td th:text="${order?.actPayment != null ? order.actPayment : 0}"></td>
+				                </tr>
+				            </tbody>
+				        </table>
+				    </div>
+				
+				    <!-- 주문 상세 항목 -->
+				    <div th:each="order : ${orders}">
+				        <div th:if="${order?.orderDetails != null && !#lists.isEmpty(order.orderDetails)}" class="card mb-3">
+				            <div class="card-header">주문 상세 항목</div>
+				            <div class="card-body">
+				                <table class="table table-bordered">
+				                    <thead>
+				                        <tr>
+				                            <th>상품 번호</th>
+				                            <th>이미지</th>
+				                            <th>상품 이름</th>
+				                            <th>수량</th>
+				                            <th>가격</th>
+				                        </tr>
+				                    </thead>
+				                    <tbody>
+				                        <tr th:each="detail : ${order.orderDetails}">
+				                            <td th:text="${detail?.itemNo != null ? detail.itemNo : 'N/A'}"></td>
+				                            <td><img th:src="${detail?.image != null ? detail.image : '/images/default.png'}" alt="상품 이미지" style="width: 100px;"></td>
+				                            <td th:text="${detail?.itemName != null ? detail.itemName : 'N/A'}"></td>
+				                            <td th:text="${detail?.detailEa != null ? detail.detailEa : 0}"></td>
+				                            <td th:text="${detail?.price != null ? detail.price : 0}"></td>
+				                        </tr>
+				                    </tbody>
+				                </table>
+				            </div>
+				        </div>
+				    </div>
+				    
+				    <!-- 배송지 정보 -->
 					<div class="card mb-3">
 						<div class="card-header">배송지 정보</div>
 						<div class="card-body">
@@ -90,51 +92,83 @@
 							<button type="button" class="btn btn-primary mt-3" onclick="execDaumPostcode()">주소 검색</button>
 						</div>
 					</div>
-
-					<!-- 결제 정보 입력 및 확인 폼 -->
-					<div class="card mb-3">
-						<div class="card-header">결제 정보 입력</div>
-						<div class="card-body">
-							<form action="/payment/confirm" method="post">
-								<div class="mb-3">
-									<label for="cardNumber" class="form-label">카드 번호</label>
-									<input type="text" id="cardNumber" name="cardNo" class="form-control" required>
-								</div>
-								<button type="submit" class="btn btn-primary">결제하기</button>
-							</form>
-						</div>
-					</div>
+				
+				    <!-- 결제 정보 입력 및 카카오페이 결제 -->
+				    <div class="card mb-3">
+				        <div class="card-header">결제 정보 입력 및 카카오페이 결제</div>
+				        <div class="card-body">
+				            <form action="/payment/ready" method="post">
+				            	<input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+				                <input type="hidden" name="orderNo" th:value="${order?.orderNo}" />
+				                <input type="hidden" name="username" th:value="${order?.memberUsername != null ? order.memberUsername : ''}" />
+				                <input type="hidden" name="itemName" th:value="${order?.orderDetails != null && order.orderDetails.size() > 0 ? order.orderDetails[0].itemName : '상품 정보 없음'}" />
+				                <input type="hidden" name="totalAmount" th:value="${order?.actPayment != null ? order.actPayment : 0}" />
+				                <button type="submit" class="btn btn-warning">카카오페이로 결제하기</button>
+				            </form>
+				        </div>
+				    </div>
 				</div>
-			</section>
-		</main>
-		<footer th:replace="~{/fragment/footer.html}"> </footer>
-	</div>
+            </section>
+        </main>
+        <footer th:replace="~{/fragment/footer.html}"> </footer>
+    </div>
 
-	<script>
-	function execDaumPostcode() {
-	    new daum.Postcode({
-	        oncomplete: function(data) {
-	            // 검색 결과 항목을 클릭했을 때 실행할 코드
+    <script>
+    function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 기존 코드: 검색 결과 항목을 클릭했을 때 실행할 코드
 
-	            // 우편번호를 postNo에 할당
-	            document.getElementById('postNo').value = data.zonecode;
+                // 우편번호를 postNo에 할당
+                document.getElementById('postNo').value = data.zonecode;
 
-	            // 기본 주소 (지번 주소 혹은 도로명 주소)
-	            if (data.roadAddress) {
-	                document.getElementById('addressMain').value = data.roadAddress;
-	                document.getElementById('addressRoad').value = data.roadAddress; // 도로명 주소 할당
-	            } else {
-	                document.getElementById('addressMain').value = data.jibunAddress;
-	                document.getElementById('addressRoad').value = ''; // 도로명 주소가 없을 때 빈 값
-	            }
+                // 기본 주소 (지번 주소 혹은 도로명 주소)
+                if (data.roadAddress) {
+                    document.getElementById('addressMain').value = data.roadAddress;
+                    document.getElementById('addressRoad').value = data.roadAddress; // 도로명 주소 할당
+                } else {
+                    document.getElementById('addressMain').value = data.jibunAddress;
+                    document.getElementById('addressRoad').value = ''; // 도로명 주소가 없을 때 빈 값
+                }
 
-	            // 상세 주소는 사용자가 직접 입력하도록 남겨둠
-	        },
-	        onerror: function(error) {
-	            console.error('Error during postcode search:', error);
-	        }
-	    }).open();
-	}
-	</script>
+                // 상세 주소는 사용자가 직접 입력하도록 남겨둠
+
+                // 추가된 코드: 상세 주소가 비어 있는 경우 사용자에게 안내 메시지
+                if (!document.getElementById('addressDetail').value) {
+                    alert('상세 주소를 입력해 주세요.');
+                }
+            },
+            onerror: function(error) {
+                console.error('Error during postcode search:', error);
+            }
+        }).open();
+    }
+
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let orderNo = document.getElementById('orderNo').value;/* 주문 번호를 설정하는 로직 추가 (e.g., 템플릿 엔진을 사용하여 값 삽입) */
+        
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                // 페이지를 떠날 때 주문 취소 요청을 보냄
+                fetch('/order/auto-cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId: orderNo })
+                }).then(response => {
+                    if (!response.ok) {
+                        console.error('Failed to cancel order:', response.statusText);
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    });
+    </script>
 </body>
 </html>

@@ -4,18 +4,20 @@
 <mapper namespace="com.example.demo.order.OrderDetailDao">
 
     <!-- 주문 상세 정보 저장 -->
-    <insert id="save" parameterType="com.example.demo.order.OrderDetail">
+    <insert id="save" parameterType="com.example.demo.order.OrderDetailDto">
         INSERT INTO orders_detail (order_no, item_no, item_name, image, detail_ea, price, review_written)
-        VALUES (#{orderNo}, #{itemNo}, #{itemName}, #{image}, #{detailEa}, #{price}, #{reviewWritten})
+        VALUES (#{orderNo}, #{itemNo}, #{itemName}, #{image, jdbcType=VARCHAR}, #{detailEa}, #{price}, #{reviewWritten, jdbcType=CHAR})
     </insert>
 
     <!-- 주문 번호로 주문 상세 정보 조회 -->
     <select id="findByOrderNo" parameterType="long" resultMap="OrderDetailResultMap">
-        SELECT * FROM orders_detail WHERE order_no = #{orderNo}
+        SELECT order_no, item_no, item_name, image, detail_ea, price, review_written 
+        FROM orders_detail 
+        WHERE order_no = #{orderNo}
     </select>
 
     <!-- 주문 상세 정보 업데이트 -->
-    <update id="update" parameterType="com.example.demo.order.OrderDetail">
+    <update id="update" parameterType="com.example.demo.order.OrderDetailDto">
         UPDATE orders_detail
         SET item_name = #{itemName}, image = #{image}, detail_ea = #{detailEa}, price = #{price}, review_written = #{reviewWritten}
         WHERE order_no = #{orderNo} AND item_no = #{itemNo}
@@ -26,12 +28,18 @@
         DELETE FROM orders_detail WHERE order_no = #{orderNo}
     </delete>
 
+    <!-- 주문 상세 정보 복원 - 장바구니로 복원 -->
+    <insert id="restoreToCart" parameterType="com.example.demo.order.OrderDetailDto">
+        INSERT INTO cart (item_no, username, cart_ea, cart_price, cart_totalprice)
+        VALUES (#{itemNo}, #{username}, #{detailEa}, #{price}, #{detailEa} * #{price})
+    </insert>
+
     <!-- 주문 상세 조회를 위한 OrderDetailResultMap -->
-    <resultMap id="OrderDetailResultMap" type="com.example.demo.order.OrderDetailDto">
+    <resultMap id="OrderDetailResultMap" type="com.example.demo.order.OrderDetail">
         <id property="orderNo" column="order_no" />
         <result property="itemNo" column="item_no" />
         <result property="itemName" column="item_name" />
-        <result property="image" column="image" />
+        <result property="image" column="image" jdbcType="VARCHAR" />
         <result property="detailEa" column="detail_ea" />
         <result property="price" column="price" />
         <result property="reviewWritten" column="review_written" />
