@@ -26,25 +26,26 @@ public class CartDto { // 장바구니 관련 데이터 전달 객체
         }
     }
 
-    @Getter
+    @Data
     @ToString
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class Read { // 장바구니 조회를 위한 DTO
         private Long itemNo; // 상품 번호
         private String username; // 사용자 이름 (회원 ID)
         private int cartEa; // 장바구니에 담긴 상품 개수
         private int cartPrice; // 상품의 개별 가격
         private int cartTotalPrice; // 상품의 총 가격
-        private String itemName; // 상품 이름 (item 패키지에서 가져옴)
-        private String itemImageUrl; // 상품 이미지 URL (image 패키지에서 가져옴)
+        private String itemIrum; // 상품 이름 (item 패키지에서 가져옴)
+        private String imageName; // 상품 이미지 URL (image 패키지에서 가져옴)
         // 추가: setItemName 메서드
-        public void setItemName(String itemName) {
-            this.itemName = itemName;
+        public void setItemIrum(String itemIrum) {
+            this.itemIrum = itemIrum;
         }
 
         // 추가: setItemImageUrl 메서드
-        public void setItemImageUrl(String itemImageUrl) {
-            this.itemImageUrl = itemImageUrl;
+        public void setImageName(String imageName) {
+            this.imageName = imageName;
         }
     }
 

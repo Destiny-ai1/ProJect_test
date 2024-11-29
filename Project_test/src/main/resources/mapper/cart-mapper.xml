@@ -11,18 +11,28 @@
 
     <!-- 회원 아이디로 장바구니 조회 -->
     <select id="findAllByUsername" parameterType="string" resultMap="CartReadResultMap">
-        SELECT * FROM cart WHERE username = #{username}
+        SELECT c.item_no, c.username, c.cart_ea, c.cart_price, c.cart_totalprice,
+               i.item_irum, img.image_name
+        FROM cart c
+        JOIN item i ON c.item_no = i.item_no
+        JOIN item_image img ON i.item_no = img.item_no
+        WHERE c.username = #{username}
     </select>
     
     <!-- 상품 번호와 사용자 이름으로 장바구니 항목 조회 -->
-	<select id="findByItemNoAndUsername" parameterType="map" resultMap="CartReadResultMap">
-	    SELECT * FROM cart WHERE item_no = #{itemNo} AND username = #{username}
-	</select>
+    <select id="findByItemNoAndUsername" parameterType="map" resultMap="CartReadResultMap">
+        SELECT c.item_no, c.username, c.cart_ea, c.cart_price, c.cart_totalprice,
+               i.item_irum, img.image_name
+        FROM cart c
+        JOIN item i ON c.item_no = i.item_no
+        JOIN item_image img ON i.item_no = img.item_no
+        WHERE c.item_no = #{itemNo} AND c.username = #{username}
+    </select>
 
     <!-- 장바구니 상품 수량 업데이트 -->
     <update id="update" parameterType="com.example.demo.cart.Cart">
         UPDATE cart
-        SET cart_ea = #{cartEa}
+        SET cart_ea = #{cartEa}, cart_totalprice = #{cartEa} * #{cartPrice}
         WHERE item_no = #{itemNo} AND username = #{username}
     </update>
 
@@ -31,13 +41,21 @@
         DELETE FROM cart WHERE item_no = #{itemNo} AND username = #{username}
     </delete>
 
+    <!-- 주문 취소 시 장바구니로 항목 복원 -->
+    <insert id="restoreFromOrderDetail" parameterType="com.example.demo.order.OrderDetailDto">
+        INSERT INTO cart (item_no, username, cart_ea, cart_price, cart_totalprice)
+        VALUES (#{itemNo}, #{username}, #{detailEa}, #{price}, #{detailEa} * #{price})
+    </insert>
+
     <!-- 장바구니 조회를 위한 CartReadResultMap -->
-    <resultMap id="CartReadResultMap" type="com.example.demo.cart.CartDto.Read">
+    <resultMap id="CartReadResultMap" type="com.example.demo.cart.CartDto$Read">
         <id property="itemNo" column="item_no" />
         <result property="username" column="username" />
         <result property="cartEa" column="cart_ea" />
         <result property="cartPrice" column="cart_price" />
         <result property="cartTotalPrice" column="cart_totalprice" />
+        <result property="itemIrum" column="item_irum" />
+        <result property="imageName" column="image_name" />
     </resultMap>
 
 </mapper>

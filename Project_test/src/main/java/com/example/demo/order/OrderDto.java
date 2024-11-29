@@ -47,11 +47,29 @@ public class OrderDto {
     // 주문 목록을 제공하기 위한 DTO 클래스
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class OrderList {
         private Long orderNo; // 주문 번호
-        private String orderDate; // 주문 날짜
+        private LocalDate orderDate; // 주문 날짜
         private String orderStatus; // 주문 상태
         private int totalPrice; // 총 가격
+        private int usedPoint; // 사용 포인트
+        private int actPayment; // 실제 결제 금액
+        private List<OrderDetailDto> orderDetails; // 주문 상세 항목 리스트
+    }
+
+    // 결제 정보를 포함한 주문 목록을 제공하기 위한 DTO 클래스
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class OrderListWithPayment {
+        private Long orderNo; // 주문 번호
+        private LocalDate orderDate; // 주문 날짜
+        private String orderStatus; // 주문 상태
+        private int totalPrice; // 총 가격
+        private String payMethod; // 결제 수단
+        private int pointAdd; // 포인트 적립 금액
+        private Long cardNo; // 카드 번호
         private List<OrderDetailDto> orderDetails; // 주문 상세 항목 리스트
     }
 
@@ -67,7 +85,7 @@ public class OrderDto {
         private int usedPoint; // 사용된 포인트
         private int actPayment; // 실제 결제 금액
         private String memberUsername; // 회원의 사용자 이름
-        private Long addressNo; // 우편 번호
+        private Long addressNo; // 배송지 번호
         private List<OrderDetailDto> orderDetails; // 주문 상세 항목 리스트
     }
 
