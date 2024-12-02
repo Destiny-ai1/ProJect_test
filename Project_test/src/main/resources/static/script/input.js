@@ -1,21 +1,3 @@
-//회원가입관련
-function loadProfile() {
-    const file = $('#profile')[0].files[0];
-    const maxSize = 1024 * 1024;
-    if(file.size > maxSize) {
-        alert("프사는 최대 1MB입니다");
-        $('#profile').val("");
-        return false;
-    }
-    
-    let reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = function(e) {
-        $('#show-profile').attr("src", e.target.result);
-    }
-    return true;
-}
-
 function emptyAndPatternCheck(입력값, $출력할곳, pattern, emptyErrorMessage, patternErrorMessage) {
     $출력할곳.text('');
     if(입력값 == '') {

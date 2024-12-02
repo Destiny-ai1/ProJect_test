@@ -86,8 +86,6 @@
             }
         }
 
-        $('#profile').change(loadProfile);
-        $('#username').blur(async () => await usernameCheck());
         
         $('#join').click(async function () {
             const a1 = await usernameCheck();
