@@ -34,20 +34,16 @@ public class MemberService {
 		try {
 	        // 1. 비밀번호를 암호화
 	        String encodedPassword = encoder.encode(dto.getPassword());
-	        System.out.println("비밀번호 암호화 완료: " + encodedPassword);
 	        
 	        // 2. dto를 멤버로 변환
-	        System.out.println("DTO 데이터: " + dto);
 	        Member member = dto.toEntity(encodedPassword);
-	        System.out.println("Member 객체로 변환: " + member);
+	       
 	        
 	        // 3. Member를 DB에 저장
-	        memberDao.save(member);
-	        System.out.println("DB 저장 완료: " + member.getUsername());
+	        memberDao.save(member);  
 	    } catch(Exception e) {
 	        // 예외 출력
 	        e.printStackTrace();
-	        System.out.println("회원가입 중 오류 발생: " + e.getMessage());
 	    }
 	}
 	
@@ -101,6 +97,11 @@ public class MemberService {
 	public MemberDto.Member_Read 내정보보기(String loginId) {
         return memberDao.UserDetails(loginId);
 	}
+	
+	public Optional<String> findNameUsingUserDetails(String username) {
+		MemberDto.Member_Read member = memberDao.UserDetails(username);
+	    return Optional.ofNullable(member != null ? member.getName() : null);
+    }
 	
 	//비밀번호 확인
 	public boolean 비밀번호확인(String password, String loginId) {

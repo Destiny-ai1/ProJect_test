@@ -13,7 +13,7 @@
         bno from comments where bno = #{bno} order by comment_write_time desc
     </select>
     
-    <!-- 특정 댓글 삭제 -->
+    <!-- 댓글 삭제 -->
     <delete id="delete" parameterType="map">
     delete from comments where comment_cno = #{cno} and comment_writer = #{loginId}
 	</delete>

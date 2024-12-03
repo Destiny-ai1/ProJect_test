@@ -22,6 +22,12 @@
                     <a class="nav-link" href="/board/list?cno=1002" th:classappend="${cno == '1002'} ? 'active' : ''">Q&A</a>
                 </li>
             </ul>
+			
+			<div class="alert alert-info mb-4">
+				<p>고객센터에서는 공지사항과 Q&A를 통해 고객님께 필요한 정보를 신속하게 제공합니다.</p>
+			    <p>궁금한 점이 있으시면 언제든지 Q&A를 통해 질문해 주세요.</p>
+			    <p>그 이외로 좀더 궁금한점이 있으신 분들은 <strong>고객센터: 000-0000-0000</strong> 연락주시기 바랍니다</p>
+			</div>
 
             <!-- 게시글 목록 출력 수정 -->
             <section th:if="${cno == '1001'}">
@@ -33,25 +39,25 @@
                             <th>제목</th>
                             <th>작성자</th>
                             <th>작성일</th>
+							<th>조회수</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr th:each="notice : ${result.boards}">  <!-- <<수정: result.boards를 사용하여 공지사항 목록 출력>> -->
-                            <td th:text="${notice.bno}"></td>
-                            <td>
-                                <a th:href="@{'/board/read?bno=' + ${notice.bno} + '&cno=1001}" th:text="${notice.title}"></a>
-                            </td>
-                            <td th:text="${notice.writer}"></td>
-                            <td th:text="${notice.writeTime}"></td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(result.boards)}">  <!-- <<수정: result.boards를 사용하여 빈 목록 처리>> -->
-                            <td colspan="4">등록된 공지사항이 없습니다.</td>
-                        </tr>
+					<tbody>
+						<tr th:each="notice : ${result.boards}">
+			            <td th:text="${notice.bno}"></td>
+					   		<td><a th:href="@{'/board/read?bno=' + ${notice.bno} + '&cno=1001'}" th:text="${notice.title}"></a></td>
+					        <td th:text="${notice.writer}"></td>
+					        <td th:text="${notice.writeTime}"></td>
+					        <td th:text="${notice.readCnt}"></td>
+					   	</tr>
+					    <tr th:if="${#lists.isEmpty(result.boards)}">
+					        <td colspan="5">등록된 공지사항이 없습니다.</td>
+					    </tr>
                     </tbody>
                 </table>
-                <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
-                    <button class="btn btn-primary mt-3" onclick="location.href='/board/write?cno=1001'">공지사항 작성</button>
-                </div>
+				<div th:if="${#authorization.expression('hasRole(''admin'')')}">
+					<button class="btn btn-primary mt-3" onclick="location.href='/board/write?cno=1001'">공지사항 작성</button>
+				</div>
             </section>
 
             <section th:if="${cno == '1002'}">
@@ -63,25 +69,42 @@
                             <th>제목</th>
                             <th>작성자</th>
                             <th>작성일</th>
+							<th>조회수</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr th:each="qa : ${result.boards}">  <!-- <<수정: result.boards를 사용하여 Q&A 목록 출력>> -->
-                            <td th:text="${qa.bno}"></td>
-                            <td>
-                                <a th:href="@{'/board/read?bno=' + ${qa.bno} + '&cno=1002'}" th:text="${qa.title}"></a>
-                            </td>
-                            <td th:text="${qa.writer}"></td>
-                            <td th:text="${qa.writeTime}"></td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(result.boards)}">  <!-- <<수정: result.boards를 사용하여 빈 목록 처리>> -->
-                            <td colspan="4">등록된 Q&A가 없습니다.</td>
-                        </tr>
-                    </tbody>
+					<tbody>
+					<tr th:each="qa : ${result.boards}">
+						<td th:text="${qa.bno}"></td>
+					    	<td>
+					    		<!-- 비밀글 여부에 따라 제목에 🔒 표시 -->
+					    		<a th:if="${qa.secretBoard}" th:href="@{'/board/read?bno=' + ${qa.bno} + '&cno=1002'}">
+					    		🔒 <span th:text="${qa.title}"></span></a>
+					    		<a th:if="${!qa.secretBoard}" th:href="@{'/board/read?bno=' + ${qa.bno} + '&cno=1002'}" th:text="${qa.title}"></a>
+					    	</td>
+					        <td th:text="${qa.writer}"></td>
+					        <td th:text="${qa.writeTime}"></td>
+					        <td th:text="${qa.readCnt}"></td>
+					</tr>
+					        <tr th:if="${#lists.isEmpty(result.boards)}">
+					        	<td colspan="6">등록된 Q&A가 없습니다.</td>
+					        </tr>
+					</tbody>
                 </table>
-                <div th:if="${#authorization.expression('hasRole(''USER'') or hasRole(''ADMIN'')')}">
-                    <button class="btn btn-primary mt-3" onclick="location.href='/board/write?cno=1002'">질문 작성</button>
-                </div>
+				<div class="pagination-container text-center mt-4">
+				     <ul class="pagination justify-content-center">
+				         <li class="page-item" th:if="${result.back > 0}">
+				             <a class="page-link" th:href="'/board/list?cno=' + ${cno} + '&pageno=' + ${result.back}">이전으로</a></li>
+				         <li class="page-item" th:each="i : ${#numbers.sequence(result.start, result.end)}"
+				         th:class="${i == result.pageno ? 'page-item active' : 'page-item'}">
+				             <a class="page-link" th:href="'/board/list?cno=' + ${cno} + '&pageno=' + ${i}" th:text="${i}"></a></li>
+				         <li class="page-item" th:if="${result.next > 0}">
+				             <a class="page-link" th:href="'/board/list?cno=' + ${cno} + '&pageno=' + ${result.next}">다음으로</a></li>
+				     </ul>
+				</div>
+				
+				<div th:if="${#authorization.expression('hasRole(''user'')')}">
+					<button class="btn btn-primary mt-3" onclick="location.href='/board/write?cno=1002'">Q&A 작성</button>
+				</div>
             </section>
         </main>
         <footer th:replace="~{/fragment/footer.html}"></footer>

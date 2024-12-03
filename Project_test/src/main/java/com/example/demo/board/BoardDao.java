@@ -11,6 +11,8 @@ import org.apache.ibatis.annotations.Update;
 
 
 
+
+
 @Mapper
 public interface BoardDao {
 	//게시한글을 저장
@@ -25,9 +27,13 @@ public interface BoardDao {
 	int Count();
 
 	public List<BoardDto.BoardList> findAll(Map<String, Object> params);
-
+	
+	//게시글 업데이트
 	public void Board_update(Board entity);
-
+	
+	//게시글삭제
 	public void Board_delete(long bno);
+
+	public Long findBnoByCategory(Integer cno);
 	
 }

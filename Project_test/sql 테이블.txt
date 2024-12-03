@@ -31,7 +31,7 @@ create table member (
     email varchar2(30 CHAR),                                -- 회원의 이메일 주소
     phone varchar2(20 char),                                -- 회원의 전화번호
     joinday date,                                           -- 회원 가입일
-    totalpurchase number(10, 2),                            -- 회원의 총 구매 금액
+    totalpurchase number(10),                            	-- 회원의 총 구매 금액
     grade varchar2(10 CHAR),                                -- 회원 등급 (예: 일반, VIP)
     login_fail_Count number(1),                             -- 로그인 실패 횟수
     enabled number(1),                                      -- 계정 활성화 상태 (1: 활성, 0: 비활성)
@@ -110,6 +110,7 @@ create table board(
     write_time date,                                            -- 작성시간
     read_cnt number(7),                                         -- 조회수
     board_password number(6),                                   -- 글 비밀번호
+    secret_board number(5),										-- 비밀글 확인여부
     board_delete number(1),                                		-- 글 삭제
     username VARCHAR2(50 CHAR),                                 -- 회원 ID (외래 키)
     cno number(5),												-- 카테고리 번호(외래 키)
@@ -184,7 +185,7 @@ create table review(
     review_writer varchar2(20 char),                            --리뷰 작성자
     review_good_cnt number(7),                                  --리뷰 별점
     username varchar2(50 char),                                 -- 회원 ID (외래 키, member 테이블 참조)
-    item_no number(10),                                       		-- 상품번호 (외래 키, item 테이블 참조)
+    item_no number(10),                                       	-- 상품번호 (외래 키, item 테이블 참조)
     constraint review_pk_review_no primary key (review_no),
     constraint review_fk_username foreign key (username) references member (username),
     constraint review_fk_item_no foreign key (item_no) references item (item_no)
@@ -199,4 +200,7 @@ create table comments(
 	bno number(7),												--글의 번호(외래키)
 	constraint comments_pk_comments_cno primary key(comment_cno)
 );
+
+create sequence comments_seq;									--댓글 시퀀스 생성
+
 select * from tab;

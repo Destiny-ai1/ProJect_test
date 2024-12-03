@@ -1,121 +1,180 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-<meta charset="UTF-8">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="/style/main.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="/script/input.js"></script>
-<title th:text="${result.title} + ' - 게시판'">게시글 보기</title>
-<style>
-    /* 댓글 작성 창 크기 변경 막기 */
-    textarea {
-        resize: none; 
-    }
-</style>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/style/main.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="/script/input.js"></script>
+    <title th:text="${result.title} + ' - 게시판'">게시글 보기</title>
 </head>
 <body>
     <div id="app">
-        <header th:replace="~{/fragment/header.html}"> </header>
+        <!-- Header와 Navigation -->
+        <header th:replace="~{/fragment/header.html}"></header>
         <nav th:replace="~{/fragment/nav.html}"></nav>
+
+        <!-- Main Section -->
         <main>
             <section>
+                <!-- 게시글 정보 -->
                 <div class="mb-4">
-                    <h2 th:text="${result.title}">제목:</h2> 
+                    <h2 th:text="${result.title}">제목:</h2>
                     <div class="d-flex justify-content-between">
                         <p>
                             <strong>작성자:</strong> <span th:text="${result.writer}"></span>
                         </p>
                         <p>
-                            <strong>조회수:</strong> <span th:text="${result.readCnt}"></span> 
+                            <strong>조회수:</strong> <span th:text="${result.readCnt}"></span>
                             <strong>작성일:</strong> <span th:text="${result.writeTime}"></span>
                         </p>
                     </div>
                 </div>
-                <div class="mb-4">
-                    <h3>내용:</h3>
-                    <div th:utext="${result.content}"></div> 
-                </div>
-                
-                <!-- 댓글작성 -->
-                <div sec:authorize="isAuthenticated()">
+				
+				<!-- 비밀글 및 일반 글 내용 -->
+				<div th:if="${result != null}">
+				    <div th:if="${result.secretBoard}">
+				        <!-- 비밀글일 경우 -->
+				        <div th:if="${result.writer == #authentication.name or #authorization.expression('hasRole(''ROLE_admin'')}">
+				            <div th:utext="${result.content}"></div>
+				        </div>
+				        <div th:unless="${result.writer == #authentication.name or #authorization.expression('hasRole(''ROLE_admin'')}">
+							<p>비밀글입니다.</p>
+				        </div>
+				    </div>
+
+				    <!-- 일반 게시글 처리 -->
+				    <div th:unless="${result.secretBoard}">
+				        <h3>내용:</h3>
+				        <div th:utext="${result.content}"></div>
+				    </div>
+				</div>
+
+                <!-- 댓글 작성 -->
+                <div class="mt-4" sec:authorize="isAuthenticated()" th:if="${result.cno == 3}">
+                    <!-- 추가: 댓글 작성 기능은 Q&A(cno=3)에만 노출 -->
                     <textarea class="form-control" rows="5" placeholder="댓글을 달아주세요" id="comment"></textarea>
                     <button class="btn btn-outline-success mt-2" id="write-comment">댓글 작성</button>
                 </div>
-                
-                <!-- 댓글목록 및 삭제 -->
-                <div id="comments">
-                    <div th:each="comment:${result.comments}">
-                        <div class='upper' style="display:flex; justify-content: space-between;">
+
+                <!-- 댓글 목록 -->
+                <div id="comments" class="mt-4" th:if="${result.cno == 3}">
+                    <!-- 추가: 댓글 목록은 Q&A(cno=3)에만 표시 -->
+                    <div th:each="comment : ${result.comments}">
+                        <div class="upper d-flex justify-content-between">
                             <div>
-                                 <strong th:text='${comment.writer}'></strong>
-                                 <button th:if="${comment.writer} == ${#authentication.name}" class="btn btn-light delete-comment" th:data-cno="${comment.cno}">삭제</button>
+                                <strong th:text="${comment.writer}"></strong>
+                                <button th:if="${comment.writer == #authentication.name}" class="btn btn-light delete-comment" th:data-cno="${comment.cno}">삭제</button>
                             </div>
-                            <div th:text='${comment.writeTime}'></div>
+                            <div th:text="${comment.writeTime}"></div>
                         </div>
-                        <div th:text='${comment.content}' class='lower'></div>
+                        <div th:text="${comment.content}" class="lower"></div>
                         <hr>
                     </div>
-                </div>      
-                
-                <!-- 게시글 수정 및 삭제 -->
-                <div class="d-flex justify-content-end mt-4" th:if="${result.writer == #authentication.name}">
-                    <a type="button" class="btn btn-info me-2" th:href="'/board/update/' + ${result.bno} + '/' + ${result.boardType} + '.html'"> 변경하기</a>
-                    <button type="button" class="btn btn-danger" id='delete-board'> 삭제하기</button>
                 </div>
+
+                <!-- 게시글 수정 및 삭제 -->
+                <div class="d-flex justify-content-end mt-4">
+                    <a type="button" class="btn btn-info me-2" th:if="${isWriter}" th:href="'/board/update/' + ${result.bno}">변경하기</a>
+                    <!-- 추가: 삭제 버튼은 작성자 또는 ROLE_admin 권한 사용자가 볼 수 있음 -->
+					<button type="button" class="btn btn-danger" 
+					        th:if="${isWriter or #authorization.expression('hasRole(''ROLE_admin'')')}" 
+					        id="delete">삭제하기</button>
+                </div>
+				
             </section>
         </main>
-        <footer th:replace="~{/fragment/footer.html}"> </footer>
+
+        <!-- Footer -->
+        <footer th:replace="~{/fragment/footer.html}"></footer>
     </div>
-    
-    <!-- 댓글 작성 -->
+
+    <!-- 댓글 작성 스크립트 -->
     <script>
-    $('#write-comment').click(function() {
-        const bno = '[[${result.bno}]]';
-        const _csrf = '[[${_csrf.token}]]';
-        const content = $('#comment').val();
-        $.ajax({
-            url: '/api/comments/' + bno,
-            method: 'post',
-            data: {content, _csrf},
-            success(result) {
-                printComments(result);
-            }
+        $('#write-comment').click(function () {
+            // 추가: 댓글 작성은 Q&A(cno=3)에서만 작동
+            const bno = '[[${result.bno}]]';
+            const _csrf = '[[${_csrf.token}]]';
+            const content = $('#comment').val();
+
+            $.ajax({
+                url: '/api/comments/' + bno,
+                method: 'POST',
+                contentType: 'application/json',
+                headers: { 'X-CSRF-TOKEN': _csrf },
+                data: JSON.stringify({ content: content }),
+                success: function (result) {
+                    printComments(result);
+                },
+                error: function (xhr) {
+                    alert('댓글 작성에 실패했습니다.');
+                }
+            });
+            $('#comment').val('');
         });
-        $('#comment').val("");
-    });
     </script>
-    
-    <!-- 댓글 삭제 -->
     <script>
-    $('#comments').on('click', '.delete-comment', function() {
-        const cno = $(this).data('cno');
-        const bno = '[[${result.bno}]]';
-        const _csrf = '[[${_csrf.token}]]';
-        $.ajax({
-            url: '/api/comments/' + bno + '/' + cno,
-            method: 'delete',
-            data: {_csrf},
-            success(result) {
-                printComments(result);
-            }
-        });
-    });
+        // 댓글 리스트 출력
+        function printComments(comments) {
+            const $comments = $('#comments');
+            const loginId = '[[${#authentication.name}]]';
+            $comments.empty();
+            comments.forEach(function (comment) {
+                const deleteButtonHtml = comment.writer === loginId ? `<button class="btn btn-light delete-comment" data-cno="${comment.cno}">삭제</button>` : '';
+                const html = `
+                    <div>
+                        <div class="upper d-flex justify-content-between">
+                            <div>
+                                <strong>${comment.writer}</strong>
+                                ${deleteButtonHtml}
+                            </div>
+                            <div>${comment.writeTime}</div>
+                        </div>
+                        <div class="lower">${comment.content}</div>
+                        <hr>
+                    </div>
+                `;
+                $comments.append($(html));
+            });
+        }
     </script>
-    
+    <script>
+        // 댓글 삭제
+        $('#comments').on('click', '.delete-comment', function () {
+            const cno = $(this).data('cno');
+            const bno = '[[${result.bno}]]';
+            const _csrf = '[[${_csrf.token}]]';
+
+            $.ajax({
+                url: '/api/comments/' + bno + '/' + cno,
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': _csrf },
+                success: function (result) {
+                    printComments(result);
+                },
+                error: function (xhr) {
+                    alert('댓글 삭제에 실패했습니다.');
+                }
+            });
+        });
+    </script>
+
     <!-- 게시글 삭제 -->
     <script>
-    $('#delete-board').click(function(){
-        const bno = '[[${result.bno}]]';
-        const _csrf = '[[${_csrf.token}]]';
-        const form = `
-            <form action="/board/delete/${bno}" method="post">
-                <input type="hidden" name="_csrf" value="${_csrf}">
-            </form>
-        `;
-        $(form).appendTo($('body')).submit();
-    });
-    </script>   
+        $('#delete').click(function () {
+            const bno = '[[${result.bno}]]';
+            const token = '[[${_csrf.token}]]';
+
+            const form = `
+                <form action='/board/delete' method='post'>
+                    <input type='hidden' name='bno' value='${bno}' />
+                    <input type='hidden' name='_csrf' value='${token}' />
+                </form>
+            `;
+
+            $(form).appendTo($('body')).submit();
+        });
+    </script>
 </body>
 </html>

@@ -56,7 +56,7 @@ private MemberDto() {}
 		private LocalDate joinday;				//변경불가능
 		private Integer totalpurchase;			//변경다른곳에서 처리함	
 		private String grade;					//변경다른곳에서 처리함	
-		private String role;					//변경불가
+		private String role;					//변경불가(html에서는 출력할때는 활성화라고 출력)
 		private int point;						//변경다른곳에서 처리함
 	}
 }

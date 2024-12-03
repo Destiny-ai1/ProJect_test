@@ -22,7 +22,6 @@ public class CommentService {
 		return commentDao.findByBno(bno);
 	}
 	
-	
 	//댓글 삭제
 	public List<Read> remove(Long bno, Long cno, String loginId) {
 		commentDao.delete(cno, loginId);

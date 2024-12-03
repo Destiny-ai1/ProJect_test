@@ -9,7 +9,7 @@ import com.example.demo.member.MemberDao;
 
 import lombok.*;
 
-// 사용자 정보를 UserDetails 객체로 만들어 스프링 시큐리티에 넘긴다
+
 @RequiredArgsConstructor
 @Component
 public class MyUserDetailsService implements UserDetailsService {
@@ -27,7 +27,7 @@ public class MyUserDetailsService implements UserDetailsService {
         return User.builder()
                 .username(member.getUsername())
                 .password(member.getPassword())
-                .roles(roleAsString) // 문자열 형태의 Role 전달
+                .roles(roleAsString) 										// 문자열 형태의 Role 전달
                 .disabled(!member.getEnabled())
                 .build();
         }

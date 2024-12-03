@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.comment.CommentDao;
+import com.example.demo.comment.CommentDto;
 import com.example.demo.exception.FailException;
 import com.example.demo.member.MemberDao;
-
+import com.example.demo.security.SecurityUtils;
 
 
 
@@ -26,39 +28,116 @@ public class BoardService {
     private BoardDao boardDao;
 	@Autowired
 	private MemberDao readDao;
+	@Autowired
+	private CommentDao commentDao;
 	
-	//고객센터 QnA작성할때 (회원은 Q&A작성, 관리자는 공지사항이랑 FAQ 작성)
+	// 고객센터 QnA 작성 서비스 (회원은 Q&A 작성, 관리자는 공지사항과 FAQ 작성)
 	public Long write(BoardDto.Create dto, String loginId) {
-		Board board= dto.toEntity(loginId);
-		boardDao.save(board);
-		return board.getBno();
+
+	    // 확인해야 될 부분: 현재 카테고리 번호와 Secret_Board 값 확인
+	    System.out.println("작성 요청 카테고리 번호 (cno): " + dto.getCno());
+	    System.out.println("작성 요청 Secret_Board 값: " + dto.isSecretBoard());
+
+	    // 기존 게시글 번호 조회
+	    Long lastBno = boardDao.findBnoByCategory(dto.getCno());
+	    Long newBno = (lastBno != null ? lastBno : 0) + 1;
+
+	    // 확인해야 될 부분: 생성된 새 게시글 번호 확인
+	    System.out.println("생성될 새 게시글 번호 (newBno): " + newBno);
+
+	    // 작성자 이름 가져오기
+	    String name = readDao.UserDetails(loginId).getName();
+
+	    // 확인해야 될 부분: 로그인한 사용자의 이름 확인
+	    System.out.println("작성자 이름 (name): " + name);
+
+	    // 공지사항일 경우 비밀번호와 비밀글 설정 무시
+	    if (dto.getCno() == 2) {
+	        dto.setPassword(null);
+	        dto.setSecretBoard(false);
+
+	        // 확인해야 될 부분: 공지사항에서 Secret_Board 값 강제 설정 확인
+	        System.out.println("공지사항 작성 시 Secret_Board 강제 설정: " + dto.isSecretBoard());
+	    }
+
+	    // Q&A일 경우 비밀글 설정 검증
+	    if (dto.getCno() == 3 && dto.isSecretBoard()) {
+	        if (dto.getPassword() == null || dto.getPassword().isBlank()) {
+	            // 확인해야 될 부분: 비밀글인데 비밀번호가 없을 경우 예외 발생 확인
+	            System.out.println("비밀글 비밀번호 미입력 오류 발생");
+	            throw new IllegalArgumentException("Q&A 비밀글에는 비밀번호를 입력해야 합니다.");
+	        }
+
+	        // 확인해야 될 부분: 비밀글 비밀번호 값 확인
+	        System.out.println("Q&A 비밀글 비밀번호: " + dto.getPassword());
+	    }
+
+	    // DTO를 엔티티로 변환
+	    Board board = dto.toEntity(loginId, name);
+
+	    // 엔티티에 새 게시글 번호 설정
+	    board.setBno(newBno);
+
+	    // 확인해야 될 부분: 엔티티 변환 후 Secret_Board 값과 BNO 확인
+	    System.out.println("엔티티 변환 후 Secret_Board 값: " + board.isSecretBoard());
+	    System.out.println("엔티티 변환 후 게시글 번호 (bno): " + board.getBno());
+
+	    // 게시글 저장
+	    boardDao.save(board);
+
+	    // 저장된 게시글 번호 반환
+	    return board.getBno();
 	}
 	
-	//고객센터 공지사항+FAQ+Q&A를 조회할때
+	// 고객센터 공지사항+FAQ+Q&A를 조회할 때
 	@Transactional
-	public BoardDto.BoardRead Board_senter(Long bno,String loginId, String name) {
-		//DB에 저장되어있는글인지 먼저확인
-		BoardDto.BoardRead dto=boardDao.findById(bno).orElseThrow(()-> new FailException("글을 찾을수 없습니다."));
-		//0.삭제된 글이라면 내용을 삭제된 글이라고 변경
-		if(dto.isBoard_delete()) {
-			return dto.글삭제();
-		}
-		
-		// 비로그인이거나 내가 작성한 글이면 조회수 변경 없음
-		if(loginId==null || dto.getWriter().equals(name))
-			return dto;
-			
-		// 로그인을 했거나,남이 작성한글인경우 조회수 증가시키고 내가작성한글이면 조회수 증가안시키고 중복을 방지하기위해 저장한다
-		boolean ReadCheck= readDao.existsByBnoAndloginId(bno,loginId);
-		if(!ReadCheck) {
-			readDao.read_save(loginId, bno);
-			boardDao.increaseReadCnt(bno);
-			dto.ReadCnt();
-		}
-		return dto;
+	public BoardDto.BoardRead Board_senter(Long bno, String loginId, String password) {
+	    // 1. 게시글 데이터 조회
+	    BoardDto.BoardRead dto = boardDao.findById(bno)
+	        .orElseThrow(() -> new FailException("글을 찾을 수 없습니다.")); // 게시글이 없는 경우 예외 발생
+
+	    // 2. 삭제된 글인지 확인
+	    if (dto.isBoard_delete()) {
+	        return dto.글삭제(); // 삭제된 글의 경우, 해당 내용을 반환
+	    }
+
+	    // 3. 비밀글 접근 제어
+	    if (dto.isSecret_Board()) {
+	        String userName = readDao.UserDetails(loginId).getName(); // 로그인 사용자 이름 조회
+
+	        // 관리자 또는 작성자라면 비밀번호 검증 없이 접근 허용
+	        if (SecurityUtils.isAdmin() || (loginId != null && dto.getWriter().equals(userName))) {
+	           
+	            return dto; // 작성자나 관리자는 비밀번호 없이 접근 가능
+	        }
+
+	        // 비밀번호가 없거나 잘못된 경우 접근 차단
+	        if (password == null || !dto.getPassword().equals(password)) {
+	            throw new FailException("비밀글 입니다. 비밀번호를 입력해주세요.");
+	        }
+	    }
+
+	    // 4. 조회수 증가 로직 (작성자 제외)
+	    if (loginId != null && !dto.getWriter().equals(readDao.UserDetails(loginId).getName())) {
+	        boolean isWriter = dto.getWriter().equals(readDao.UserDetails(loginId).getName());
+	        boolean readCheck = readDao.existsByBnoAndloginId(bno, loginId);
+
+	        // 작성자가 아니고, 이전에 읽은 기록이 없을 경우 조회수 증가
+	        if (!isWriter && !readCheck) {
+	            readDao.read_save(loginId, bno); // 읽은 기록 저장
+	            boardDao.increaseReadCnt(bno); // DB 조회수 증가
+	            dto.ReadCnt(); // DTO 조회수 증가 반영
+	        }
+	    }
+
+	    // 5. 댓글 조회 추가
+	    List<CommentDto.Read> comments = commentDao.findByBno(bno); // 해당 게시글의 댓글 목록 조회
+	    dto.setComments(comments); // 댓글 데이터를 DTO에 추가
+
+	    return dto;
 	}
 	
-	
+
 	//페에지당 보여지는 게시물 리스트 수
 	@Value("10")
 	private int Page_Size;
@@ -95,17 +174,31 @@ public class BoardService {
 	
 	//글을 수정할때
 	public void Board_update(BoardDto.update dto, String loginId) {
-		BoardDto.BoardRead board= boardDao.findById(dto.getBno()).orElseThrow(()-> new FailException("삭제된 글 입니다"));
-		if(!board.getTitle().equals(loginId))
-			throw new FailException("삭제되었거나 글을 읽을 권환이 없습니다");
-		boardDao.Board_update(dto.toEntity());
+		
+	    BoardDto.BoardRead board = boardDao.findById(dto.getBno()).orElseThrow(() -> new FailException("삭제된 글입니다."));
+	    
+	    String userName = readDao.UserDetails(loginId).getName();
+	   
+	    if (!board.getWriter().equals(userName)) {
+	        throw new FailException("작성자만 글을 수정할 수 있습니다.");
+	    }
+	    Board entity = dto.toEntity(); 								
+	    boardDao.Board_update(entity);
 	}
 	
 	//삭제한 글일때
 	public void Board_delete(long bno, String loginId) {
-		BoardDto.BoardRead board= boardDao.findById(bno).orElseThrow(()-> new FailException("삭제된 글 입니다"));
-		if(!board.getWriter().equals(loginId))
-			throw new FailException("삭제되었거나 글을 읽을 권환이 없습니다");
-		boardDao.Board_delete(bno);
+		// 게시글을 가져옴
+		BoardDto.BoardRead board = boardDao.findById(bno).orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+		
+		String userName = readDao.UserDetails(loginId).getName();
+		
+	    // 로그인한 아이디의 작성자 이름확인
+	    if (!board.getWriter().equals(userName) && !SecurityUtils.isAdmin()) {
+	        throw new SecurityException("작성자와 관리자만이 삭제할 수 있습니다.");
+	    }
+
+	    // 게시글 삭제
+	    boardDao.Board_delete(bno);
 	}
 }
