@@ -2,125 +2,156 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Header with Fixed Background Image</title>
+    <title>Header - Correct Position Swap</title>
     <style>
-/* 헤더 스타일 */
-header.site-header {
-	height: 50px;
-	line-height: 50px;
-	text-align: center;
-	margin: 10px 0;
-	border: 1px solid gray;
-	letter-spacing: 1em;
-	background-color: #f8f8f8;
-	color: #333;
-}
+        /* 상단 메뉴 바 스타일 */
+        .top-menu {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            background-color: rgb(255, 255, 255);
+            color:rgb(0,0,0);
+            padding: 5px 10px; /* 기존 10px 20px에서 줄임 */
+        }
 
-/* 고정 이미지 스타일 */
-.fixed-image {
-	position: relative;
-	top: 0;
-	width: 100%;
-	height: calc(50vh); /* 화면 높이의 50% */
-	background-image:
-		url('https://cdn.actionhub.com/wp-content/uploads/2019/02/Screen-Shot-2019-02-15-at-10.51.34-AM.png');
-	background-size: cover; /* 이미지를 전체 영역에 맞춤 */
-	background-position: center; /* 이미지 중앙 정렬 */
-	margin-top: 20px; /* 네비게이션 바와 이미지 사이 간격 */
-}
+        .top-menu .menu-item {
+            margin-left: 10px; /* 기존 20px에서 줄임 */
+            font-size: 16px;
+        }
 
-/* 네비게이션 스타일 */
-.navbar {
-	background-color: #333;
-	color: white;
-	z-index: 1000;
-	position: relative;
-	padding: 10px 20px;
-}
+        .top-menu .menu-item a {
+            text-decoration: none;
+            color: black; /* 로그인, 회원가입, 장바구니 기본 텍스트 색상 */
+            transition: color 0.3s;
+        }
 
-.navbar .nav-link {
-	color: white;
-	text-decoration: none;
-	padding: 10px;
-	transition: color 0.3s;
-}
+        /* 고객센터 드롭다운 스타일 */
+        .dropdown-content a {
+            color: black !important; /* 고객센터 하위 항목은 검정색으로 설정 */
+        }
 
-.navbar .nav-link:hover {
-	color: #ddd;
-}
+        .dropdown-content a:hover {
+            background-color: #f9f9f9;
+        }
 
-/* 드롭다운 스타일 */
-.dropdown-content {
-	display: none;
-	position: absolute;
-	top: 100%;
-	left: 0;
-	background-color: white;
-	box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-	border-radius: 5px;
-	overflow: hidden;
-	z-index: 1000;
-}
+        /* 로고 및 정보 영역 스타일 */
+        .bottom-info {
+            display: flex;
+            justify-content: center; /* 중앙 정렬 */
+            align-items: center;
+            padding: 20px;
+            background-color: #f8f8f8;
+            color: #333;
+        }
 
-.dropdown-content a {
-	display: block;
-	padding: 10px 15px;
-	color: #333;
-	text-decoration: none;
-	font-size: 14px;
-	border-bottom: 1px solid #f0f0f0;
-}
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-.dropdown-content a:hover {
-	background-color: #f9f9f9;
-}
+        .customer-info {
+            text-align: left;
+            font-size: 14px;
+            color: #333;
+        }
 
-.dropdown:hover .dropdown-content {
-	display: block;
-}
-</style>
+        .customer-info p {
+            margin: 0;
+        }
+
+        /* 고정 이미지 스타일 */
+        .fixed-image {
+            position: relative;
+            top: 0;
+            width: 100%;
+            height: calc(50vh); /* 화면 높이의 50% */
+            background-image:
+                url('https://cdn.actionhub.com/wp-content/uploads/2019/02/Screen-Shot-2019-02-15-at-10.51.34-AM.png');
+            background-size: cover; /* 이미지를 전체 영역에 맞춤 */
+            background-position: center; /* 이미지 중앙 정렬 */
+            margin-top: 20px; /* 네비게이션 바와 이미지 사이 간격 */
+        }
+
+        /* 드롭다운 스타일 */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            color:black;
+            background-color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 1000;
+        }
+		
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        ul {
+            list-style-type: none; /* 리스트의 기본 스타일을 없앱니다 */
+            padding: 0; /* 리스트의 기본 패딩을 없앱니다 */
+            margin: 0; /* 리스트의 기본 마진을 없앱니다 */
+        }      
+    </style>
 </head>
 <body>
-<header id="header">쇼핑몰</header>
-<script>
-    document.getElementById("header").addEventListener("click", function() {
-        window.location.href = "/";
-    });
-</script>
-    <!-- 상단 네비게이션 바 -->
-    <nav class="navbar navbar-expand-sm navbar-dark">
-        <div class="collapse navbar-collapse justify-content-end" id="mynavbar">
-            <ul class="navbar-nav" sec:authorize="isAnonymous()">
-                <li class="nav-item"><a class="nav-link" href="/member/login">로그인</a></li>
-                 <li class="nav-item"><a class="nav-link" href="/member/readme">내정보</a></li>
-                <li class="nav-item"><a class="nav-link" href="/member/join">회원가입</a></li>
-                <li class="nav-item dropdown"><a
-					class="nav-link dropdown-button" href="#">고객센터</a>
-					<div class="dropdown-content">
-						<a href="/board/list?cno=qa">Q&A</a> <a
-							href="/board/list?cno=notice">공지사항</a>
-					</div></li>
-					<li class="nav-item"><a class="nav-link" href="/cart/cart-view">장바구니</a></li>
-            </ul>
-            <ul class="navbar-nav" sec:authorize="isAuthenticated()">
-                <li class="nav-item"><a class="nav-link" href="#" id="logout">로그아웃</a></li>
-                <li class="nav-item"><a class="nav-link" href="/member/readme">내정보</a></li>
-                <li class="nav-item dropdown"><a
-					class="nav-link dropdown-button" href="#">고객센터</a>
-					<div class="dropdown-content">
-						<a href="/board/list?cno=qa">Q&A</a> <a
-							href="/board/list?cno=notice">공지사항</a>
-					</div></li>
-                <li class="nav-item"><a class="nav-link" href="/cart/cart-view">장바구니</a></li>
-                <li class="nav-item"><a class="nav-link" href="/order/list">주문목록</a></li>
-                <li sec:authorize="hasRole('ROLE_ADMIN')" class="nav-item">
-               		<a class="nav-link" href="/board/write">글쓰기</a>
-                    <a class="nav-link" href="/product/add">상품추가</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-<script>
+    <!-- 상단 메뉴 바 (로그인/회원가입/장바구니 등) -->
+    <div class="top-menu">
+        <!-- 비로그인 사용자를 위한 메뉴 -->
+        <ul sec:authorize="isAnonymous()" style="display: flex;">
+            <li class="menu-item"><a href="/member/login">로그인</a></li>
+            <li class="menu-item"><a href="/member/join">회원가입</a></li>
+            <li class="menu-item dropdown">
+                <a class="nav-link dropdown-button" href="#">고객센터</a>
+                <div class="dropdown-content">
+                    <a href="/board/list?cno=qa">Q&A</a>
+                    <a href="/board/list?cno=notice">공지사항</a>
+                </div>
+            </li>
+            <li class="menu-item"><a href="/cart/cart-view">장바구니</a></li>
+        </ul>
+
+        <!-- 로그인된 사용자를 위한 메뉴 -->
+        <ul sec:authorize="isAuthenticated()" style="display: flex;">
+            <li class="menu-item"><a href="#" id="logout">로그아웃</a></li>
+            <li class="menu-item"><a href="/member/readme">내정보</a></li>
+            <li class="menu-item dropdown">
+                <a class="nav-link dropdown-button" href="#">고객센터</a>
+                <div class="dropdown-content">
+                    <a href="/board/list?cno=1001">Q&A</a>
+                    <a href="/board/list?cno=1002">공지사항</a>
+                </div>
+            </li>
+            <li class="menu-item"><a href="/cart/cart-view">장바구니</a></li>
+            <li class="menu-item"><a href="/order/list">주문목록</a></li>
+            <!-- 관리자만 볼 수 있는 메뉴 -->
+            <li sec:authorize="hasRole('ROLE_ADMIN')" class="menu-item">
+                <a href="/item/add">상품추가</a>
+            </li>
+            <li class="menu-item dropdown">
+                <a class="nav-link dropdown-button" href="#">고객센터</a>
+                <div class="dropdown-content">
+                    <a href="/board/list?cno=1001">Q&A</a>
+                    <a href="/board/list?cno=1002">공지사항</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 하단 로고 및 기타 정보 -->
+    <div class="bottom-info">
+        <div class="logo" onclick="window.location.href='/'">쇼핑몰</div>
+    </div>
+
+    <!-- 고정된 배경 이미지 -->
+    <div class="fixed-image"></div>
+
+    <!-- 로그아웃 스크립트 추가 -->
+   <script>
 			// 로그아웃 처리
 			$('#logout').click(function() {
 				const token = '[[${_csrf.token}]]';
@@ -132,8 +163,5 @@ header.site-header {
 				$(html).appendTo($('body')).submit();
 			});
 		</script>
-    <!-- 네비게이션 바와 간격을 둔 이미지 -->
-    <div class="fixed-image"></div>
-    
 </body>
 </html>
