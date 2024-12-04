@@ -130,7 +130,7 @@
             <li class="menu-item"><a href="/order/list">주문목록</a></li>
             <li class="menu-item"><a href="/member/delete">회원탈퇴</a></li>
             <!-- 관리자만 볼 수 있는 메뉴 -->
-            <li sec:authorize="hasRole('ROLE_admin)" class="menu-item">
+            <li sec:authorize="hasRole('ROLE_admin')" class="menu-item">
                 <a href="/item/add">상품추가</a>
             </li>
             </ul>   
