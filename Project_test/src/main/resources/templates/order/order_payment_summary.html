@@ -17,44 +17,47 @@
             <section class="container mt-5">
                 <h1 class="mb-4">주문 및 결제 내역</h1>
 
-                <!-- 주문 정보가 없는 경우 표시하는 메시지 -->
-                <div th:if="${orders == null || #lists.isEmpty(orders)}">
-                    <p>주문 내역이 없습니다.</p>
-                </div>
+                <!-- 로그인된 사용자 확인 -->
+                <div th:if="${#authentication.name != null}">
+                    <!-- 주문 정보가 없는 경우 표시하는 메시지 -->
+                    <div th:if="${orders == null || #lists.isEmpty(orders)}">
+                        <p>주문 내역이 없습니다.</p>
+                    </div>
 
-                <div th:if="${orders != null && !#lists.isEmpty(orders)}">
-                    <!-- 주문 및 결제 내역 -->
-                    <div class="card mb-3">
-                        <div class="card-header">주문 및 결제 내역</div>
-                        <div class="card-body">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>주문 번호</th>
-                                        <th>주문 날짜</th>
-                                        <th>주문 상태</th>
-                                        <th>총 가격</th>
-                                        <th>결제 수단</th>
-                                        <th>포인트 적립 금액</th>
-                                        <th>카드 번호</th>
-                                        <th>삭제</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="order : ${orders}">
-                                        <td th:text="${order.orderNo}">주문 번호</td>
-                                        <td th:text="${order.orderDate}">주문 날짜</td>
-                                        <td th:text="${order.orderStatus}">주문 상태</td>
-                                        <td th:text="${order.totalPrice}">총 가격</td>
-                                        <td th:text="${order.payMethod != null ? order.payMethod : '결제 정보 없음'}">결제 수단</td>
-										<td th:text="${order.pointAdd != null ? order.pointAdd : '0'}">포인트 적립 금액</td>
-										<td th:text="${order.cardNo != null ? order.cardNo : '결제 정보 없음'}">카드 번호</td>
-                                        <td><a th:href="@{/order/delete(orderNo=${order.orderNo})}" class="btn btn-danger">삭제</a></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <!-- 로그인된 사용자의 주문 내역만 표시 -->
+                    <div th:if="${orders != null && !#lists.isEmpty(orders)}">
+                        <!-- 주문 및 결제 내역 -->
+                        <div class="card mb-3">
+                            <div class="card-header">주문 및 결제 내역</div>
+                            <div class="card-body">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>주문 번호</th>
+                                            <th>주문 날짜</th>
+                                            <th>주문 상태</th>
+                                            <th>총 가격</th>
+                                            <th>삭제</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="order : ${orders}" th:if="${order.memberUsername == #authentication.name}">
+                                            <td th:text="${order.orderNo}">주문 번호</td>
+                                            <td th:text="${order.orderDate}">주문 날짜</td>
+                                            <td th:text="${order.orderStatus}">주문 상태</td>
+                                            <td th:text="${order.totalPrice}">총 가격</td>
+                                            <td><a th:href="@{/order/delete(orderNo=${order.orderNo})}" class="btn btn-danger">삭제</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
+                </div>
+                
+                <!-- 로그인되지 않은 경우 경고 메시지 -->
+                <div th:if="${#authentication.name == null}">
+                    <p>로그인이 필요합니다. 주문 내역을 확인하려면 먼저 로그인해 주세요.</p>
                 </div>
             </section>
         </main>

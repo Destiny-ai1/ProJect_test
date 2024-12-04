@@ -157,25 +157,17 @@ create table orders_detail (
     constraint orders_detail_fk_item_no foreign key (item_no) references item (item_no)
 );
 
---카드
-create table card(
-    card_no number(20),                                        --카드번호
-    ex_date date,                                              -- 유효기간
-    cvc number(3),                                             -- cvc 번호
-    member_username varchar2(50 char),                         -- 회원 ID (외래 키, member 테이블 참조)
-    constraint card_pk_card_no primary key (card_no),
-    constraint card_fk_member_username foreign key (member_username) references member (username)
-);
-
---결제
+--결제 // 카카오페이 결제로 인해서 테이블 수정★★★
 create table payment (
-    order_no number(20),                                       -- 주문번호 (외래 키, orders 테이블 참조)
-    pay_method varchar2(20 char),                              -- 결제 수단
-    point_add number(10),                                      -- 포인트 적립 금액
-    card_no number(20),                                        -- 카드 번호 (외래 키, card 테이블 참조)
-    constraint payment_pk primary key (order_no),
-    constraint payment_fk_order_no foreign key (order_no) references orders (order_no),
-    constraint payment_fk_card_no foreign key (card_no) references card (card_no)
+    order_no NUMBER(20),                             -- 주문번호 (외래 키, orders 테이블 참조) 
+    username VARCHAR2(50 CHAR),                      -- 회원 ID (외래 키, member 테이블 참조) 
+    item_name VARCHAR2(50 CHAR),                     -- 상품 이름 (결제 시점의 상품 이름 저장)
+    total_amount NUMBER(20),                         -- 총 결제 금액
+    tid VARCHAR2(255 CHAR),                          -- 카카오페이
+    payment_status VARCHAR2(50 CHAR),                -- 카카오페이
+    CONSTRAINT payment_pk PRIMARY KEY (order_no),
+    CONSTRAINT payment_fk_order_no FOREIGN KEY (order_no) REFERENCES orders (order_no),
+    CONSTRAINT payment_fk_username FOREIGN KEY (username) REFERENCES member (username)
 );
 
 --리뷰
