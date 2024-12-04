@@ -69,22 +69,25 @@ public class BoardService {
 	public BoardDto.BoardRead Board_senter(Long bno, String loginId, String password) {
 	    // 1. 게시글 데이터 조회
 	    BoardDto.BoardRead dto = boardDao.findById(bno)
-	        .orElseThrow(() -> new FailException("글을 찾을 수 없습니다.")); // 게시글이 없는 경우 예외 발생
-
+	        .orElseThrow(() -> new FailException("글을 찾을 수 없습니다.")); // 게시글이 없는 경우 예외 발생   
+	    System.out.println("SecretBoard 상태: " + dto.isSecretBoard());
+	    
 	    // 2. 삭제된 글인지 확인
 	    if (dto.isBoard_delete()) {
 	        return dto.글삭제(); // 삭제된 글의 경우, 해당 내용을 반환
 	    }
 
 	    // 3. 비밀글 접근 제어
-	    if (dto.isSecret_Board()) {
-	        String userName = readDao.UserDetails(loginId).getName(); // 로그인 사용자 이름 조회
-
+	    if (dto.isSecretBoard()) {
+	        String userName = readDao.UserDetails(loginId).getName(); // 로그인 사용자 이름 조회      
 	        // 관리자 또는 작성자라면 비밀번호 검증 없이 접근 허용
 	        if (SecurityUtils.isAdmin() || (loginId != null && dto.getWriter().equals(userName))) {
 	           
 	            return dto; // 작성자나 관리자는 비밀번호 없이 접근 가능
 	        }
+	        
+	        System.out.println("DTO SecretBoard 상태: " + dto.isSecretBoard());
+	        System.out.println("DTO Password: " + dto.getPassword());
 
 	        // 비밀번호가 없거나 잘못된 경우 접근 차단
 	        if (password == null || !dto.getPassword().equals(password)) {
@@ -108,7 +111,6 @@ public class BoardService {
 	    // 5. 댓글 조회 추가
 	    List<CommentDto.Read> comments = commentDao.findByBno(bno); // 해당 게시글의 댓글 목록 조회
 	    dto.setComments(comments); // 댓글 데이터를 DTO에 추가
-
 	    return dto;
 	}
 	

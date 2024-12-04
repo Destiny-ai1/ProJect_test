@@ -97,7 +97,7 @@ public class BoardDto {
             this.readCnt++;
         }
 
-        public boolean isSecret_Board() {
+        public boolean isSecretBoard() {
             return SecretBoard;
         }
     }
