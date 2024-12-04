@@ -55,7 +55,7 @@ $(document).ready(function() {
 		$('#add-form').submit();
 	});
 	
-	// 대분류 선택 후 중간분류, 소분류 로드
+	// 대분류 선택 후 소분류 로드
 	$('#major').change(async function() {
 	    const cno = $('#major').val();  // 선택된 대분류의 cno 값 가져오기
 	    console.log('선택된 대분류 cno:', cno);  // 대분류 cno 확인
@@ -67,44 +67,7 @@ $(document).ready(function() {
 	    }
 
 	    try {
-	        // 대분류에 해당하는 중간분류 카테고리 받아오기
-	        const result = await $.ajax(`/api/categories?cno=${cno}`);
-	        console.log('받아온 중간분류 데이터:', result);  // 받아온 중간분류 데이터 확인
-
-	        // 중간분류 카테고리 로드
-	        const $intermediate = $('#intermediate');
-	        $intermediate.empty();  // 기존 중간분류 목록 초기화
-	        $(`<option selected disabled>중간분류를 선택하세요</option>`).appendTo($intermediate);  // 기본 메시지 추가
-
-	        if (Array.isArray(result) && result.length > 0) {
-	            result.forEach(c => {
-	                if (c.CNO && c.CNAME) {  // 'CNO'와 'CNAME'을 사용
-	                    $(`<option value='${c.CNO}'>${c.CNAME}</option>`).appendTo($intermediate);
-	                } else {
-	                    console.error('잘못된 데이터:', c);
-	                }
-	            });
-	        } else {
-	            console.log('중간분류 데이터가 없습니다.');
-	        }
-	    } catch (err) {
-	        console.error('중간분류 데이터 로드 실패:', err);
-	    }
-	});
-
-	// 중간분류 선택 후 소분류 로드
-	$('#intermediate').change(async function() {
-	    const cno = $('#intermediate').val();  // 선택된 중간분류의 cno 값 가져오기
-	    console.log('선택된 중간분류 cno:', cno);  // 중간분류 cno 확인
-
-	    // cno 값이 없거나 선택되지 않은 경우, 처리하지 않고 종료
-	    if (!cno) {
-	        console.error('중간분류 cno 값이 없습니다. 선택된 값을 확인해주세요.');
-	        return;  // 중단하고 더 이상 진행하지 않음
-	    }
-
-	    try {
-	        // 중간분류에 해당하는 소분류 카테고리 받아오기
+	        // 대분류에 해당하는 소분류 카테고리 받아오기
 	        const result = await $.ajax(`/api/categories?cno=${cno}`);
 	        console.log('받아온 소분류 데이터:', result);  // 받아온 소분류 데이터 확인
 
@@ -161,9 +124,6 @@ $(document).ready(function() {
 					<select id="major" class="form-select">
 						<option disabled selected>대분류 선택</option>
 						<option th:each="m:${category}" th:text="${m.CNAME}" th:value="${m.CNO}"></option>
-					</select>
-					<select id="intermediate" class="form-select">
-						<option disabled selected>중간분류 선택</option>
 					</select>
 					<select id="small" class="form-select" name="cno">
 						<option disabled selected>소분류 선택</option>
