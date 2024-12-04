@@ -1,28 +1,26 @@
 package com.example.demo.payment;
 
-import java.util.*;
-
 import org.apache.ibatis.annotations.*;
 
+import com.example.demo.payment.PaymentDto.*;
+
+import java.util.Optional;
+
 @Mapper
-public interface PaymentDao { // 결제 관련 데이터 접근 객체 (DAO)
-    // 결제 정보 저장
-    @Insert("INSERT INTO payment (order_no, pay_method, point_add, card_no) VALUES (#{orderNo}, #{payMethod}, #{pointAdd}, #{cardNo})")
-    int save(Payment payment); // 결제 정보를 데이터베이스에 저장
+public interface PaymentDao {
 
     // 주문 번호로 결제 정보 조회
-    @Select("SELECT * FROM payment WHERE order_no = #{orderNo}")
-    Optional<PaymentDto.Read> findById(@Param("orderNo") Long orderNo); // 특정 주문 번호로 결제 정보 조회
+    Optional<PaymentDto.Read> findById(@Param("orderNo") Long orderNo);
 
-    // 모든 결제 정보 조회
-    @Select("SELECT * FROM payment")
-    List<PaymentDto.Read> findAll(); // 모든 결제 정보 조회
+    // 주문 번호로 TID 조회    
+    String findTidByOrderNo(@Param("orderNo") Long orderNo);
 
-    // 결제 정보 업데이트
-    @Update("UPDATE payment SET pay_method = #{payMethod}, point_add = #{pointAdd} WHERE order_no = #{orderNo}")
-    int update(Payment payment); // 결제 정보 업데이트
+    // 주문 번호로 TID 업데이트
+    int updateTidByOrderNo(@Param("orderNo") Long orderNo, @Param("tid") String tid);
 
-    // 결제 정보 삭제
-    @Delete("DELETE FROM payment WHERE order_no = #{orderNo}")
-    int delete(@Param("orderNo") Long orderNo); // 특정 결제 정보 삭제
+	void update(Read payment);
+
+	int save(Payment payment);
+
+	String findUserIdByOrderNo(Long orderNo);
 }
