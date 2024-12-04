@@ -108,11 +108,11 @@
             <li class="menu-item dropdown">
                 <a class="nav-link dropdown-button" href="#">고객센터</a>
                 <div class="dropdown-content">
-                    <a href="/board/list?cno=qa">Q&A</a>
-                    <a href="/board/list?cno=notice">공지사항</a>
+               		 <a href="/board/list?cno=1002">공지사항</a>
+                    <a href="/board/list?cno=1001">Q&A</a>
+                   
                 </div>
             </li>
-            <li class="menu-item"><a href="/cart/cart-view">장바구니</a></li>
         </ul>
 
         <!-- 로그인된 사용자를 위한 메뉴 -->
@@ -122,26 +122,19 @@
             <li class="menu-item dropdown">
                 <a class="nav-link dropdown-button" href="#">고객센터</a>
                 <div class="dropdown-content">
+                	<a href="/board/list?cno=1002">공지사항</a>
                     <a href="/board/list?cno=1001">Q&A</a>
-                    <a href="/board/list?cno=1002">공지사항</a>
                 </div>
             </li>
             <li class="menu-item"><a href="/cart/cart-view">장바구니</a></li>
             <li class="menu-item"><a href="/order/list">주문목록</a></li>
+            <li class="menu-item"><a href="/member/delete">회원탈퇴</a></li>
             <!-- 관리자만 볼 수 있는 메뉴 -->
-            <li sec:authorize="hasRole('ROLE_ADMIN')" class="menu-item">
+            <li sec:authorize="hasRole('ROLE_admin')" class="menu-item">
                 <a href="/item/add">상품추가</a>
             </li>
-            <li class="menu-item dropdown">
-                <a class="nav-link dropdown-button" href="#">고객센터</a>
-                <div class="dropdown-content">
-                    <a href="/board/list?cno=1001">Q&A</a>
-                    <a href="/board/list?cno=1002">공지사항</a>
+            </ul>   
                 </div>
-            </li>
-        </ul>
-    </div>
-
     <!-- 하단 로고 및 기타 정보 -->
     <div class="bottom-info">
         <div class="logo" onclick="window.location.href='/'">쇼핑몰</div>
