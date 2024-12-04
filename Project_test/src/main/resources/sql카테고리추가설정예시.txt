@@ -36,4 +36,4 @@ insert into category values(26, '악세서리', 4);
 
 --고객센터 중분류
 insert into category values(1001, '공지사항', 1000);
-insert into category values(1002, 'Q&A',1000 );
+insert into category values(1002, 'QnA',1000 );

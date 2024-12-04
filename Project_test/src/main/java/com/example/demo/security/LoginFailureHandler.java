@@ -17,47 +17,50 @@ import jakarta.transaction.*;
 
 @Component
 public class LoginFailureHandler implements AuthenticationFailureHandler {
-	@Autowired
-	private MemberDao memberDao;
-	
-	@Transactional
-	@Override
-	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException exception) throws IOException, ServletException {
-		// 사용자 요청에서 아이디를 꺼낸다
-		String username = request.getParameter("username");
-		
-		// 아이디를 가지고 사용자 정보를 가져온다(로그인 실패횟수 증가 + 계정 블록 을 확인할려고)
-		Member member  = memberDao.findById(username);
-		// 사용자 정보를 저장하는 세션을 꺼내자
-		HttpSession session = request.getSession();
-		
-		if (member == null) {
-			
+
+    @Autowired
+    private MemberDao memberDao;
+
+    @Transactional
+    @Override
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+                                        AuthenticationException exception) throws IOException, ServletException {
+    	
+        String username = request.getParameter("username");
+        Member member = memberDao.findById(username);
+        HttpSession session = request.getSession();
+
+        if (member == null) {
+            // 가입되지 않은 사용자 처리
             session.setAttribute("message", "가입되어 있지 않은 사용자입니다.");
-        } 
-		
-		else {
-		
-            session.setAttribute("message", "비밀번호가 틀렸습니다.");
-		
-        if (!member.getEnabled()) {
+        } else {
+            if (!member.getEnabled()) {
+                // 블록된 계정 처리
                 session.setAttribute("message", "블록된 계정입니다. 관리자에게 연락하세요.");
-            } 
-        
-        else if (member.getLoginFailCount() == 4) {
-        		memberDao.memberLoginFailAndBlock(username);
-                session.setAttribute("message", "로그인 5회 실패로 계정이 블록되었습니다. 관리자에게 연락하세요.");
-            } 
-        
-        else {
-        		memberDao.memberLoginFailAndBlock(username);
-                session.setAttribute("message", "로그인에 " + member.getLoginFailCount() + "회 실패했습니다.");
+            } else {
+                int failCount = member.getLoginFailCount() + 1; // 실패 횟수 증가
+
+                if (failCount >= 5) {
+                    // 5회 실패 시 계정 블록
+                    memberDao.memberLoginFailAndBlock(username); // DAO에 있는 메서드 이름 유지
+                    session.setAttribute("message", "로그인 5회 실패로 계정이 블록되었습니다. 관리자에게 연락하세요.");
+                } else {
+                    // 실패 횟수 업데이트 및 메시지 설정
+                    memberDao.memberLoginFailAndBlock(username); // 동일 메서드 사용
+                    if (failCount == 4) {
+                        session.setAttribute("message", "로그인 5회 실패 시 계정이 블록됩니다.");
+                    } else {
+                        session.setAttribute("message", "로그인에 " + failCount + "회 실패했습니다.");
+                    }
+                }
             }
         }
+
+        // 로그인 페이지로 리다이렉트
         response.sendRedirect("/member/login");
     }
 }
+
 
 
 

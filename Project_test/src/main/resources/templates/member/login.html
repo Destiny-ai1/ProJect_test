@@ -12,6 +12,10 @@
 	<div id="app">
 		<header th:replace="~{/fragment/header.html}"> </header>
 		<nav th:replace="~{/fragment/nav.html}"></nav>
+		<!--로그인 실패시 메세지뜨는거-->
+		<div th:if="${message}" class="alert alert-danger" role="alert">
+			<p th:text="${message}"></p>
+		</div>
 		<section>
 			<form id="login-form" method="post" action="/member/login">
 				<input type="hidden" name="_csrf" th:value="${_csrf.token}">

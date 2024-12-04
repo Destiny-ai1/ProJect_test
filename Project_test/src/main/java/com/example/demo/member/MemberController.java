@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.enums.PasswordChange;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -49,9 +50,19 @@ public class MemberController {
 	//로그인 페이지로 이동
 	@PreAuthorize("isAnonymous()")
 	@GetMapping("/member/login")
-	public ModelAndView login() {
-		return new ModelAndView("member/login");
-	}
+	public ModelAndView login(HttpServletRequest request) {
+		ModelAndView mav = new ModelAndView("member/login");
+			
+		HttpSession session = request.getSession();
+			
+		// 세션에 저장된 메시지 확인 및 모델에 추가
+		String message = (String) session.getAttribute("message");
+		if (message != null) {
+		    mav.addObject("message", message); // 메시지를 모델에 추가
+		    session.removeAttribute("message"); // 세션에서 메시지 제거
+		    }
+		return mav;
+		}
 	
 	//임시 비밀번호 발급후 ,임시비밀번호로 로그인했으면 비밀번호 변경 페이지로 보낸다
 	@PreAuthorize("isAuthenticated()")
