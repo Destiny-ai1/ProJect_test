@@ -1,84 +1,74 @@
 <!DOCTYPE html>
-<html  lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>Navigator</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $("#flip").click(function() {
-            $("#panel").slideDown("slow");
-        });
-    });
-</script>
-<style>
-/* 기본 스타일 초기화 */
-body {
-    margin: 0;
-    font-family: Arial, sans-serif; /* 기본 폰트 설정 */
-}
+    <meta charset="UTF-8">
+    <title>Navigator</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style>
+        /* 기본 스타일 초기화 */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
 
-/* 네비게이터 높이 및 너비 조절 */
-.fixed-menu {
-    position: fixed;
-    top: 50px; /* 헤더 높이에 맞춰서 */
-    width: 100%;
-    
-    background-color:  rgba(255, 255, 255, 0.8); /* 배경색 반투명으로 설정 */
-    color: black;
-    z-index: 1000;
-    padding: 5px 0; /* 줄인 패딩 */
-    text-align: center;
-    margin: auto; /* 화면 중앙 정렬 */
-    left: 0;
-    right: 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
-}
+        /* 네비게이터 높이 및 너비 조절 */
+        .fixed-menu {
+            position: fixed;
+            top: 135px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black;
+            z-index: 1000;
+            padding: 5px 0;
+            text-align: center;
+            margin: auto;
+            left: 0;
+            right: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
-.fixed-menu .dropdown {
-    display: inline-block;
-    margin: 0 100px; /* 대분류 간의 거리 조정 */
-    position: relative; /* 드롭다운을 위한 상대적 위치 설정 */
-    line-height: 1.5; /* 줄 간격 조정 */
-}
+        .fixed-menu .dropdown {
+            display: inline-block;
+            margin: 0 100px;
+            position: relative;
+            line-height: 1.5;
+        }
 
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: rgba(255, 255, 255, 0.8); /* 드롭다운 배경색 */
-    min-width: 200px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
-    padding: 12px 16px;
-    z-index: 1;
-    border-radius: 5px; /* 둥근 모서리 */
-}
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            min-width: 200px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 12px 16px;
+            z-index: 1;
+            border-radius: 5px;
+        }
 
-.dropdown:hover .dropdown-content {
-    display: block; /* 드롭다운 메뉴 보이기 */
-}
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
 
-.fixed-menu .dropdown:hover {
-    background-color: #b9eeff; /* 드롭다운 메뉴 배경색 변화 */
-    border: 2px solid #000;
-}
+        .fixed-menu .dropdown:hover {
+            background-color: #b9eeff;
+            border: 2px solid #000;
+        }
 
-.custom-button {
-    border: none;
-    background: none;
-    color: black;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 12px 24px; /* 버튼 패딩 */
-    border-radius: 4px; /* 버튼 둥글게 */
-    transition: background-color 0.3s; /* 부드러운 호버 효과 */
-}
+        .custom-button {
+            border: none;
+            background: none;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 12px 24px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
 
-.custom-button:hover {
-    background-color:#b9eeff; /* 버튼 호버 효과 */
-}
-
-
-</style>
+        .custom-button:hover {
+            background-color: #b9eeff;
+        }
+    </style>
 </head>
 <body>
     <!-- 스크롤 시 고정되는 메뉴 -->
@@ -87,10 +77,10 @@ body {
             <span>스키</span>
             <div class="dropdown-content">
                 <p>
-                    <button onclick="window.location.href='https://www.naver.com/';" class="custom-button">폴</button>
+                    <button onclick="window.location.href='/item/ski/list';" class="custom-button">폴</button>
                 </p>
                 <p>
-                    <button onclick="window.location.href='https://www.google.com/';" class="custom-button">플레이트</button>
+                    <button onclick="window.location.href='/item/ski/list';" class="custom-button">플레이트</button>
                 </p>
             </div>
         </div>
@@ -99,10 +89,10 @@ body {
             <span>스키용품</span>
             <div class="dropdown-content">
                 <p>
-                    <button onclick="window.location.href='https://www.example.com/ski-goggles';" class="custom-button">고글</button>
+                    <button onclick="window.location.href='/item/miniCategory/list';" class="custom-button">고글</button>
                 </p>
                 <p>
-                    <button onclick="window.location.href='https://www.example.com/ski-boots';" class="custom-button">부츠</button>
+                    <button onclick="window.location.href='/item/miniCategory/list';" class="custom-button">부츠</button>
                 </p>
             </div>
         </div>
@@ -111,10 +101,10 @@ body {
             <span>스노우보드</span>
             <div class="dropdown-content">
                 <p>
-                    <button onclick="window.location.href='https://www.example.com/board';" class="custom-button">보드</button>
+                    <button onclick="window.location.href='/item/snowboard/list';" class="custom-button">데크</button>
                 </p>
                 <p>
-                    <button onclick="window.location.href='https://www.example.com/bindings';" class="custom-button">바인딩</button>
+                    <button onclick="window.location.href='/item/snowboard/list';" class="custom-button">바인딩</button>
                 </p>
             </div>
         </div>
@@ -123,10 +113,10 @@ body {
             <span>스노우보드용품</span>
             <div class="dropdown-content">
                 <p>
-                    <button onclick="window.location.href='https://www.example.com/board-goggles';" class="custom-button">고글</button>
+                    <button onclick="window.location.href='/item/miniCategory/list';" class="custom-button">고글</button>
                 </p>
                 <p>
-                    <button onclick="window.location.href='https://www.example.com/board-boots';" class="custom-button">부츠</button>
+                    <button onclick="window.location.href='/item/miniCategory/list';" class="custom-button">부츠</button>
                 </p>
             </div>
         </div>
