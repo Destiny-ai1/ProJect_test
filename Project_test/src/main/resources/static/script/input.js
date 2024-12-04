@@ -1,3 +1,4 @@
+//회원가입관련
 function emptyAndPatternCheck(입력값, $출력할곳, pattern, emptyErrorMessage, patternErrorMessage) {
     $출력할곳.text('');
     if(입력값 == '') {
@@ -20,11 +21,13 @@ function nameCheck() {
 
 // 전화번호 검증 함수
 function phoneCheck() {
-    const pattern = /^[0-9]{10,11}$/;  // 10자리 또는 11자리 숫자
+    const pattern = /^01[016789]-[0-9]{3,4}-[0-9]{4}$/;  // 010-XXX-XXXX 또는 010-XXXX-XXXX 형식
     const value = $('#phone').val();
     const $phoneMsg = $('#phone-msg');
     return emptyAndPatternCheck(value, $phoneMsg, pattern, '전화번호를 입력하세요', '유효한 전화번호 형식이 아닙니다');
 }
+
+
 
 function birthdayCheck() {
     const pattern = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;

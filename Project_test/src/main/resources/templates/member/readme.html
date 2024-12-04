@@ -39,7 +39,7 @@
         <nav th:replace="~{/fragment/nav.html}"></nav>
         <main>
             <section>
-                <form action="/member/update" method="post">
+                <form action="/member/update" method="post" id="memberForm">
                     <!-- CSRF 토큰 -->
                     <input type="hidden" id="csrfToken" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
@@ -56,6 +56,11 @@
                     <div class="mb-3 mt-3">
                         <label for="phone" class="form-label">핸드폰번호:</label> 
                         <input type="tel" class="form-control" id="phone" name="phone" th:value="${result.phone}" oninput="formatPhoneNumber(this)">
+                    </div>
+
+                    <div class="mb-3 mt-3">
+                        <label for="new-password" class="form-label">비밀번호:</label>
+                        <a type="button" class="btn btn-primary" href="/member/update-password">비밀번호 변경</a>
                     </div>
 
                     <div class="mb-3 mt-3">
@@ -86,25 +91,55 @@
                     <hr>
                     <button id="update" class="btn btn-success" type="submit">변경</button>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    <button type="button" id="delete" class="btn btn-danger">삭제</button>
+                   <button type="button" id="cancel" class="btn btn-danger">취소</button>
                 </form>
             </section>
         </main>
     </div>
-
-    <script>
-        $('#delete').click(function() {
-            const token = $('#csrfToken').val(); // 탈퇴시 CSRF토큰 필요 아직 작업중이라써있어서 참고
-            const form = `
-                <form action="/member/withdraw" method="post">
-                    <input type="hidden" name="_csrf" value="${token}">
-                </form>
-            `;
-            $(form).appendTo($('body')).submit();
-        });
-    </script>
+<script>
+    // 기존 값 가져오기
+    const originalEmail = $('#email').val();
+    const originalPhone = $('#phone').val();
     
-    <script>
+    // 폼 제출 전 변경 여부와 패턴 체크
+    $('#memberForm').submit(function(event) {
+        event.preventDefault();
+        const email = $('#email').val();
+        const phone = $('#phone').val();
+
+        // 변경 여부 확인
+        if (email === originalEmail && phone === originalPhone) {
+            alert('변경된 내용이 없습니다.');
+            return;
+        }
+        
+        // 서버로 폼을 제출한 후 성공 메시지 표시
+        $.post($(this).attr('action'), $(this).serialize(), function() {
+            alert('변경되었습니다.');
+            window.location.reload();
+        }).fail(function() {
+            alert('변경에 실패했습니다. 다시 시도해주세요.');
+        });
+
+        // 이메일 패턴 검사
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            alert('유효한 이메일 주소를 입력해주세요.');
+            return;
+        }
+
+        // 전화번호 패턴 검사 (010-XXXX-XXXX 형식)
+        const phonePattern = /^010-\d{4}-\d{4}$/;
+        if (!phonePattern.test(phone)) {
+            alert('유효한 핸드폰 번호를 입력해주세요. (형식: 010-XXXX-XXXX)');
+            return;
+        }
+    });
+
+    $('#cancel').click(function() {
+        window.location.href = '/'; // 예시 URL, 실제로 이동하고자 하는 경로로 변경하세요.
+    });
+
     function formatPhoneNumber(input) {
         // 숫자 이외의 문자 제거
         let cleaned = input.value.replace(/\D/g, '');
@@ -119,6 +154,6 @@
         
         input.value = formatted;
     }
-    </script>
+</script>
 </body>
 </html>
