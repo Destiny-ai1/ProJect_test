@@ -98,7 +98,6 @@ public class BoardDto {
         }
 
         public boolean isSecret_Board() {
-            System.out.println("BoardRead secret_Board value: " + SecretBoard);
             return SecretBoard;
         }
     }

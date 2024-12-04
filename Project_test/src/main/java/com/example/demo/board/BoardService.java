@@ -33,58 +33,33 @@ public class BoardService {
 	
 	// 고객센터 QnA 작성 서비스 (회원은 Q&A 작성, 관리자는 공지사항과 FAQ 작성)
 	public Long write(BoardDto.Create dto, String loginId) {
-
-	    // 확인해야 될 부분: 현재 카테고리 번호와 Secret_Board 값 확인
-	    System.out.println("작성 요청 카테고리 번호 (cno): " + dto.getCno());
-	    System.out.println("작성 요청 Secret_Board 값: " + dto.isSecretBoard());
-
 	    // 기존 게시글 번호 조회
 	    Long lastBno = boardDao.findBnoByCategory(dto.getCno());
 	    Long newBno = (lastBno != null ? lastBno : 0) + 1;
 
-	    // 확인해야 될 부분: 생성된 새 게시글 번호 확인
-	    System.out.println("생성될 새 게시글 번호 (newBno): " + newBno);
-
 	    // 작성자 이름 가져오기
 	    String name = readDao.UserDetails(loginId).getName();
 
-	    // 확인해야 될 부분: 로그인한 사용자의 이름 확인
-	    System.out.println("작성자 이름 (name): " + name);
-
 	    // 공지사항일 경우 비밀번호와 비밀글 설정 무시
-	    if (dto.getCno() == 2) {
+	    if (dto.getCno() == 1001) {
 	        dto.setPassword(null);
 	        dto.setSecretBoard(false);
-
-	        // 확인해야 될 부분: 공지사항에서 Secret_Board 값 강제 설정 확인
-	        System.out.println("공지사항 작성 시 Secret_Board 강제 설정: " + dto.isSecretBoard());
 	    }
 
 	    // Q&A일 경우 비밀글 설정 검증
-	    if (dto.getCno() == 3 && dto.isSecretBoard()) {
+	    if (dto.getCno() == 1002 && dto.isSecretBoard()) {
 	        if (dto.getPassword() == null || dto.getPassword().isBlank()) {
-	            // 확인해야 될 부분: 비밀글인데 비밀번호가 없을 경우 예외 발생 확인
-	            System.out.println("비밀글 비밀번호 미입력 오류 발생");
 	            throw new IllegalArgumentException("Q&A 비밀글에는 비밀번호를 입력해야 합니다.");
 	        }
-
-	        // 확인해야 될 부분: 비밀글 비밀번호 값 확인
-	        System.out.println("Q&A 비밀글 비밀번호: " + dto.getPassword());
 	    }
 
 	    // DTO를 엔티티로 변환
 	    Board board = dto.toEntity(loginId, name);
-
 	    // 엔티티에 새 게시글 번호 설정
 	    board.setBno(newBno);
-
-	    // 확인해야 될 부분: 엔티티 변환 후 Secret_Board 값과 BNO 확인
-	    System.out.println("엔티티 변환 후 Secret_Board 값: " + board.isSecretBoard());
-	    System.out.println("엔티티 변환 후 게시글 번호 (bno): " + board.getBno());
-
+	    
 	    // 게시글 저장
 	    boardDao.save(board);
-
 	    // 저장된 게시글 번호 반환
 	    return board.getBno();
 	}

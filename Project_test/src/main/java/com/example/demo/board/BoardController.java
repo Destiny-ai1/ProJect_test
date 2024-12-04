@@ -50,9 +50,9 @@ public class BoardController {
 	// 카테고리 번호를 기반으로 글 종류(공지사항, Q&A) 반환
 	private String getBoardType(Integer cno) {
 	    switch (cno) {
-	        case 2:
+	        case 1001:
 	            return "공지사항";
-	        case 3:
+	        case 1002:
 	            return "Q&A";
 	        default:
 	            throw new IllegalArgumentException("잘못된 카테고리 번호입니다: " + cno);
