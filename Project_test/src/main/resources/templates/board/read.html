@@ -28,38 +28,39 @@
                         <p>
                             <strong>조회수:</strong> <span th:text="${result.readCnt}"></span>
                             <strong>작성일:</strong> <span th:text="${result.writeTime}"></span>
+							<p>SecretBoard 상태: <span th:text="${result.SecretBoard}"></span></p>
                         </p>
                     </div>
                 </div>
 				
 				<!-- 비밀글 및 일반 글 내용 -->
 				<div th:if="${result != null}">
-				    <div th:if="${result.secretBoard}">
+				    <div th:if="${result.SecretBoard}">
 				        <!-- 비밀글일 경우 -->
-				        <div th:if="${result.writer == #authentication.name or #authorization.expression('hasRole(''ROLE_admin'')}">
-				            <div th:utext="${result.content}"></div>
+				        <div th:if="${result.writer == #authentication.name or #authorization.expression('hasRole(''ROLE_admin'')')}">
 				        </div>
-				        <div th:unless="${result.writer == #authentication.name or #authorization.expression('hasRole(''ROLE_admin'')}">
-							<p>비밀글입니다.</p>
+				        <div th:unless="${result.writer == #authentication.name or #authorization.expression('hasRole(''ROLE_admin'')')}">
+							<strong>비밀글입니다.</strong>
+							<div th:utext="${result.content}"></div>
 				        </div>
 				    </div>
 
 				    <!-- 일반 게시글 처리 -->
-				    <div th:unless="${result.secretBoard}">
+				    <div th:unless="${result.SecretBoard}">
 				        <h3>내용:</h3>
 				        <div th:utext="${result.content}"></div>
 				    </div>
 				</div>
 
                 <!-- 댓글 작성 -->
-                <div class="mt-4" sec:authorize="isAuthenticated()" th:if="${result.cno == 3}">
-                    <!-- 추가: 댓글 작성 기능은 Q&A(cno=3)에만 노출 -->
+                <div class="mt-4" sec:authorize="isAuthenticated()" th:if="${result.cno == 1002}">
+                    <!-- 추가: 댓글 작성 기능은 Q&A(cno=1002)에만 노출 -->
                     <textarea class="form-control" rows="5" placeholder="댓글을 달아주세요" id="comment"></textarea>
                     <button class="btn btn-outline-success mt-2" id="write-comment">댓글 작성</button>
                 </div>
 
                 <!-- 댓글 목록 -->
-                <div id="comments" class="mt-4" th:if="${result.cno == 3}">
+                <div id="comments" class="mt-4" th:if="${result.cno == 1002}">
                     <!-- 추가: 댓글 목록은 Q&A(cno=3)에만 표시 -->
                     <div th:each="comment : ${result.comments}">
                         <div class="upper d-flex justify-content-between">
@@ -79,7 +80,7 @@
                     <a type="button" class="btn btn-info me-2" th:if="${isWriter}" th:href="'/board/update/' + ${result.bno}">변경하기</a>
                     <!-- 추가: 삭제 버튼은 작성자 또는 ROLE_admin 권한 사용자가 볼 수 있음 -->
 					<button type="button" class="btn btn-danger" 
-					        th:if="${isWriter or #authorization.expression('hasRole(''ROLE_admin'')')}" 
+					th:if="${isWriter} or ${#authorization.expression('hasRole(''ROLE_admin'')')}" 
 					        id="delete">삭제하기</button>
                 </div>
 				
@@ -93,7 +94,7 @@
     <!-- 댓글 작성 스크립트 -->
     <script>
         $('#write-comment').click(function () {
-            // 추가: 댓글 작성은 Q&A(cno=3)에서만 작동
+            // 추가: 댓글 작성은 Q&A(cno=1002)에서만 작동
             const bno = '[[${result.bno}]]';
             const _csrf = '[[${_csrf.token}]]';
             const content = $('#comment').val();

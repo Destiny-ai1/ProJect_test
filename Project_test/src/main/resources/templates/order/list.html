@@ -28,27 +28,27 @@
 				    <div class="card-header">주문 정보</div>
 				    <div class="card-body">
 				        <table class="table table-bordered">
-				            <thead>
-				                <tr>
-				                    <th>주문 번호</th>
-				                    <th>주문 날짜</th>
-				                    <th>주문 상태</th>
-				                    <th>총 가격</th>
-				                    <th>사용 포인트</th>
-				                    <th>실제 결제 금액</th>
-				                </tr>
-				            </thead>
-				            <tbody>
-				                <tr th:each="order : ${orders}">
-				                    <td th:text="${order?.orderNo != null ? order.orderNo : 'N/A'}"></td>
-				                    <td th:text="${order?.orderDate != null ? order.orderDate : 'N/A'}"></td>
-				                    <td th:text="${order?.orderStatus != null ? order.orderStatus : 'N/A'}"></td>
-				                    <td th:text="${order?.totalPrice != null ? order.totalPrice : 0}"></td>
-				                    <td th:text="${order?.usedPoint != null ? order.usedPoint : 0}"></td>
-				                    <td th:text="${order?.actPayment != null ? order.actPayment : 0}"></td>
-				                </tr>
-				            </tbody>
-				        </table>
+						    <thead>
+						        <tr>
+						        	<th>선택</th>
+						            <th>주문 번호</th>
+						            <th>총 가격</th>
+						            <th>사용 포인트</th>
+						            <th>실제 결제 금액</th>
+						        </tr>
+						    </thead>
+						    <tbody>
+						        <tr th:each="order : ${orders}">
+						        	<td>
+						                <input type="radio" name="selectedOrder" th:value="${order.orderNo}" onclick="onSelectOrder(this.value)" />
+						            </td>
+						            <td th:text="${order.orderNo}"></td>
+						            <td th:text="${order.totalPrice}"></td>
+						            <td th:text="${order.usedPoint}"></td>
+						            <td th:text="${order.actPayment}"></td>						            
+						        </tr>
+						    </tbody>
+						</table>
 				    </div>
 				
 				    <!-- 주문 상세 항목 -->
@@ -92,19 +92,20 @@
 							<button type="button" class="btn btn-primary mt-3" onclick="execDaumPostcode()">주소 검색</button>
 						</div>
 					</div>
+					<p>Order 정보: <span th:text="${order}">N/A</span></p>
 				
 				    <!-- 결제 정보 입력 및 카카오페이 결제 -->
 				    <div class="card mb-3">
 				        <div class="card-header">결제 정보 입력 및 카카오페이 결제</div>
 				        <div class="card-body">
 				            <form action="/payment/ready" method="post">
-				            	<input type="hidden" name="_csrf" th:value="${_csrf.token}" />
-				                <input type="hidden" name="orderNo" th:value="${order?.orderNo}" />
-				                <input type="hidden" name="username" th:value="${order?.memberUsername != null ? order.memberUsername : ''}" />
-				                <input type="hidden" name="itemName" th:value="${order?.orderDetails != null && order.orderDetails.size() > 0 ? order.orderDetails[0].itemName : '상품 정보 없음'}" />
-				                <input type="hidden" name="totalAmount" th:value="${order?.actPayment != null ? order.actPayment : 0}" />
-				                <button type="submit" class="btn btn-warning">카카오페이로 결제하기</button>
-				            </form>
+							    <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+							    <input type="hidden" id="orderNo" name="orderNo" value="" />
+								<input type="hidden" id="username" name="username" value="" />
+								<input type="hidden" id="itemName" name="itemName" value="" />
+								<input type="hidden" id="totalAmount" name="totalAmount" value="" />
+							    <button type="submit" class="btn btn-warning">카카오페이로 결제하기</button>
+							</form>
 				        </div>
 				    </div>
 				</div>
@@ -112,6 +113,8 @@
         </main>
         <footer th:replace="~{/fragment/footer.html}"> </footer>
     </div>
+
+	
 
     <script>
     function execDaumPostcode() {
@@ -145,6 +148,55 @@
     }
 
     </script>
+
+	<script>
+    // 주문 선택 후, 선택된 주문의 정보를 각 필드에 설정합니다.
+    function setOrderDetails(order) {
+        document.getElementById('orderNo').value = order.orderNo;
+        document.getElementById('username').value = order.memberUsername;
+        document.getElementById('itemName').value = order.orderDetails[0].itemName;
+        document.getElementById('totalAmount').value = order.actPayment;
+    }
+
+    // 사용자가 특정 주문을 선택했을 때 실행
+    function onSelectOrder(orderNo) {
+        let selectedOrder = getOrderInfoByOrderNo(orderNo);
+        setOrderDetails(selectedOrder);
+    }
+
+    // 예시 데이터를 반환하는 함수 (실제로는 서버에서 가져오는 방식으로 변경)
+    function getOrderInfoByOrderNo(orderNo) {
+        return {
+            orderNo: orderNo,
+            memberUsername: "guest1",
+            orderDetails: [{ itemName: "iPhone 16 Pro" }],
+            actPayment: 1550000
+        };
+    }
+    
+	document.querySelector("form[action='/payment/ready']").addEventListener("submit", function (event) {
+	    let orderNo = document.querySelector('input[name="orderNo"]').value;
+	    let postNo = document.getElementById('postNo').value;
+	    let addressMain = document.getElementById('addressMain').value;
+	    let addressDetail = document.getElementById('addressDetail').value;
+
+	    // 주문 번호가 없을 때
+	    if (!orderNo || orderNo === 'N/A') {
+	        event.preventDefault();
+	        alert("주문 번호가 설정되지 않았습니다. 주문을 다시 확인해 주세요.");
+	        return;
+	    }
+
+	    // 배송지 정보가 입력되지 않았을 때
+	    if (!postNo || !addressMain || !addressDetail) {
+	        event.preventDefault();
+	        alert("배송지 정보를 모두 입력해 주세요.");
+	        return;
+	    }
+	});
+
+
+	</script>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {

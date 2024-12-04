@@ -53,7 +53,7 @@ public class BoardController {
 	        case 1001:
 	            return "공지사항";
 	        case 1002:
-	            return "Q&A";
+	            return "QnA";
 	        default:
 	            throw new IllegalArgumentException("잘못된 카테고리 번호입니다: " + cno);
 	    }
@@ -63,24 +63,22 @@ public class BoardController {
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/board/write")
 	public ModelAndView 글작성POST(@Valid BoardDto.Create dto, BindingResult br, Principal principal, HttpServletRequest request) {
-	 
 	    if (br.hasErrors()) {
 	        ModelAndView mav = new ModelAndView("board/write");
 	        mav.addObject("errors", br.getAllErrors());
 	        mav.addObject("cno", dto.getCno());
 	        return mav;
 	    }
-
-	 // 비밀번호 유효성 검사
+	    
 	    if (dto.isSecretBoard()) {
-	        if (dto.getPassword() == null || !dto.getPassword().matches("\\d{1,5}")) {
+	        if (dto.getPassword() == null || !dto.getPassword().matches("\\d{1,4}")) {
 	            ModelAndView mav = new ModelAndView("board/write");
-	            mav.addObject("errorMessage", "비밀글은 5자리까지 숫자 비밀번호를 입력해야 합니다.");
+	            mav.addObject("errorMessage", "비밀글은 4자리까지 숫자 비밀번호를 입력해야 합니다.");
 	            mav.addObject("cno", dto.getCno());
 	            return mav;
 	        }
 	    }
-	    
+
 	    Long bno = boardService.write(dto, principal.getName());
 	    return new ModelAndView("redirect:/board/read?bno=" + bno);
 	}
@@ -92,10 +90,8 @@ public class BoardController {
 	    try {
 	        // 서비스에서 게시글 데이터를 가져옴
 	        BoardDto.BoardRead dto = boardService.Board_senter(bno, loginId, password);
-
 	        // 로그인 사용자의 이름 가져오기
 	        String userName = memberService.findNameUsingUserDetails(loginId).orElse(null);
-	        
 	        // 작성자 확인: 로그인 사용자 이름과 게시글 작성자 이름 비교
 	        boolean isWriter = dto.getWriter().equals(userName);
 	        

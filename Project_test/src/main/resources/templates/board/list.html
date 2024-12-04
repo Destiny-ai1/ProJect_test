@@ -61,7 +61,7 @@
             </section>
 
             <section th:if="${cno == '1002'}">
-                <h3 class="mt-3">Q&A 목록</h3>
+                <h3 class="mt-3">QnA 목록</h3>
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -73,20 +73,20 @@
                         </tr>
                     </thead>
 					<tbody>
-					<tr th:each="qa : ${result.boards}">
-						<td th:text="${qa.bno}"></td>
+					<tr th:each="QnA : ${result.boards}">
+						<td th:text="${QnA.bno}"></td>
 					    	<td>
 					    		<!-- 비밀글 여부에 따라 제목에 🔒 표시 -->
-					    		<a th:if="${qa.secretBoard}" th:href="@{'/board/read?bno=' + ${qa.bno} + '&cno=1002'}">
-					    		🔒 <span th:text="${qa.title}"></span></a>
-					    		<a th:if="${!qa.secretBoard}" th:href="@{'/board/read?bno=' + ${qa.bno} + '&cno=1002'}" th:text="${qa.title}"></a>
+					    		<a th:if="${QnA.SecretBoard}" th:href="@{'/board/read?bno=' + ${QnA.bno} + '&cno=1002'}">
+					    		🔒 <span th:text="${QnA.title}"></span></a>
+					    		<a th:if="${!QnA.SecretBoard}" th:href="@{'/board/read?bno=' + ${QnA.bno} + '&cno=1002'}" th:text="${QnA.title}"></a>
 					    	</td>
-					        <td th:text="${qa.writer}"></td>
-					        <td th:text="${qa.writeTime}"></td>
-					        <td th:text="${qa.readCnt}"></td>
+					        <td th:text="${QnA.writer}"></td>
+					        <td th:text="${QnA.writeTime}"></td>
+					        <td th:text="${QnA.readCnt}"></td>
 					</tr>
 					        <tr th:if="${#lists.isEmpty(result.boards)}">
-					        	<td colspan="6">등록된 Q&A가 없습니다.</td>
+					        	<td colspan="6">등록된 QnA가 없습니다.</td>
 					        </tr>
 					</tbody>
                 </table>
@@ -103,7 +103,7 @@
 				</div>
 				
 				<div th:if="${#authorization.expression('hasRole(''user'')')}">
-					<button class="btn btn-primary mt-3" onclick="location.href='/board/write?cno=1002'">Q&A 작성</button>
+					<button class="btn btn-primary mt-3" onclick="location.href='/board/write?cno=1002'">QnA 작성</button>
 				</div>
             </section>
         </main>

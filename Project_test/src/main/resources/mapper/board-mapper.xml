@@ -22,7 +22,7 @@
     <!-- 게시글 조회 (댓글 포함) -->
     <select id="findById" resultMap="BoardAndCommentsMap">
         select b.bno, b.title, b.content, b.writer, to_char(b.write_time, 'YYYY-MM-DD HH24:MI:SS') as writeTime, 
-             nvl(b.read_cnt, 0) as readCnt, b.board_password, b.secret_board as SecretBoard,
+             nvl(b.read_cnt, 0) as readCnt, b.board_password, case when b.secret_board = 1 then 'true' else 'false' end as SecretBoard,
              b.board_delete, b.username, b.cno, cat.cname, 
              c.comment_cno, c.comment_content, c.comment_writer, to_char(c.comment_write_time, 'YYYY-MM-DD HH24:MI:SS') as comment_writeTime
         from board b 
@@ -55,7 +55,7 @@
     	select * from (
         	select rownum as rnum, 
                b.bno, b.title, b.writer, to_char(b.write_time, 'yyyy-mm-dd hh24:mi:ss') as writeTime, 
-               b.read_cnt, b.cno, b.secret_board as SecretBoard, 
+               b.read_cnt, b.cno, case when b.secret_board = 1 then 'true' else 'false' end as SecretBoard, 
                cat.cname
         from (
             select /*+ index_desc(board board_pk_bno) */
@@ -87,7 +87,7 @@
         <result column="writeTime" property="writeTime"/>
         <result column="readCnt" property="readCnt"/>
         <result column="board_password" property="password"/>
-        <result column="secret_board" property="SecretBoard" javaType="boolean"/>	
+        <result column="Secretboard" property="SecretBoard" javaType="boolean"/>	
         <result column="board_delete" property="board_delete"/>
         <result column="cno" property="cno"/>
         <result column="cname" property="cname"/>

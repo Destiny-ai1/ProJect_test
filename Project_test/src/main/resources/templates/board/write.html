@@ -65,12 +65,12 @@
 				<!-- 비밀글 옵션 -->
 				<div class="mb-3" th:if="${cno == 1002}">
 				    <div class="form-check">
-				        <input class="form-check-input" type="checkbox" id="secret" name="Secret_Board" value="true" 
+				        <input class="form-check-input" type="checkbox" id="secret" name="SecretBoard" value="true" 
 				               onclick="toggleHiddenField(this)">
 				        <label class="form-check-label" for="secret">비밀글로 설정</label>
 				    </div>
 				    <!-- 비밀글이 아닐 경우 기본값 false 설정 -->
-				    <input type="hidden" name="Secret_Board" value="false" id="hiddenSecretBoard">
+				    <input type="hidden" name="SecretBoard" value="false" id="hiddenSecretBoard">
 				</div>
 
                 <!-- 비밀글 비밀번호 -->
@@ -118,7 +118,6 @@
         $('#postForm').on('submit', function (e) {
             const title = $('#title').val().trim();
             const content = $('#content').val().trim();
-
             // 제목과 내용이 비어 있는지 확인
             if (!title || !content) {
                 e.preventDefault();

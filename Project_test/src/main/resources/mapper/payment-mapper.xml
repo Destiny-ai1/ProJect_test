@@ -5,12 +5,12 @@
 
     <!-- 결제 정보 저장 -->
     <insert id="save" parameterType="com.example.demo.payment.Payment">
-        INSERT INTO payment (order_no, pay_method, point_add, card_no)
-        VALUES (#{orderNo}, #{payMethod}, #{pointAdd}, #{cardNo})
+        INSERT INTO payment (order_no, username, item_name, total_amount, tid, payment_status)
+        VALUES (#{orderNo}, #{username}, #{itemName}, #{totalAmount}, #{tid, jdbcType=VARCHAR}, #{paymentStatus})
     </insert>
 
     <!-- 주문 번호로 결제 정보 조회 -->
-    <select id="findById" parameterType="long" resultMap="PaymentReadResultMap">
+    <select id="findById" parameterType="long" resultType="com.example.demo.payment.Payment">
         SELECT * FROM payment WHERE order_no = #{orderNo}
     </select>
 
@@ -18,11 +18,28 @@
     <select id="findAll" resultMap="PaymentReadResultMap">
         SELECT * FROM payment
     </select>
+    
+    <!-- 주문 번호로 TID 조회 -->
+    <select id="findTidByOrderNo" parameterType="long" resultType="string">
+        SELECT tid FROM payment WHERE order_no = #{orderNo}
+    </select>
+    
+    <!-- 주문 번호로 사용자 ID 조회 -->
+    <select id="findUserIdByOrderNo" parameterType="long" resultType="string">
+        SELECT username FROM payment WHERE order_no = #{orderNo}
+    </select>
+
+    <!-- 주문 번호로 TID 업데이트 -->
+    <update id="updateTidByOrderNo" parameterType="map">
+        UPDATE payment
+        SET tid = #{tid, jdbcType=VARCHAR}
+        WHERE order_no = #{orderNo}
+    </update>
 
     <!-- 결제 정보 업데이트 -->
     <update id="update" parameterType="com.example.demo.payment.Payment">
         UPDATE payment
-        SET pay_method = #{payMethod}, point_add = #{pointAdd}
+        SET username = #{username}, item_name = #{itemName}, total_amount = #{totalAmount}, tid = #{tid}, payment_status = #{paymentStatus}
         WHERE order_no = #{orderNo}
     </update>
 
@@ -34,9 +51,11 @@
     <!-- 결제 조회를 위한 PaymentReadResultMap -->
     <resultMap id="PaymentReadResultMap" type="com.example.demo.payment.PaymentDto$Read">
         <id property="orderNo" column="order_no" />
-        <result property="payMethod" column="pay_method" />
-        <result property="pointAdd" column="point_add" />
-        <result property="cardNo" column="card_no" />
+        <result property="username" column="username" />
+        <result property="itemName" column="item_name" />
+        <result property="totalAmount" column="total_amount" />
+        <result property="tid" column="tid" />
+        <result property="paymentStatus" column="payment_status" />
     </resultMap>
 
 </mapper>

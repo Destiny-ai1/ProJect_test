@@ -1,20 +1,24 @@
 package com.example.demo.payment;
 
-import org.springframework.stereotype.Component;
+import jakarta.persistence.*;
+import lombok.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
+@Entity
+@Table(name = "payment")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Builder
-@Component
-public class Payment { // 결제 엔티티 클래스
-    private Long orderNo; // 주문 번호 (orders 테이블과 연관 관계)
-    private String payMethod; // 결제 수단
-    private int pointAdd; // 포인트 적립 금액
-    private Long cardNo; // 카드 번호 (card 테이블과 연관 관계)
+public class Payment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // IDENTITY는 DB에서 자동 증가되도록 설정합니다.
+    private Long orderNo; // 주문 번호 (기본 키)
+
+    private String username; // 사용자 이름 (member 테이블에서 참조)
+    private String itemName; // 상품 이름 (결제 시점의 상품 이름 저장)
+    private int totalAmount; // 총 결제 금액
+    private String tid; // TID 값 추가
+    private String paymentStatus; // 결제 상태 추가 (예: "READY", "APPROVED", "CANCELLED" 등)
 }
