@@ -62,7 +62,7 @@ public interface MemberDao {
 	public int loginSuccessReset(String username);
 	
 	//회원이 내정보에서 업데이트가능한것들
-	public void Member_update(String username,String email, String phone);
+	public void Member_update(String username,String name, String email, String phone);
 	
 	//로그인했거나 남이작성한글인지 확인
 	public boolean existsByBnoAndloginId(Long bno, String loginId);

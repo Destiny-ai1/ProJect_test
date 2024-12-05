@@ -36,6 +36,7 @@ private MemberDto() {}
 	//회원정보에서 바꿀수있는 정보
 	@Data
 	public static class Member_update{
+		private String name;					//내정보내에서 변경가능
 		private String oldPassword;				//내정보보기에서 비밀번호변경 버튼눌러서 다른페이지로 이동시킬것
 		private String newPassword;				//내정보보기에서 비밀번호변경 버튼눌러서 다른페이지로 이동시킬것
 		@Email
