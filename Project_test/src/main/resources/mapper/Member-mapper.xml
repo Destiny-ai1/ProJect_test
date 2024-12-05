@@ -91,6 +91,11 @@
     <!--회원정보 업데이트되는 것들 동적 처리-->
     <update id="Member_update">
     	update member <set>
+    	
+    	<if test="name != null">
+            name = #{name},
+        </if>
+    	
         <if test="email != null">
             email = #{email},
         </if>

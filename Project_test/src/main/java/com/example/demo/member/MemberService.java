@@ -169,9 +169,9 @@ public class MemberService {
 	
 	//회원정보에서 업데이트 처리
 	public void member_update(@Valid MemberDto.Member_update dto,String loginId ) {
-	    // 이메일, 전화번호,
-		if (dto.getEmail() != null || dto.getPhone() != null) {
-	        memberDao.Member_update(loginId,dto.getEmail(), dto.getPhone());
+	    //이름, 이메일, 전화번호,
+		if (dto.getName() != null ||dto.getEmail() != null || dto.getPhone() != null) {
+	        memberDao.Member_update(loginId,dto.getName(),dto.getEmail(), dto.getPhone());
 	    }	
 	}
 	
