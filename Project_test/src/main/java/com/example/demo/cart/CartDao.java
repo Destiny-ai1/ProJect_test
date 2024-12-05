@@ -11,21 +11,34 @@ import java.util.List;
 import java.util.Optional;
 
 @Mapper
-public interface CartDao { // 장바구니 관련 데이터 접근 객체 (DAO)
-    // 장바구니 저장
-    int save(Cart cart); // 장바구니 항목을 데이터베이스에 저장
+public interface CartDao {
+    
+	// 장바구니에 상품이 있는지의 여부
+	@Select("SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END FROM cart WHERE username = #{username} AND item_no = #{itemNo} AND rownum = 1")
+    public Boolean SearchCartByUsernameAndItemNo(String username, Long itemNo);  // 사용자 장바구니에 상품이 존재하는지 확인
 
-    // 회원 아이디로 장바구니 조회
-    List<CartDto.Read> findAllByUsername(@Param("username") String username); // 특정 사용자의 모든 장바구니 항목 조회
+    // 장바구니에 상품정보 저장
+    @Insert("insert into cart (item_no, username, cart_ea, cart_price, cart_totalprice) values(#{itemNo}, #{username}, #{cartEa}, #{cartPrice}, #{cartTotalPrice})")
+    public Integer save(Cart cart);
+    
+    // 장바구니에 있는 상품 추가시 개수 증가
+    public Integer increase(String username, Long itemNo);
+    
+    // 구매 개수 변경
+    public Integer updateCartEa(@Param("username") String username, 
+                                @Param("itemNo") Long itemNo, 
+                                @Param("cartEa") Long cartEa);
 
-    // 상품 번호와 사용자 이름으로 장바구니 항목 조회
-    Optional<CartDto.Read> findByItemNoAndUsername(@Param("itemNo") Long itemNo, @Param("username") String username); // 특정 사용자의 특정 상품 조회
+    // 사용자명으로 장바구니 상품 찾기
+    public List<CartDto.Read> findByUsername(String username, String imageUrl);
 
-    // 장바구니 상품 수량 업데이트
-    int update(Cart cart); // 장바구니 항목의 수량을 업데이트
+    // 장바구니에서 해당 itemNo의 상품 삭제
+    public int deleteCartItems(@Param("itemNos") List<Long> itemNos, @Param("username") String username);
 
-    // 장바구니 항목 삭제
-    int delete(@Param("itemNo") Long itemNo, @Param("username") String username); // 장바구니에서 특정 항목 삭제
+    // 주문내용 확인
+    public List<CartDto.Read> findByUsernameAndInos(String username, String imageUrl, List<Long> inos);
 
-	void save(Long itemNo, String username, int detailEa, int price);
+    // 장바구니 상품 개수 검색
+    @Select("select cart_ea from cart where username=#{username} and item_no=#{itemNo}")
+    public Optional<Integer> findCartEaByUsernameAndItemNo(String username, Long itemNo);
 }

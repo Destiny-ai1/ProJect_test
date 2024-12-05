@@ -18,6 +18,7 @@ import com.example.demo.category.CategoryDao;
 import com.example.demo.image.ItemImage;
 import com.example.demo.image.ItemImageDao;
 import com.example.demo.image.ItemImageSaveLoad;
+import com.example.demo.item.ItemDto.Read;
 
 @Service
 @Transactional
@@ -185,4 +186,14 @@ public class ItemService {
 	    
 	    return itemList;
 	}
+	
+	// 상품 번호로 전체 상품 정보를 반환하는 메소드
+	public ItemDto.Read getItemByNo(Long itemNo, String language) {
+	    System.out.println("Fetching item by itemNo: " + itemNo);
+	    // 실제 상품 조회 로직
+	    ItemDto.Read item = (Read) itemDao.findByItemNo(itemNo);
+	    System.out.println("Item found: " + item);
+	    return item;
+	}
+
 }

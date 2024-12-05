@@ -1,61 +1,100 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
 <mapper namespace="com.example.demo.cart.CartDao">
+	<!-- 회원 아이디로 장바구니 조회 -->
+	<!-- winter_shop 을 username으로 변경하기 -->
+	<select id="findByUsername"
+		resultType="com.example.demo.cart.CartDto$Read" parameterType="map">
+		SELECT
+		c.item_no,
+		c.username,
+		i.item_irum,
+		i.item_price,
+		COALESCE(ii.image_name,
+		#{imageUrl}) AS item_image,
+		c.cart_ea,
+		c.cart_totalprice
+		FROM cart c
+		JOIN
+		item i ON c.item_no = i.item_no
+		LEFT JOIN (
+		SELECT
+		item_no,
+		image_name,
+		ROW_NUMBER() OVER (PARTITION BY item_no ORDER BY image_no ASC) AS
+		row_num
+		FROM item_image
+		) ii ON c.item_no = ii.item_no AND ii.row_num =
+		1
+		WHERE c.username = #{username}
+	</select>
 
-    <!-- 장바구니 항목 저장 -->
-    <insert id="save" parameterType="com.example.demo.cart.Cart">
-        INSERT INTO cart (item_no, username, cart_ea, cart_price, cart_totalprice)
-        VALUES (#{itemNo}, #{username}, #{cartEa}, #{cartPrice}, #{cartTotalPrice})
-    </insert>
+	<update id="increase" parameterType="map">
+		UPDATE cart
+		SET cart_ea =
+		COALESCE(cart_ea, 0) + 1,
+		cart_totalprice = cart_price *
+		(COALESCE(cart_ea, 0) + 1)
+		WHERE username = #{username}
+		AND item_no =
+		#{itemNo}
+	</update>
 
-    <!-- 회원 아이디로 장바구니 조회 -->
-    <select id="findAllByUsername" parameterType="string" resultMap="CartReadResultMap">
-        SELECT c.item_no, c.username, c.cart_ea, c.cart_price, c.cart_totalprice,
-               i.item_irum, img.image_name
-        FROM cart c
-        JOIN item i ON c.item_no = i.item_no
-        JOIN item_image img ON i.item_no = img.item_no
-        WHERE c.username = #{username}
-    </select>
-    
-    <!-- 상품 번호와 사용자 이름으로 장바구니 항목 조회 -->
-    <select id="findByItemNoAndUsername" parameterType="map" resultMap="CartReadResultMap">
-        SELECT c.item_no, c.username, c.cart_ea, c.cart_price, c.cart_totalprice,
-               i.item_irum, img.image_name
-        FROM cart c
-        JOIN item i ON c.item_no = i.item_no
-        JOIN item_image img ON i.item_no = img.item_no
-        WHERE c.item_no = #{itemNo} AND c.username = #{username}
-    </select>
+	<update id="updateCartEa" parameterType="map">
+		UPDATE cart
+		SET
+		cart_ea =
+		#{cartEa},
+		cart_totalprice = #{cartEa} * (SELECT item_price FROM item
+		WHERE item_no = #{itemNo})
+		WHERE username = #{username}
+		AND item_no =
+		#{itemNo}
+		AND EXISTS (SELECT 1 FROM item WHERE item_no = #{itemNo})
+	</update>
 
-    <!-- 장바구니 상품 수량 업데이트 -->
-    <update id="update" parameterType="com.example.demo.cart.Cart">
-        UPDATE cart
-        SET cart_ea = #{cartEa}, cart_totalprice = #{cartEa} * #{cartPrice}
-        WHERE item_no = #{itemNo} AND username = #{username}
-    </update>
 
-    <!-- 장바구니 항목 삭제 -->
-    <delete id="delete" parameterType="map">
-        DELETE FROM cart WHERE item_no = #{itemNo} AND username = #{username}
-    </delete>
+	<!-- 상품 선택 삭제 -->
+	<delete id="deleteAll">
+		delete from cart
+		where item_no in
+		<foreach collection="inos" item="item" open="(" separator=","
+			close=")">
+			#{item}
+		</foreach>
+	</delete>
 
-    <!-- 주문 취소 시 장바구니로 항목 복원 -->
-    <insert id="restoreFromOrderDetail" parameterType="com.example.demo.order.OrderDetailDto">
-        INSERT INTO cart (item_no, username, cart_ea, cart_price, cart_totalprice)
-        VALUES (#{itemNo}, #{username}, #{detailEa}, #{price}, #{detailEa} * #{price})
-    </insert>
+	<!-- 상품 주문 페이지에서 상품 정보 표시 -->
+	<!-- winter_shop 을 username으로 변경하기 -->
+	<select id="findByUsernameAndInos"
+		resultType="com.example.demo.cart.CartDto$Read">
+		select c.item_no,
+		i.item_irum,
+		i.item_price,
+		COALESCE(#{imageUrl},
+		'/default/images/') || ii.image_name AS item_image,
+		c.cart_ea,
+		c.cart_totalprice
+		from cart c
+		join item i on c.item_no = i.item_no
+		join
+		item_image ii on c.item_no = ii.item_no
+		where c.username = #{username}
+		and ii.image_no in
+		<foreach collection="inos" item="item" open="(" separator=","
+			close=")">
+			#{item}
+		</foreach>
+		and ii.image_no = 0
+	</select>
 
-    <!-- 장바구니 조회를 위한 CartReadResultMap -->
-    <resultMap id="CartReadResultMap" type="com.example.demo.cart.CartDto$Read">
-        <id property="itemNo" column="item_no" />
-        <result property="username" column="username" />
-        <result property="cartEa" column="cart_ea" />
-        <result property="cartPrice" column="cart_price" />
-        <result property="cartTotalPrice" column="cart_totalprice" />
-        <result property="itemIrum" column="item_irum" />
-        <result property="imageName" column="image_name" />
-    </resultMap>
-
+	<!-- 장바구니에서 해당 itemNo의 상품 삭제 -->
+	<delete id="deleteCartItems" parameterType="map">
+		DELETE FROM cart WHERE item_no IN
+		<foreach item="itemNo" index="index" collection="itemNos"
+			open="(" separator="," close=")">
+			#{itemNo}
+		</foreach>
+		AND username = #{username}
+	</delete>
 </mapper>

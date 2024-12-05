@@ -22,17 +22,16 @@ public interface ItemDao {
             + "ORDER BY it.item_no ASC")  // itemNo 기준 오름차순 정렬
     public List<ItemDto.ItemList> findAll(@Param("imageUrl") String imageUrl);
 
-
-    // 상품 번호로 찾기
+    // 상품 번호로 상품 찾기
     public ItemDto.Read findById(Long itemNo, String imageUrl);
     
     // 상품에 해당하는 가격 찾기
-    @Select("select item_price from item where item_no=#{item_no} and rownum=1")
-    public Integer findPriceByPno(Long itemNo);
+    @Select("select item_price from item where item_no=#{itemNo} and rownum=1")
+    public Integer findPriceByItemNo(Long itemNo);
     
-    // 잔고가 1개 이상인 상품은 주문 가능
-    @Select("select case when item_jango>#{count} then 1 else 0 end from item where item_no=#{item_no} and rownum=1")
-    public Boolean availabelToOrder(Long itemNo, Integer count);
+    // 재고가 1개 이상인 상품은 주문 가능
+    @Select("select case when item_jango>#{cartEa} then 1 else 0 end from item where item_no=#{itemNo} and rownum=1")
+    public Boolean availableToOrder(Long itemNo, Integer cart_ea);
     
     // 상품 번호가 일치하는 상품의 이미지정보 삭제
     @Delete("delete from item_image where item_no = #{itemNo}")
@@ -55,4 +54,12 @@ public interface ItemDao {
     
 	// 상품별 평균 평점 조회
     public Double findAverageRatingByItemNo(Long itemNo);
+    
+    // 재고 수량 조회 (상품 번호로 조회)
+    @Select("SELECT item_jango FROM item WHERE item_no = #{itemNo} AND rownum = 1")
+    public Integer getAvailableJango(Long itemNo);
+    
+    // itemNo에 해당하는 모든 이미지를 조회하는 메서드
+    @Select("SELECT * FROM item_image WHERE item_no = #{itemNo}")
+    public List<ItemImage> findItemImagesByItemNo(Long itemNo);
 }

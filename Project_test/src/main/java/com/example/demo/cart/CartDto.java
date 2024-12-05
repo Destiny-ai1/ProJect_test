@@ -7,61 +7,51 @@ public class CartDto { // 장바구니 관련 데이터 전달 객체
     private CartDto() {}
 
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Create { // 장바구니에 상품을 추가하기 위한 DTO
+    // 장바구니에 상품을 추가하기 위한 DTO
+    public static class Create { 
         @NotNull
         private Long itemNo; // 상품 번호
         @NotEmpty
         private String username; // 사용자 이름 (회원 ID)
         @NotNull
-        private int cartEa; // 장바구니에 담길 상품 개수
+        private Long cartEa; // 장바구니에 담길 상품 개수
         @NotNull
-        private int cartPrice; // 상품의 개별 가격
+        private Integer cartPrice; // 상품의 개별 가격
         @NotNull
-        private int cartTotalPrice; // 상품의 총 가격
-
-        public Cart toEntity() { // DTO를 Cart 엔티티로 변환하는 메소드
+        private Integer cartTotalPrice; // 상품의 총 가격
+        // DTO를 Cart 엔티티로 변환하는 메소드
+        public Cart toEntity() {
             return new Cart(itemNo, username, cartEa, cartPrice, cartTotalPrice);
         }
     }
 
     @Data
-    @ToString
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Read { // 장바구니 조회를 위한 DTO
-        private Long itemNo; // 상품 번호
-        private String username; // 사용자 이름 (회원 ID)
-        private int cartEa; // 장바구니에 담긴 상품 개수
-        private int cartPrice; // 상품의 개별 가격
-        private int cartTotalPrice; // 상품의 총 가격
-        private String itemIrum; // 상품 이름 (item 패키지에서 가져옴)
-        private String imageName; // 상품 이미지 URL (image 패키지에서 가져옴)
-        // 추가: setItemName 메서드
-        public void setItemIrum(String itemIrum) {
-            this.itemIrum = itemIrum;
-        }
-
-        // 추가: setItemImageUrl 메서드
-        public void setImageName(String imageName) {
-            this.imageName = imageName;
-        }
+    public static class Read {  // 장바구니 조회를 위한 DTO
+        private Long itemNo;        // 상품 번호
+        private String username;    // 사용자 이름 (회원 ID)
+        private Long cartEa;         // 장바구니에 담긴 상품 개수
+        private Integer itemPrice;      // 상품의 개별 가격
+        private Integer cartTotalPrice; // 상품의 총 가격 (개별 가격 * 개수)
+        private String itemIrum;    // 상품 이름 (item 패키지에서 가져옴)
+        private String itemImage; // 상품 이미지 URL (image 패키지에서 가져옴)
+        private String itemSize;    // 상품 사이즈
     }
 
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Update { // 장바구니에 담긴 상품 정보를 수정하기 위한 DTO
-        @NotNull
-        private Long itemNo; // 상품 번호
-        @NotEmpty
-        private String username; // 사용자 이름 (회원 ID)
-        @NotNull
-        private int cartEa; // 수정할 상품 개수
-
-        public Cart toEntity() { // DTO를 Cart 엔티티로 변환하는 메소드
-            return Cart.builder().itemNo(itemNo).username(username).cartEa(cartEa).build();
-        }
+    public static class CartUpdateRequest {
+        private Long itemNo; // 상품 번호는 Long 타입으로 변경
+        private String username; // 사용자 이름(회원 ID)
+        // private String itemSize; // 상품 사이즈
+        private Long cartEa; // 수량
+    }
+    
+    @Data
+    public static class Update	{
+    	private Long itemNo;			// 상품번호
+    	private String itemIrum;		// 상품명
+    	private Integer itemPrice;		// 상품 가격
+    	private Long cartEa;			// 장바구니 수량
+    	private String itemImage;		// 상품 이미지
+    	private Integer cartTotalPrice; // 총 금액
     }
 }

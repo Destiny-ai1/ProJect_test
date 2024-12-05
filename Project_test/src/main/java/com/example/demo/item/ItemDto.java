@@ -1,5 +1,6 @@
 package com.example.demo.item;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -7,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 public class ItemDto {
@@ -44,6 +46,9 @@ public class ItemDto {
         // 재고 상태 메시지
 		private String stockMessage; 
 		private Double avgRating; // 평균 평점 추가
+		
+		// 상품 사이즈 목록을 추가하는 메소드
+		private List<String> sizes = Arrays.asList("Small", "Middle", "Larg", "XLarge");
     }
 
     // 상품 생성/수정 요청 DTO
@@ -73,8 +78,15 @@ public class ItemDto {
 
     // 선택된 카테고리 번호를 위한 DTO
     @Data
-    public static class Pnos {
-        @NotNull(message="상품을 선택하세요")
-        private List<Long> pnos; // 여러 카테고리를 선택할 수 있도록
+    public static class Inos {
+        @Size(min = 1, message = "상품을 하나 이상 선택해야 합니다.")
+        private List<Long> inos; // 여러 카테고리를 선택할 수 있도록
+
+        public List<Long> getInos() {
+            return inos;
+        }
+        public void setInos(List<Long> inos) {
+            this.inos = inos;
+        }
     }
 }

@@ -38,7 +38,7 @@
 					<div class="col-lg-3 col-md-4 col-sm-6 mb-4"
 						th:each="item : ${categoryResult}">
 						<div class="card h-100">
-							<a th:href="'/item/read?itemNo=' + ${item.itemNo}"> <!-- 상품 이미지 출력 -->
+							<a th:href="@{/item/read/{itemNo}(itemNo=${item.itemNo})}"> <!-- 상품 이미지 출력 -->
 								<img th:src="@{${item.itemImage}}" class="card-img-top"
 								alt="상품 이미지">
 							</a>
@@ -76,7 +76,7 @@
 				// 버튼에 설정된 상품 번호(itemNo) 가져오기
 				var itemNo = $(this).data("itemno");
 
-				if (confirm(itemNo + "번 상품을 정말로 삭제하시겠습니까?")) {
+				if (confirm("상품을 정말로 삭제하시겠습니까?")) {
 					// AJAX 요청 보내기
 					$.ajax({
 						url : "/item/delete/" + itemNo, // 동적으로 상품 번호를 포함한 URL
@@ -84,7 +84,7 @@
 						success : function(response) {
 							if (response === "success") {
 								// 삭제 성공 시, 알림 메시지
-								alert(itemNo + "번 상품이 삭제되었습니다.");
+								alert(itemIrum + "상품이 삭제되었습니다.");
 								location.reload(); // 페이지 새로고침 (상품 목록을 갱신)
 							} else {
 								alert("상품 삭제에 실패했습니다.");

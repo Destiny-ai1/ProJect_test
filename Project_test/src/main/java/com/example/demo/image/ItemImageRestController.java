@@ -48,35 +48,37 @@ public class ItemImageRestController {
 	}
 
 	// 저장한 이미지 적절히 노출
-    @GetMapping("/api/images")
-    public ResponseEntity<byte[]> viewImage(@RequestParam("imagename") String imageName) {
-        if (imageName == null || imageName.isEmpty()) {
-            imageName = "normal/default-image.jpg"; // 기본 이미지 경로
-        }
+	@GetMapping("/api/images")
+	public ResponseEntity<byte[]> viewImage(@RequestParam("imagename") String imageName) {
+	    if (imageName == null || imageName.isEmpty()) {
+	        imageName = "normal/default-image.jpg"; // 기본 이미지 경로
+	    }
 
-        try {
-            // URL 디코딩 처리: URL에서 전달된 파일 이름이 URL 인코딩되어 있을 수 있음
-            String decodedImageName = java.net.URLDecoder.decode(imageName, "UTF-8");
-            
-            // 경로를 안전하게 결합 (기본 경로 + 이미지 이름)
-            Path imagePath = Paths.get(ItemImageSaveLoad.IMAGE_FOLDER + decodedImageName);
-            
-            // 이미지 파일이 없으면 기본 이미지로 대체
-            if (Files.notExists(imagePath)) {
-                imagePath = Paths.get(ItemImageSaveLoad.IMAGE_FOLDER + "normal/default-image.jpg");
-            }
+	    try {
+	        // URL 디코딩 처리: URL에서 전달된 파일 이름이 URL 인코딩되어 있을 수 있음
+	        String decodedImageName = java.net.URLDecoder.decode(imageName, "UTF-8");
+	        
+	        // 경로를 안전하게 결합 (기본 경로 + 이미지 이름)
+	        Path imagePath = Paths.get(ItemImageSaveLoad.IMAGE_FOLDER, decodedImageName);
+	        
+	        // 이미지 파일이 없으면 기본 이미지로 대체
+	        if (Files.notExists(imagePath)) {
+	            imagePath = Paths.get(ItemImageSaveLoad.IMAGE_FOLDER, "normal/default-image.jpg");
+	        }
 
-            byte[] imageBytes = Files.readAllBytes(imagePath);
+	        byte[] imageBytes = Files.readAllBytes(imagePath);
 
-            // MIME 타입을 추출하고 MediaType으로 변환
-            String mimeType = Files.probeContentType(imagePath);
-            MediaType mediaType = MediaType.parseMediaType(mimeType);
+	        // MIME 타입을 추출하고 MediaType으로 변환
+	        String mimeType = Files.probeContentType(imagePath);
+	        if (mimeType == null) {
+	            mimeType = "image/jpeg"; // 기본값을 JPEG로 설정
+	        }
+	        MediaType mediaType = MediaType.parseMediaType(mimeType);
 
-            return ResponseEntity.status(HttpStatus.OK).contentType(mediaType).body(imageBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
+	        return ResponseEntity.status(HttpStatus.OK).contentType(mediaType).body(imageBytes);
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+	    }
+	}
 }

@@ -52,9 +52,9 @@ public class ItemController {
 	}
 
 	// 상품 상세 정보 페이지 이동
-	@GetMapping("/item/read")
-    public ModelAndView read(Long itemNo, String imageUrl) {
-        ItemDto.Read result = itemService.read(itemNo, imageUrl); // 상품 상세 정보 조회
+	@GetMapping("/item/read/{itemNo}")
+	public ModelAndView read(@PathVariable Long itemNo, @RequestParam(required = false) String imageUrl) {
+	    ItemDto.Read result = itemService.read(itemNo, imageUrl);
 
         // 상품이 없다면 에러 페이지로 리다이렉트
         if (result == null) {

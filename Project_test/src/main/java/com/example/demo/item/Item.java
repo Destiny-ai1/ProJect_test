@@ -28,6 +28,4 @@ public class Item {
 	public String itemSize;
 	public Integer reviewEa;
 	public Integer cno;
-	
-	
 }

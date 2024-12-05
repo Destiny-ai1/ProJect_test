@@ -1,124 +1,63 @@
 package com.example.demo.cart;
 
 import java.security.Principal;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.example.demo.exception.FailException;
-
 import jakarta.validation.Valid;
 
+@Validated
 @Controller
-public class CartController { // 장바구니 관련 요청을 처리하는 컨트롤러 클래스
+public class CartController {
 
     @Autowired
-    private CartService cartService; // 장바구니 서비스
+    private CartService cartService;
 
-    // 장바구니에 상품 추가 폼을 보여주는 메소드
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/cart/add")
-    public ModelAndView addToCartForm() {
-        return new ModelAndView("cart/add"); // 장바구니 추가 폼 뷰 반환
-    }
-
-    // 장바구니에 상품 추가 요청을 처리하는 메소드
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/cart/add")
-    public ModelAndView addToCart(@Valid CartDto.Create dto, BindingResult br, Principal principal) {
-        if (principal == null) {
-            return new ModelAndView("redirect:/login"); // 로그인되지 않은 경우 로그인 페이지로 리디렉션
-        }
-        String username = principal.getName();
-        if (br.hasErrors()) { // 입력 데이터에 오류가 있는 경우
-            return new ModelAndView("cart/add").addObject("errors", br.getAllErrors()); // 오류 메시지를 포함한 뷰 반환
-        }
-        cartService.addToCart(dto, username); // 장바구니에 상품 추가
-        return new ModelAndView("redirect:/cart/list"); // 장바구니 목록으로 리디렉션
-    }
-
-    // 장바구니 조회 메소드
-    @PreAuthorize("isAuthenticated()")
+    // 장바구니 상품 목록
+    // principal 추가하기
+    // @PreAuthorize("isAuthenticated()")
     @GetMapping("/cart/list")
-    public ModelAndView listCartItems(Principal principal) {
-        ModelAndView modelAndView = new ModelAndView("cart/list");
-        if (principal == null) {
-            return new ModelAndView("redirect:/login"); // 로그인되지 않은 경우 로그인 페이지로 리디렉션
-        }
-        String username = principal.getName();
-        List<CartDto.Read> cartItems = cartService.getCartItems(username); // 해당 사용자의 장바구니 항목 조회
-        if (cartItems.isEmpty()) {
-            modelAndView.addObject("emptyMessage", "장바구니가 비어 있습니다.");
-        } else {
-            modelAndView.addObject("result", cartItems);
-        }
-        return modelAndView; // 장바구니 목록 뷰에 데이터 전달
+    public ModelAndView view() {
+        String username = "winter_shop";
+        String imageUrl = "/default/images/";  // 기본 이미지 URL 설정
+        List<CartDto.Read> result = cartService.read(username, imageUrl);  // imageUrl도 함께 전달
+        return new ModelAndView("cart/list").addObject("result", result);
     }
-
-    // 선택된 장바구니 항목을 주문으로 생성하는 메소드
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/cart/order")
-    public ModelAndView createOrderFromCart(@RequestParam List<Long> selectedItems, Principal principal) {
-        if (selectedItems == null || selectedItems.isEmpty()) {
-            return new ModelAndView("redirect:/cart/list").addObject("emptyMessage", "선택된 장바구니 항목이 없습니다.");
-        }
-        String username = principal.getName();
-        try {
-            Long orderNo = cartService.createOrder(selectedItems, username); // 선택된 장바구니 항목으로 주문 생성
-            return new ModelAndView("redirect:/order/read?orderNo=" + orderNo);
-        } catch (FailException e) {
-            return new ModelAndView("error/error").addObject("message", e.getMessage());
-        }
-    }
-
-    // 장바구니 항목 수정 폼을 보여주는 메소드
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/cart/update")
-    public ModelAndView updateCartItemForm(Long itemNo, Principal principal) {
-        if (principal == null) {
-            return new ModelAndView("redirect:/login"); // 로그인되지 않은 경우 로그인 페이지로 리디렉션
-        }
-        String username = principal.getName();
-        CartDto.Read cartItem = cartService.getCartItemByUsernameAndItemNo(username, itemNo)
-                .orElseThrow(() -> new FailException("장바구니 항목을 찾을 수 없습니다")); // 특정 항목 찾기
-        return new ModelAndView("cart/update").addObject("result", cartItem); // 수정 폼 뷰 반환
-    }
-
-    // 장바구니 항목 수정 요청을 처리하는 메소드
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/cart/update")
-    public ModelAndView updateCartItem(@Valid CartDto.Update dto, BindingResult br, Principal principal) {
-        if (principal == null) {
-            return new ModelAndView("redirect:/login"); // 로그인되지 않은 경우 로그인 페이지로 리디렉션
-        }
-        String username = principal.getName();
-        if (br.hasErrors()) { // 입력 데이터에 오류가 있는 경우
-            return new ModelAndView("cart/update").addObject("errors", br.getAllErrors()); // 오류 메시지를 포함한 뷰 반환
-        }
-        cartService.updateCartItem(dto, username); // 장바구니 항목 업데이트
-        return new ModelAndView("redirect:/cart/list"); // 장바구니 목록으로 리디렉션
-    }
-
+    
     // 장바구니 항목 삭제 요청 처리 메소드
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/cart/delete")
-    public ModelAndView deleteCartItem(@RequestParam Long itemNo, Principal principal) {
-        if (principal == null) {
-            return new ModelAndView("redirect:/login"); // 로그인되지 않은 경우 로그인 페이지로 리디렉션
+    // @PreAuthorize("isAuthenticated()")
+    @PostMapping("/cart/delete")
+    public String deleteCartItems(@RequestParam("itemNos") String itemNos) {
+        // itemNos 값 확인 (테스트용 출력)
+        System.out.println("Received itemNos: " + itemNos);
+        // itemNos를 쉼표(,) 기준으로 분리하여 List<Long>으로 변환
+        List<Long> itemNoList = Arrays.stream(itemNos.split(","))
+                                      .map(Long::parseLong)
+                                      .collect(Collectors.toList());
+        // 하드코딩된 username (나중에 로그인 기능에서 principal로 변경 예정)
+        String username = "winter_shop";  // 현재 사용자의 username을 하드코딩 (후에 principal로 변경 예정)
+        try {
+            // 삭제 메서드 호출
+            cartService.deleteCartItems(itemNoList, username);
+            // 성공 메시지 후 /cart/list로 리다이렉트
+            return "redirect:/cart/list";
+        } catch (Exception e) {
+            // 예외 발생 시, 오류 메시지를 모델에 추가하여 반환 (장바구니 목록 페이지로)
+            return "redirect:/cart/list?error=" + e.getMessage();
         }
-        String username = principal.getName();
-        cartService.removeCartItem(itemNo, username); // 장바구니 항목 삭제
-        return new ModelAndView("redirect:/cart/list"); // 장바구니 목록으로 리디렉션
     }
 
-    // 예외 처리 핸들러
-    @ExceptionHandler(FailException.class)
-    public ModelAndView failExceptionHandler(FailException e) {
-        return new ModelAndView("error/error").addObject("message", e.getMessage()); // 에러 메시지를 에러 페이지에 전달
-    }
+
+    // 주문 확인
 }
+
