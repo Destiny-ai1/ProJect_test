@@ -28,8 +28,12 @@ public class SecurityConfig {
     private MyEntryPoint myEntryPoint;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {        
-        // 로그인 설정
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    	// 카카오페이 설정
+    	http.authorizeHttpRequests(c -> c.requestMatchers("/payment/ready", "/payment/approve").authenticated() // 인증된 사용자만 접근 가능
+				.anyRequest().permitAll()); // 나머지 모든 요청에 대해 접근 허용
+    	
+    	// 로그인 설정
         http.formLogin(c -> c.loginPage("/member/login")
                 .loginProcessingUrl("/member/login")
                 .successHandler(successHandler)

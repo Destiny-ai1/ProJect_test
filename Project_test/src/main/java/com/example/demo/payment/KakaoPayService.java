@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import com.example.demo.exception.FailException;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ public class KakaoPayService {
             logger.info("카카오페이 결제 준비 응답 바디: {}", response.getBody());
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                JSONObject jsonResponse = new JSONObject(response.getBody());
+                JSONObject jsonResponse = new JSONObject(response.getBody()); // 오류가 뜨면 pom.xml에 JSON 추가
                 String tid = jsonResponse.optString("tid", "");
                 if (tid.isEmpty()) {
                     logger.warn("TID가 없으므로 기본값으로 설정합니다.");
