@@ -1,3 +1,4 @@
+-- 
 -- 시스템 user 제작
 create user c##winter_shop identified by 1234;
 grant connect, resource to c##winter_shop;
