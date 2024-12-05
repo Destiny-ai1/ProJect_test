@@ -96,6 +96,7 @@ create table cart(
 
 create index idx_cart_item_no on cart(item_no);
 
+
 --배송지
 create table address(
     member_username varchar2(50 CHAR),                          -- 회원 ID (외래 키)
