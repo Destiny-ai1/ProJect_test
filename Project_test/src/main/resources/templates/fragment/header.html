@@ -7,135 +7,154 @@
         /* 상단 메뉴 바 스타일 */
         .top-menu {
             display: flex;
-            justify-content: flex-end;
+            justify-content: flex-end; /* 메뉴를 오른쪽 정렬 */
             align-items: center;
-            background-color: rgb(255, 255, 255);
-            color:rgb(0,0,0);
-            padding: 5px 10px; /* 기존 10px 20px에서 줄임 */
+            background-color: rgb(255, 255, 255); /* 배경 흰색 */
+            color: rgb(0, 0, 0); /* 텍스트 색상 검정 */
+            padding: 5px 10px; /* 위아래 5px, 좌우 10px */
         }
 
         .top-menu .menu-item {
-            margin-left: 10px; /* 기존 20px에서 줄임 */
-            font-size: 16px;
+            margin-left: 10px; /* 메뉴 항목 사이의 간격 */
+            font-size: 16px; /* 글씨 크기 */
         }
 
         .top-menu .menu-item a {
-            text-decoration: none;
-            color: black; /* 로그인, 회원가입, 장바구니 기본 텍스트 색상 */
-            transition: color 0.3s;
+            text-decoration: none; /* 밑줄 제거 */
+            color: black; /* 링크 텍스트 기본 색상 검정 */
+            transition: color 0.3s; /* 색상 전환 효과 */
         }
 
         /* 고객센터 드롭다운 스타일 */
-        .dropdown-content a {
-            color: black !important; /* 고객센터 하위 항목은 검정색으로 설정 */
-        }
+		    /* 드롭다운 부모 요소 */
+		    .dropdown {
+		        position: relative; /* 부모 기준으로 자식 위치 결정 */
+		    }
 
-        .dropdown-content a:hover {
-            background-color: #f9f9f9;
-        }
+		    /* 드롭다운 메뉴 */
+		    .dropdown-content {
+		        display: none; /* 기본적으로 숨김 */
+		        position: absolute;
+		        top: 100%; /* 부모 요소 바로 아래 표시 */
+		        left: 0; /* 부모 왼쪽 정렬 */
+		        background-color: white; /* 배경색 흰색 */
+		        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+		        border-radius: 5px; /* 모서리 둥글게 */
+		        z-index: 1000; /* 다른 요소 위로 표시 */
+		        width: auto; /* 너비 자동 조정 */
+		        min-width: 200px; /* 최소 너비 지정 */
+		        white-space: nowrap; /* 텍스트 줄 바꿈 방지 */
+		        overflow: visible; /* 드롭다운 내부 잘림 방지 */
+		    }
+
+		    /* 드롭다운 메뉴 마우스 오버 시 표시 */
+		    .dropdown:hover .dropdown-content {
+		        display: block; /* 드롭다운 표시 */
+		    }
+
+		    /* 드롭다운 항목 스타일 */
+		    .dropdown-content a {
+		        display: block; /* 항목을 블록 요소로 설정 */
+		        padding: 10px 15px; /* 내부 여백 추가 */
+		        text-decoration: none; /* 밑줄 제거 */
+		        color: black; /* 텍스트 색상 */
+		        transition: background-color 0.3s; /* 마우스 오버 시 색상 전환 효과 */
+		    }
+
+		    /* 드롭다운 항목 마우스 오버 시 스타일 */
+		    .dropdown-content a:hover {
+		        background-color: #f9f9f9; /* 배경색 변경 */
+		    }
 
         /* 로고 및 정보 영역 스타일 */
         .bottom-info {
             display: flex;
             justify-content: center; /* 중앙 정렬 */
-            align-items: center;
-            padding: 20px;
-            background-color: #f8f8f8;
-            color: #333;
+            align-items: center; /* 수직 중앙 정렬 */
+            padding: 20px; /* 내부 여백 */
+            background-color: #f8f8f8; /* 배경 회색 */
+            color: #333; /* 텍스트 색상 진한 회색 */
         }
 
         .logo {
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
+            font-size: 24px; /* 로고 글씨 크기 */
+            font-weight: bold; /* 글씨 두껍게 */
+            cursor: pointer; /* 클릭 가능하도록 포인터 표시 */
         }
 
         .customer-info {
-            text-align: left;
-            font-size: 14px;
-            color: #333;
+            text-align: left; /* 텍스트 왼쪽 정렬 */
+            font-size: 14px; /* 글씨 크기 */
+            color: #333; /* 텍스트 색상 */
         }
 
         .customer-info p {
-            margin: 0;
+            margin: 0; /* 기본 마진 제거 */
         }
 
         /* 고정 이미지 스타일 */
         .fixed-image {
-            position: relative;
-            top: 0;
-            width: 100%;
+            position: relative; /* 문서 흐름 내 위치 유지 */
+            top: 0; /* 페이지 상단에 고정 */
+            width: 100%; /* 이미지가 화면 너비에 맞게 표시 */
             height: calc(50vh); /* 화면 높이의 50% */
-            background-image:
-                url('https://cdn.actionhub.com/wp-content/uploads/2019/02/Screen-Shot-2019-02-15-at-10.51.34-AM.png');
-            background-size: cover; /* 이미지를 전체 영역에 맞춤 */
+            background-image: url('https://cdn.actionhub.com/wp-content/uploads/2019/02/Screen-Shot-2019-02-15-at-10.51.34-AM.png'); /* 배경 이미지 URL */
+            background-size: cover; /* 이미지 크기를 전체 영역에 맞춤 */
             background-position: center; /* 이미지 중앙 정렬 */
             margin-top: 20px; /* 네비게이션 바와 이미지 사이 간격 */
         }
 
-        /* 드롭다운 스타일 */
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            color:black;
-            background-color: white;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            overflow: hidden;
-            z-index: 1000;
-        }
-		
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
         ul {
-            list-style-type: none; /* 리스트의 기본 스타일을 없앱니다 */
-            padding: 0; /* 리스트의 기본 패딩을 없앱니다 */
-            margin: 0; /* 리스트의 기본 마진을 없앱니다 */
-        }      
+            list-style-type: none; /* 리스트 기본 스타일 제거 */
+            padding: 0; /* 기본 패딩 제거 */
+            margin: 0; /* 기본 마진 제거 */
+        }
     </style>
 </head>
 <body>
-    <!-- 상단 메뉴 바 (로그인/회원가입/장바구니 등) -->
+    <!-- 상단 메뉴 바 -->
     <div class="top-menu">
         <!-- 비로그인 사용자를 위한 메뉴 -->
         <ul sec:authorize="isAnonymous()" style="display: flex;">
+			<li class="menu-item dropdown">
+			    <a class="nav-link dropdown-button" href="#">고객센터</a>
+			    <div class="dropdown-content">
+			    	<a href="/board/list?cno=1001">공지사항</a>
+			    	<a href="/board/list?cno=1002">Q&A</a>
+			    </div>
+			</li>
             <li class="menu-item"><a href="/member/login">로그인</a></li>
             <li class="menu-item"><a href="/member/join">회원가입</a></li>
-            <li class="menu-item dropdown">
-                <a class="nav-link dropdown-button" href="#">고객센터</a>
-                <div class="dropdown-content">
-               		 <a href="/board/list?cno=1001">공지사항</a>
-                    <a href="/board/list?cno=1002">Q&A</a>
-                   
-                </div>
-            </li>
         </ul>
 
-        <!-- 로그인된 사용자를 위한 메뉴 -->
-        <ul sec:authorize="isAuthenticated()" style="display: flex;">
+        <!-- 로그인된 일반 사용자 메뉴 -->
+        <ul sec:authorize="isAuthenticated() and !hasRole('ROLE_admin')" style="display: flex;">
             <li class="menu-item"><a href="#" id="logout">로그아웃</a></li>
             <li class="menu-item"><a href="/member/readme">내정보</a></li>
             <li class="menu-item dropdown">
                 <a class="nav-link dropdown-button" href="#">고객센터</a>
                 <div class="dropdown-content">
-                	<a href="/board/list?cno=1001">공지사항</a>
+                    <a href="/board/list?cno=1001">공지사항</a>
                     <a href="/board/list?cno=1002">Q&A</a>
                 </div>
             </li>
             <li class="menu-item"><a href="/cart/cart-view">장바구니</a></li>
             <li class="menu-item"><a href="/order/list">주문목록</a></li>
             <li class="menu-item"><a href="/member/delete">회원탈퇴</a></li>
-            <!-- 관리자만 볼 수 있는 메뉴 -->
-            <li sec:authorize="hasRole('ROLE_admin')" class="menu-item">
-                <a href="/item/add">상품추가</a>
-            </li>
-            </ul>   
-                </div>
-    <!-- 하단 로고 및 기타 정보 -->
+        </ul>
+
+        <!-- 관리자 전용 메뉴 -->
+        <ul sec:authorize="hasRole('ROLE_admin')" style="display: flex;">
+            <li class="menu-item"><a href="#" id="logout">로그아웃</a></li>
+            <li class="menu-item"><a href="/admin/members">회원 관리</a></li>
+            <li class="menu-item"><a href="/admin/orders">주문 관리</a></li>
+            <li class="menu-item"><a href="/item/add">상품 추가</a></li>
+            <li class="menu-item"><a href="/board/list">고객센터</a></li>
+            <li class="menu-item"><a href="/board/write?cno=1001">공지사항 작성</a></li>
+        </ul>
+    </div>
+
+    <!-- 하단 로고 -->
     <div class="bottom-info">
         <div class="logo" onclick="window.location.href='/'">쇼핑몰</div>
     </div>
@@ -143,18 +162,19 @@
     <!-- 고정된 배경 이미지 -->
     <div class="fixed-image"></div>
 
-    <!-- 로그아웃 스크립트 추가 -->
-   <script>
-			// 로그아웃 처리
-			$('#logout').click(function() {
-				const token = '[[${_csrf.token}]]';
-				const html = `
-					<form action="/member/logout" method="post">
-						<input type='hidden' name='_csrf' value='${token}'>
-					</form>
-				`;
-				$(html).appendTo($('body')).submit();
-			});
-		</script>
+    <!-- 로그아웃 스크립트 -->
+    <script>
+        // 로그아웃 처리
+        document.querySelector('#logout').addEventListener('click', function () {
+            const token = '[[${_csrf.token}]]';
+            const html = `
+                <form action="/member/logout" method="post">
+                    <input type='hidden' name='_csrf' value='${token}'>
+                </form>
+            `;
+            document.body.insertAdjacentHTML('beforeend', html);
+            document.body.querySelector('form').submit();
+        });
+    </script>
 </body>
 </html>
