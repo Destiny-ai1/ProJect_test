@@ -27,6 +27,8 @@ public class ItemDto {
         private String itemImage; // 이미지 URL
         private Long cno;         // 카테고리 번호 (cno 추가)
         private Double avgRating;	// 리뷰 평균 평점
+        // 재고 상태 메시지
+     	private String stockMessage; 
     }
 
     // 상품 상세 정보를 위한 DTO (카테고리 번호 포함)
@@ -76,17 +78,36 @@ public class ItemDto {
         }
     }
 
-    // 선택된 카테고리 번호를 위한 DTO
+    // 상품 삭제를 위한 DTO
     @Data
     public static class Inos {
         @Size(min = 1, message = "상품을 하나 이상 선택해야 합니다.")
-        private List<Long> inos; // 여러 카테고리를 선택할 수 있도록
+        private List<ItemDeleteDTO> items; // itemNo와 itemSize를 포함하는 리스트
 
-        public List<Long> getInos() {
-            return inos;
+        public List<ItemDeleteDTO> getItems() {
+            return items;
         }
-        public void setInos(List<Long> inos) {
-            this.inos = inos;
+
+        public void setItems(List<ItemDeleteDTO> items) {
+            this.items = items;
         }
+    }
+
+    // 상품 삭제를 위한 itemNo와 itemSize를 포함하는 DTO
+    @Data
+    public static class ItemDeleteDTO {
+        private Long itemNo;    // 상품 번호
+        private String itemSize; // 상품 사이즈
+
+        public ItemDeleteDTO(Long itemNo, String itemSize) {
+            this.itemNo = itemNo;
+            this.itemSize = itemSize;
+        }
+    }
+    
+    @Data
+    public static class price_update {
+    	private Long itemNo;
+    	private Integer itemPrice;
     }
 }

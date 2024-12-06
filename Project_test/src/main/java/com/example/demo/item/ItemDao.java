@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import com.example.demo.image.ItemImage;
 import com.example.demo.item.ItemDto.ItemList;
@@ -16,7 +17,7 @@ public interface ItemDao {
     public Integer save(Item item);
 
     // 아이템을 리스트로 선택
-    @Select("SELECT item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, item_size, review_ea, cno, "
+    @Select("SELECT item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, review_ea, cno, "
             + "   #{imageUrl} || COALESCE((SELECT ii.image_name FROM item_image ii WHERE it.item_no = ii.item_no AND ROWNUM = 1), 'normal/default-image.jpg') AS item_image "
             + "FROM item it "
             + "ORDER BY it.item_no ASC")  // itemNo 기준 오름차순 정렬
@@ -62,4 +63,8 @@ public interface ItemDao {
     // itemNo에 해당하는 모든 이미지를 조회하는 메서드
     @Select("SELECT * FROM item_image WHERE item_no = #{itemNo}")
     public List<ItemImage> findItemImagesByItemNo(Long itemNo);
+    
+    // 상품의 가격을 변경
+    @Update("UPDATE item SET item_price = #{itemPrice} WHERE item_no = #{itemNo}")
+    void updatePrice(@Param("itemNo") Long itemNo, @Param("itemPrice") Integer itemPrice);
 }

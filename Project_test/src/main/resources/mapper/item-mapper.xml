@@ -16,7 +16,7 @@
 			select ITEM_SEQ.nextval from dual
 		</selectKey>
 		insert into item(item_no, item_irum, item_info, item_price,
-		item_jango, item_sell_qty, item_size, review_ea, cno)
+		item_jango, item_sell_qty, review_ea, cno)
 		values(
 		#{itemNo,
 		jdbcType=NUMERIC},
@@ -27,8 +27,6 @@
 		#{itemJango,
 		jdbcType=NUMERIC},
 		#{itemSellQty, jdbcType=INTEGER},
-		#{itemSize,
-		jdbcType=INTEGER},
 		#{reviewEa, jdbcType=INTEGER},
 		#{cno,
 		jdbcType=INTEGER}
@@ -44,7 +42,6 @@
 		<result property="itemPrice" column="item_price" />
 		<result property="itemJango" column="item_jango" />
 		<result property="itemSellQty" column="item_sell_qty" />
-		<result property="itemSize" column="item_size" />
 		<result property="reviewEa" column="review_ea" />
 		<result property="cno" column="cno" />
 		<!-- 여러 개의 이미지 URL을 List<String>으로 반환 -->
@@ -63,7 +60,6 @@
 		<result property="itemPrice" column="item_price" />
 		<result property="itemJango" column="item_jango" />
 		<result property="itemSellQty" column="item_sell_qty" />
-		<result property="itemSize" column="item_size" />
 		<result property="reviewEa" column="review_ea" />
 		<result property="cno" column="cno" />
 		<result property="itemImage" column="item_image" />
@@ -78,7 +74,6 @@
 		it.item_price,
 		it.item_jango,
 		it.item_sell_qty,
-		it.item_size,
 		it.review_ea,
 		it.cno,
 		COALESCE(#{imageUrl, jdbcType=VARCHAR} || im.image_name,
@@ -105,7 +100,7 @@
 		SELECT it.item_no, it.item_irum,
 		it.item_info, it.item_price, it.item_jango,
 		it.item_sell_qty,
-		it.item_size, it.review_ea, it.cno,
+		it.review_ea, it.cno,
 		COALESCE(#{imageUrl} ||
 		im.image_name, 'normal/default-image.jpg') AS
 		item_image

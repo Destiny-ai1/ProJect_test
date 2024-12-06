@@ -13,7 +13,8 @@
 		COALESCE(ii.image_name,
 		#{imageUrl}) AS item_image,
 		c.cart_ea,
-		c.cart_totalprice
+		c.cart_totalprice,
+		c.item_size
 		FROM cart c
 		JOIN
 		item i ON c.item_no = i.item_no
@@ -21,10 +22,12 @@
 		SELECT
 		item_no,
 		image_name,
-		ROW_NUMBER() OVER (PARTITION BY item_no ORDER BY image_no ASC) AS
+		ROW_NUMBER() OVER (PARTITION BY item_no ORDER BY
+		image_no ASC) AS
 		row_num
 		FROM item_image
-		) ii ON c.item_no = ii.item_no AND ii.row_num =
+		) ii ON c.item_no = ii.item_no
+		AND ii.row_num =
 		1
 		WHERE c.username = #{username}
 	</select>
@@ -38,31 +41,50 @@
 		WHERE username = #{username}
 		AND item_no =
 		#{itemNo}
+		AND item_size = #{itemSize}
 	</update>
 
 	<update id="updateCartEa" parameterType="map">
 		UPDATE cart
 		SET
-		cart_ea =
-		#{cartEa},
-		cart_totalprice = #{cartEa} * (SELECT item_price FROM item
-		WHERE item_no = #{itemNo})
-		WHERE username = #{username}
-		AND item_no =
-		#{itemNo}
-		AND EXISTS (SELECT 1 FROM item WHERE item_no = #{itemNo})
+		cart_ea = #{cartEa},
+		cart_totalprice = #{cartEa} *
+		(SELECT item_price
+		FROM item WHERE item_no = #{itemNo})
+		WHERE
+		username =
+		#{username}
+		AND item_no = #{itemNo}
+		AND item_size =
+		#{itemSize} <!-- itemSize 
+			조건 추가 -->
+		AND EXISTS (SELECT 1 FROM item WHERE item_no = #{itemNo})  <!-- 상품 존재 확인 -->
 	</update>
 
 
+
+	<update id="updateCartTotalPrice" parameterType="map">
+		UPDATE cart
+		SET
+		cart_totalprice = cart_ea * (SELECT item_price FROM item WHERE
+		item_no
+		= #{itemNo})
+		WHERE username = #{username}
+		AND item_no = #{itemNo}
+		AND
+		EXISTS (SELECT 1 FROM item WHERE item_no = #{itemNo})
+	</update>
+
 	<!-- 상품 선택 삭제 -->
-	<delete id="deleteAll">
+	<delete id="deleteCartItems" parameterType="map">
 		delete from cart
-		where item_no in
-		<foreach collection="inos" item="item" open="(" separator=","
+		where (item_no, item_size) in
+		<foreach collection="items" item="item" open="(" separator=","
 			close=")">
-			#{item}
+			#{item.itemNo}, #{item.itemSize}
 		</foreach>
 	</delete>
+
 
 	<!-- 상품 주문 페이지에서 상품 정보 표시 -->
 	<!-- winter_shop 을 username으로 변경하기 -->
@@ -87,14 +109,4 @@
 		</foreach>
 		and ii.image_no = 0
 	</select>
-
-	<!-- 장바구니에서 해당 itemNo의 상품 삭제 -->
-	<delete id="deleteCartItems" parameterType="map">
-		DELETE FROM cart WHERE item_no IN
-		<foreach item="itemNo" index="index" collection="itemNos"
-			open="(" separator="," close=")">
-			#{itemNo}
-		</foreach>
-		AND username = #{username}
-	</delete>
 </mapper>

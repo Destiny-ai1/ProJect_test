@@ -24,9 +24,8 @@
 }
 </style>
 <script>
-		// ★★★★★★★★★csrf_와 관련한 script 넣기(불러오는 코드가 주석을 무시해서 일부러 삭제함)★★★★★★★★★
-        $(document).ready(function() {
-           // 토큰 추가
+		$(document).ready(function() {
+           // 기본 썸네일 선택 (첫 번째 이미지 선택)
             $('.thumbnail:first-of-type').addClass("choice");
 
             $('.thumbnail').click(function() {
@@ -52,12 +51,10 @@
 								alt="상품 이미지">
 						</div>
 						<div>
-							<!-- 썸네일 이미지 출력 (각 이미지에 대해 썸네일 클릭 시 해당 이미지 표시) -->
+							<!-- 썸네일 이미지 출력 -->
 							<div class="d-flex">
-								<span th:each="image : ${result.itemImages}"
-									th:if="${image != null}"> 
-									<img
-									th:src="@{${image != null ? image : '/api/images?imagename=normal/default-image.jpg'}}"
+								<span th:each="image : ${result.itemImages}" th:if="${image != null}">
+									<img th:src="@{${image != null ? image : '/api/images?imagename=normal/default-image.jpg'}}"
 									class="thumbnail" style="height: 100px; margin-right: 10px;">
 								</span>
 							</div>
@@ -65,33 +62,32 @@
 					</div>
 					<div class="col-lg-6">
 						<h3 th:text="${result.itemIrum}">상품명</h3>
-						<h4 th:text="${result.itemPrice + '원'}">₩ 가격</h4>
+						<h4 id="item-price" th:text="${result.itemPrice + '원'}">₩ 가격</h4>
+						<div>
+							<button class="btn btn-outline-primary btn-sm" id="update-price">가격 변경하기</button>
+						</div>
 
 						<div th:if="${result.avgRating != null}">
 							<p>
 								<strong>평균 평점:</strong> <span th:text="${result.avgRating}"></span>
 							</p>
 						</div>
-						
+
 						<!-- 재고 상태 메시지 표시 -->
-  						<div th:if="${result.stockMessage != null}">
-       					   <p th:text="${result.stockMessage}" class="text-danger"></p>
-   						</div>
+						<div th:if="${result.stockMessage != null}">
+							<p th:text="${result.stockMessage}" class="text-danger"></p>
+						</div>
 
 						<p id="info" th:utext="${result.itemInfo}">상품 정보</p>
 
 						<div class="form-group">
-							<label for="item-size">사이즈 선택</label> <select
-								class="form-control" id="item-size">
-								<th:block th:each="size : ${result.sizes}">
-									<option th:value="${size}" th:text="${size}">사이즈</option>
-								</th:block>
+							<label for="item-size">사이즈 선택</label>
+							<select class="form-control" id="item-size">
+								<option value="small">Small</option>
+								<option value="medium">Medium</option>
+								<option value="large">Large</option>
+								<option value="xlarge">X-Large</option>
 							</select>
-						</div>
-
-						<div class="form-group">
-							<label for="quantity">수량</label> <input type="number"
-								class="form-control" id="quantity" value="1" min="1" />
 						</div>
 
 						<div>
@@ -111,28 +107,22 @@
 	<script>
         $(document).ready(function() {
             $('#add-cart').click(function() {
-                const itemNo = '[[${result.itemNo}]]';
-                /*
-                const itemSize = $('#item_size').val();
-                const quantity = $('#quantity').val();
-                
+                const itemNo = '[[${result.itemNo}]]'; // 상품 번호
+                const itemSize = $('#item-size').val(); // 선택한 사이즈
 
-                if (!itemNo || !itemSize || !quantity) {
+                // 필수 정보 체크
+                if (!itemNo || !itemSize) {
                     alert("필수 정보를 모두 입력해주세요.");
                     return;
                 }
-                */
 
+                // 장바구니에 상품 추가 AJAX 요청
                 $.ajax({
                     type: "POST",
-                    url: "/api/cart",
-                    method: 'post',
+                    url: "/api/cart",  // 서버 API URL
                     data: {
-                        itemNo
-                        /*
-                        itemSize,
-                        quantity
-          				*/
+                        itemNo: itemNo,     // 상품 번호
+                        itemSize: itemSize, // 선택한 사이즈
                     },
                     success: function(response) {
                         alert("장바구니에 추가되었습니다.");
@@ -144,5 +134,38 @@
             });
         });
     </script>
+
+	<script>
+    $('#update-price').click(function() {
+        const newPrice = prompt("변경할 가격을 입력하세요:");
+        console.log("변경 요청된 가격:", newPrice);
+        if (newPrice != null && newPrice.trim() !== "") {
+            $.ajax({
+                url: '/item/' + '[[${result.itemNo}]]' + '/update-price',
+                method: 'PATCH',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    itemPrice: newPrice
+                }),
+                success: function() {
+                    alert("가격이 성공적으로 변경되었습니다.");
+                    
+                    // 1. 실시간으로 가격 갱신
+                    $('#item-price').text(newPrice + "원");
+                    
+                    // 2. 화면을 새로 고침하여 갱신된 데이터를 받아옴
+                    location.reload();
+                    
+                    // 장바구니에 담긴 해당 상품 가격 업데이트
+                    updateCartPrice('[[${result.itemNo}]]', newPrice);
+                },
+                error: function() {
+                    alert("가격을 변경할 수 없습니다.");
+                }
+            });
+        }
+    });
+</script>
+
 </body>
 </html>

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.cart.CartDao;
 import com.example.demo.category.CategoryDao;
 import com.example.demo.image.ItemImage;
 import com.example.demo.image.ItemImageDao;
@@ -29,6 +30,8 @@ public class ItemService {
 	private CategoryDao categoryDao;
 	@Autowired
 	private ItemImageDao imageDao;
+	@Autowired
+	private CartDao cartDao;
 	
 	// 카테고리 대분류 검색
 	public List<Map> findMajorCategory() {
@@ -40,6 +43,7 @@ public class ItemService {
 	    if (imageUrl == null || imageUrl.trim().isEmpty()) {
 	        imageUrl = "/default/images/"; // 기본 이미지 URL을 설정 (예시)
 	    }
+	    
 	    // 모든 상품을 조회한 후, 각 상품의 평균 평점을 포함시킴
 	    List<ItemDto.ItemList> items = itemDao.findAll(imageUrl);
 
@@ -47,10 +51,18 @@ public class ItemService {
 	        // 각 상품의 평균 평점 계산
 	        Double avgRating = itemDao.findAverageRatingByItemNo(item.getItemNo());
 	        item.setAvgRating(avgRating); // 평점 추가
+	        
+	        // 재고 상태 메시지 설정
+	        if (item.getItemJango() != null && item.getItemJango() < 10) {
+	            item.setStockMessage("남은 상품 수량: " + item.getItemJango());
+	        } else {
+	            item.setStockMessage(null); // 재고가 충분하면 메시지 제거
+	        }
 	    }
 
 	    return items;
 	}
+
 	
 	// 추가할 상품 정보를 저장
 	@Transactional
@@ -185,6 +197,24 @@ public class ItemService {
 	    }
 	    
 	    return itemList;
+	}
+	
+	@Transactional
+	public boolean updatePrice(ItemDto.price_update priceUpdateDto, String username) {
+	    Long itemNo = priceUpdateDto.getItemNo();
+	    Integer newPrice = priceUpdateDto.getItemPrice();
+	    
+	    // 1. 아이템 가격 업데이트
+	    Integer currentPrice = itemDao.findPriceByItemNo(itemNo);
+	    if (currentPrice == null) {
+	        return false;
+	    }
+	    itemDao.updatePrice(itemNo, newPrice);
+	    
+	    // 2. 장바구니에서 해당 상품의 가격을 업데이트
+	    cartDao.updateCartTotalPrice(username, itemNo); // 장바구니의 cart_totalprice 갱신
+
+	    return true;
 	}
 	
 	// 상품 번호로 전체 상품 정보를 반환하는 메소드

@@ -19,9 +19,11 @@ public class CartDto { // 장바구니 관련 데이터 전달 객체
         private Integer cartPrice; // 상품의 개별 가격
         @NotNull
         private Integer cartTotalPrice; // 상품의 총 가격
+        @NotNull
+        private String itemSize;
         // DTO를 Cart 엔티티로 변환하는 메소드
         public Cart toEntity() {
-            return new Cart(itemNo, username, cartEa, cartPrice, cartTotalPrice);
+            return new Cart(itemNo, username, cartEa, cartPrice, cartTotalPrice, itemSize);
         }
     }
 
