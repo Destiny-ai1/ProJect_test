@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>사용자 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/style/main.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header th:replace="~{/fragment/header.html}"></header>
+
+        <!-- Navigation -->
+        <nav th:replace="~{/fragment/nav.html}"></nav>
+
+        <!-- Main Content -->
+        <section class="product-section">
+            <div class="container mt-5">
+                <h2 class="mb-4">사용자 관리</h2>
+
+                <!-- 검색 및 필터 -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchInput" placeholder="사용자명, 이메일 등으로 검색">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">상태로 필터링</option>
+                            <option value="active">활성</option>
+                            <option value="inactive">비활성</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary w-100" id="searchButton">검색</button>
+                    </div>
+                </div>
+
+                <!-- 사용자 목록 테이블 -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>사용자명</th>
+                                <th>이름</th>
+                                <th>이메일</th>
+                                <th>전화번호</th>
+                                <th>등급</th>
+                                <th>가입일</th>
+                                <th>상태</th>
+                                <th>액션</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr th:each="user : ${user}">
+                                <td th:text="${user.username}">사용자명</td>
+                                <td th:text="${user.name}">이름</td>
+                                <td th:text="${user.email}">이메일</td>
+                                <td th:text="${user.phone}">전화번호</td>
+                                <td th:text="${user.grade}">등급</td>
+                                <td th:text="${user.joinDate}">가입일</td>
+                                <td>
+                                    <span th:classappend="${user.enabled ? 'bg-success badge' : 'bg-danger badge'}"
+                                          th:text="${user.enabled ? '활성' : '비활성'}"></span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm toggle-status-btn"
+                                            th:classappend="${user.enabled ? 'btn-danger' : 'btn-success'}"
+                                            th:text="${user.enabled ? '비활성화' : '활성화'}"
+                                            th:data-username="${user.username}"></button>
+                                </td>
+                            </tr>
+                            <tr th:if="${user == null || user.empty}">
+                                <td colspan="8" class="text-center">사용자를 찾을 수 없습니다.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer th:replace="~{/fragment/footer.html}"></footer>
+    </div>
+
+   <script>
+    $(document).ready(function () {
+        // 검색 및 필터 기능
+        $("#searchButton").on("click", function () {
+            const searchInput = $("#searchInput").val();
+            const statusFilter = $("#statusFilter").val();
+            const csrfToken = $("meta[name='_csrf']").attr("content");
+            const csrfHeader = $("meta[name='_csrf_header']").attr("content");
+
+            $.ajax({
+                url: "/admin/members/search",
+                type: "GET",
+                data: { search: searchInput, status: statusFilter },
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader(csrfHeader, csrfToken);
+                },
+                success: function (response) {
+                    updateUserTable(response); // 테이블 업데이트 함수 호출
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", xhr.responseText || error);
+                    alert("사용자 목록을 가져오는 중 문제가 발생했습니다.");
+                }
+            });
+        });
+
+        // 활성화/비활성화 버튼 기능
+        $(document).on("click", ".toggle-status-btn", function () {
+            const button = $(this);
+            const username = button.data("username");
+            const csrfToken = $("meta[name='_csrf']").attr("content");
+            const csrfHeader = $("meta[name='_csrf_header']").attr("content");
+
+            $.ajax({
+                url: '/admin/members/toggleStatus',
+                method: 'PATCH',
+                data: { username: username },
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader(csrfHeader, csrfToken);
+                },
+                success: function (response) {
+                    if (response === 'success') {
+                        // 버튼 상태 및 텍스트 업데이트
+                        const statusSpan = button.closest('tr').find('span');
+                        const newStatus = statusSpan.hasClass('bg-success') ? 'inactive' : 'active';
+
+                        // 상태 텍스트 및 스타일 업데이트
+                        statusSpan
+                            .toggleClass('bg-success bg-danger')
+                            .text(newStatus === 'active' ? '활성' : '비활성');
+
+                        // 버튼 텍스트 및 스타일 업데이트
+                        button
+                            .toggleClass('btn-success btn-danger')
+                            .text(newStatus === 'active' ? '비활성화' : '활성화');
+                    } else {
+                        alert('상태 변경 중 오류가 발생했습니다.');
+                    }
+                },
+                error: function () {
+                    alert('서버와의 통신 중 오류가 발생했습니다.');
+                }
+            });
+        });
+
+        // 테이블 업데이트 함수
+        function updateUserTable(users) {
+            let tableBody = "";
+            if (users.length > 0) {
+                users.forEach(user => {
+                    tableBody += `
+                        <tr>
+                            <td>${user.username}</td>
+                            <td>${user.name}</td>
+                            <td>${user.email}</td>
+                            <td>${user.phone}</td>
+                            <td>${user.grade}</td>
+                            <td>${user.joinDate}</td>
+                            <td>
+                                <span class="${user.enabled ? 'bg-success badge' : 'bg-danger badge'}">
+                                    ${user.enabled ? '활성' : '비활성'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm toggle-status-btn ${user.enabled ? 'btn-danger' : 'btn-success'}"
+                                        data-username="${user.username}">
+                                    ${user.enabled ? '비활성화' : '활성화'}
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+            } else {
+                tableBody = `<tr><td colspan="8" class="text-center">사용자를 찾을 수 없습니다.</td></tr>`;
+            }
+            $("#userTableBody").html(tableBody);
+        }
+    });
+</script>
+
+</body>
+</html>
