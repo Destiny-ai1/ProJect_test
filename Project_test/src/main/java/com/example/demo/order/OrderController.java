@@ -46,7 +46,7 @@ public class OrderController {
         }
 
         // 커스텀 유효성 검사 - 사용 포인트는 사용자의 보유 포인트를 초과할 수 없음
-        int userPoints = memberService.getMemberPoint(principal.getName());
+        int userPoints = memberService.updateMemberPurchase(null, 0);
         if (dto.getUsedPoint() > userPoints) {
             br.rejectValue("usedPoint", "error.usedPoint", "사용 포인트가 보유 포인트보다 많을 수 없습니다.");
             return new ModelAndView("order/create").addObject("errors", br.getAllErrors());

@@ -4,44 +4,78 @@
 <mapper namespace="com.example.demo.order.OrderDao">
 
     <!-- 주문 저장 -->
-	<insert id="save" parameterType="com.example.demo.order.Order" useGeneratedKeys="true" keyProperty="orderNo" keyColumn="order_no">
+    <insert id="save" parameterType="com.example.demo.order.Order" useGeneratedKeys="true" keyProperty="orderNo" keyColumn="order_no">
         INSERT INTO orders (order_date, total_price, order_status, used_point, act_payment, member_username, address_no)
         VALUES (#{orderDate, jdbcType=DATE}, #{totalPrice, jdbcType=NUMERIC}, #{orderStatus, jdbcType=VARCHAR}, 
-                #{usedPoint, jdbcType=NUMERIC}, #{actPayment, jdbcType=NUMERIC}, #{memberUsername, jdbcType=VARCHAR}, 
+                #{usedPoint, jdbcType=NUMERIC}, #{actPayment, jdbcType=NUMERIC}, #{username, jdbcType=VARCHAR}, 
                 #{addressNo, jdbcType=NUMERIC})
     </insert>
 
     <!-- 주문 번호로 주문 조회 -->
     <select id="findById" parameterType="long" resultMap="OrderReadResultMap">
-        SELECT * FROM orders WHERE order_no = #{orderNo, jdbcType=NUMERIC}
+        SELECT * 
+        FROM orders 
+        WHERE order_no = #{orderNo, jdbcType=NUMERIC}
+    </select>
+    
+    <select id="findAllWithDetailsByUser" parameterType="String" resultMap="OrderReadResultMap">
+       SELECT 
+           o.order_no AS orderNo,
+           o.order_date AS orderDate,
+           o.order_status AS orderStatus,
+           o.used_point AS usedPoint,
+           o.act_payment AS actPayment,
+           o.total_price AS totalPrice,
+           o.username AS username,
+           o.address_no AS addressNo,
+           od.detail_ea AS detailEa,
+           i.item_no AS itemNo,
+           i.item_name AS itemName,
+           i.price AS price,
+           i.image AS image
+       FROM orders o
+       JOIN order_detail od ON o.order_no = od.order_no
+       JOIN item i ON od.item_no = i.item_no
+       WHERE o.member_username = #{username}
+   </select>
+    
+
+    <!-- 사용자의 모든 주문 조회 -->
+    <select id="findAllByUser" parameterType="String" resultMap="OrderListResultMap">
+        SELECT * 
+        FROM orders 
+        WHERE o.member_username = #{username}
     </select>
 
-    <!-- 모든 주문 조회 -->
-    <select id="findAll" resultMap="OrderListResultMap">
-        SELECT * FROM orders
-    </select>
-
-    <!-- 모든 주문과 결제 정보를 포함한 조회 -->
-    <select id="findAllWithPayments" resultMap="OrderListWithPaymentResultMap">
+    <!-- 사용자의 주문과 결제 정보 조회 -->
+    <select id="findAllWithPayments" parameterType="java.lang.String" resultMap="OrderListWithPaymentResultMap">
         SELECT o.order_no, o.order_date, o.order_status, o.total_price,
-               p.pay_method, p.point_add, p.card_no
+               p.tid, p.payment_status
         FROM orders o
         LEFT JOIN payment p ON o.order_no = p.order_no
+        WHERE o.member_username = #{username, jdbcType=VARCHAR}
     </select>
 
     <!-- 주문 정보 업데이트 -->
     <update id="update" parameterType="com.example.demo.order.Order">
-        UPDATE orders SET order_status = #{orderStatus, jdbcType=VARCHAR} WHERE order_no = #{orderNo, jdbcType=NUMERIC}
+        UPDATE orders 
+        SET order_status = #{orderStatus, jdbcType=VARCHAR}, 
+            used_point = #{usedPoint, jdbcType=NUMERIC}, 
+            act_payment = #{actPayment, jdbcType=NUMERIC}
+        WHERE order_no = #{orderNo, jdbcType=NUMERIC}
     </update>
 
     <!-- 주문 삭제 -->
     <delete id="delete" parameterType="long">
-        DELETE FROM orders WHERE order_no = #{orderNo, jdbcType=NUMERIC}
+        DELETE FROM orders 
+        WHERE order_no = #{orderNo, jdbcType=NUMERIC}
     </delete>
 
     <!-- 주문 상태로 주문 조회 -->
     <select id="findByOrderStatus" parameterType="string" resultMap="OrderListResultMap">
-        SELECT * FROM orders WHERE order_status = #{orderStatus}
+        SELECT * 
+        FROM orders 
+        WHERE order_status = #{orderStatus}
     </select>
 
     <!-- 주문 조회를 위한 OrderReadResultMap -->
@@ -49,43 +83,49 @@
         <id property="orderNo" column="order_no" />
         <result property="orderDate" column="order_date" />
         <result property="totalPrice" column="total_price" />
-        <result property="orderStatus" column="order_status" javaType="java.lang.String"/>
+        <result property="orderStatus" column="order_status" javaType="java.lang.String" />
         <result property="usedPoint" column="used_point" />
         <result property="actPayment" column="act_payment" />
-        <result property="memberUsername" column="member_username" />
+        <result property="username" column="member_username" />
         <result property="addressNo" column="address_no" />
-        <!-- 주문 상세 정보 조인 매핑 -->
-        <collection property="orderDetails" ofType="com.example.demo.order.OrderDetailDto" resultMap="OrderDetailResultMap" />
+        <!-- 주문 상세 정보 -->
+        <collection property="orderDetails" ofType="com.example.demo.order.OrderDetail">
+           <id property="orderNo" column="order_no" />
+           <result property="itemNo" column="item_no" />
+           <result property="itemName" column="item_name" />
+           <result property="price" column="price" />
+           <result property="image" column="image" />
+           <result property="detailEa" column="detail_ea" />
+       </collection>
     </resultMap>
 
     <!-- 주문 목록 조회를 위한 OrderListResultMap -->
     <resultMap id="OrderListResultMap" type="com.example.demo.order.OrderDto$OrderList">
         <id property="orderNo" column="order_no" />
         <result property="orderDate" column="order_date" />
-        <result property="orderStatus" column="order_status" javaType="java.lang.String"/>
+        <result property="orderStatus" column="order_status" javaType="java.lang.String" />
         <result property="totalPrice" column="total_price" />
     </resultMap>
 
-    <!-- 결제 정보를 포함한 주문 목록 조회를 위한 결과 맵 정의 -->
+    <!-- 결제 정보를 포함한 주문 목록 조회를 위한 결과 맵 -->
     <resultMap id="OrderListWithPaymentResultMap" type="com.example.demo.order.OrderDto$OrderListWithPayment">
         <id property="orderNo" column="order_no" />
         <result property="orderDate" column="order_date" />
-        <result property="orderStatus" column="order_status" javaType="java.lang.String"/>
+        <result property="orderStatus" column="order_status" javaType="java.lang.String" />
         <result property="totalPrice" column="total_price" />
-        <result property="payMethod" column="pay_method" />
-        <result property="pointAdd" column="point_add" />
-        <result property="cardNo" column="card_no" />
+        <result property="tid" column="tid" />
+        <result property="paymentStatus" column="payment_status" />
     </resultMap>
 
-	<!-- 주문 상세 조회를 위한 OrderDetailResultMap -->
-	<resultMap id="OrderDetailResultMap" type="com.example.demo.order.OrderDetail">
-	    <id property="orderNo" column="order_no" />
-	    <result property="itemNo" column="item_no" />
-	    <result property="itemName" column="item_name" />
-	    <result property="image" column="image" jdbcType="VARCHAR" />
-	    <result property="detailEa" column="detail_ea" />
-	    <result property="price" column="price" />
-	    <result property="reviewWritten" column="review_written" />
-	</resultMap>
-	
+    <!-- 주문 상세 조회를 위한 OrderDetailResultMap -->
+    <resultMap id="OrderDetailResultMap" type="com.example.demo.order.OrderDetail">
+        <id property="orderNo" column="order_no" />
+        <result property="itemNo" column="item_no" />
+        <result property="itemName" column="item_name" />
+        <result property="image" column="image" jdbcType="VARCHAR" />
+        <result property="detailEa" column="detail_ea" />
+        <result property="price" column="price" />
+        <result property="reviewWritten" column="review_written" />
+    </resultMap>
+
 </mapper>

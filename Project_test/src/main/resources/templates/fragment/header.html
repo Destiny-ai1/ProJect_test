@@ -26,45 +26,40 @@
         }
 
         /* 고객센터 드롭다운 스타일 */
-		    /* 드롭다운 부모 요소 */
-		    .dropdown {
-		        position: relative; /* 부모 기준으로 자식 위치 결정 */
-		    }
+        .dropdown {
+            position: relative; /* 부모 기준으로 자식 위치 결정 */
+        }
 
-		    /* 드롭다운 메뉴 */
-		    .dropdown-content {
-		        display: none; /* 기본적으로 숨김 */
-		        position: absolute;
-		        top: 100%; /* 부모 요소 바로 아래 표시 */
-		        left: 0; /* 부모 왼쪽 정렬 */
-		        background-color: white; /* 배경색 흰색 */
-		        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
-		        border-radius: 5px; /* 모서리 둥글게 */
-		        z-index: 1000; /* 다른 요소 위로 표시 */
-		        width: auto; /* 너비 자동 조정 */
-		        min-width: 200px; /* 최소 너비 지정 */
-		        white-space: nowrap; /* 텍스트 줄 바꿈 방지 */
-		        overflow: visible; /* 드롭다운 내부 잘림 방지 */
-		    }
+        .dropdown-content {
+            display: none; /* 기본적으로 숨김 */
+            position: absolute;
+            top: 100%; /* 부모 요소 바로 아래 표시 */
+            left: 0; /* 부모 왼쪽 정렬 */
+            background-color: white; /* 배경색 흰색 */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+            border-radius: 5px; /* 모서리 둥글게 */
+            z-index: 1000; /* 다른 요소 위로 표시 */
+            width: auto; /* 너비 자동 조정 */
+            min-width: 200px; /* 최소 너비 지정 */
+            white-space: nowrap; /* 텍스트 줄 바꿈 방지 */
+            overflow: visible; /* 드롭다운 내부 잘림 방지 */
+        }
 
-		    /* 드롭다운 메뉴 마우스 오버 시 표시 */
-		    .dropdown:hover .dropdown-content {
-		        display: block; /* 드롭다운 표시 */
-		    }
+        .dropdown:hover .dropdown-content {
+            display: block; /* 드롭다운 표시 */
+        }
 
-		    /* 드롭다운 항목 스타일 */
-		    .dropdown-content a {
-		        display: block; /* 항목을 블록 요소로 설정 */
-		        padding: 10px 15px; /* 내부 여백 추가 */
-		        text-decoration: none; /* 밑줄 제거 */
-		        color: black; /* 텍스트 색상 */
-		        transition: background-color 0.3s; /* 마우스 오버 시 색상 전환 효과 */
-		    }
+        .dropdown-content a {
+            display: block; /* 항목을 블록 요소로 설정 */
+            padding: 10px 15px; /* 내부 여백 추가 */
+            text-decoration: none; /* 밑줄 제거 */
+            color: black; /* 텍스트 색상 */
+            transition: background-color 0.3s; /* 마우스 오버 시 색상 전환 효과 */
+        }
 
-		    /* 드롭다운 항목 마우스 오버 시 스타일 */
-		    .dropdown-content a:hover {
-		        background-color: #f9f9f9; /* 배경색 변경 */
-		    }
+        .dropdown-content a:hover {
+            background-color: #f9f9f9; /* 배경색 변경 */
+        }
 
         /* 로고 및 정보 영역 스타일 */
         .bottom-info {
@@ -116,20 +111,25 @@
     <div class="top-menu">
         <!-- 비로그인 사용자를 위한 메뉴 -->
         <ul sec:authorize="isAnonymous()" style="display: flex;">
-			<li class="menu-item dropdown">
-			    <a class="nav-link dropdown-button" href="#">고객센터</a>
-			    <div class="dropdown-content">
-			    	<a href="/board/list?cno=1001">공지사항</a>
-			    	<a href="/board/list?cno=1002">Q&A</a>
-			    </div>
-			</li>
+            <li class="menu-item dropdown">
+                <a class="nav-link dropdown-button" href="#">고객센터</a>
+                <div class="dropdown-content">
+                    <a href="/board/list?cno=1001">공지사항</a>
+                    <a href="/board/list?cno=1002">Q&A</a>
+                </div>
+            </li>
             <li class="menu-item"><a href="/member/login">로그인</a></li>
             <li class="menu-item"><a href="/member/join">회원가입</a></li>
         </ul>
 
         <!-- 로그인된 일반 사용자 메뉴 -->
         <ul sec:authorize="isAuthenticated() and !hasRole('ROLE_admin')" style="display: flex;">
-            <li class="menu-item"><a href="#" id="logout">로그아웃</a></li>
+            <li class="menu-item">
+                <form action="/member/logout" method="post" th:action="@{/member/logout}" style="display: inline;">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                    <button type="submit" style="background: none; border: none; color: black; cursor: pointer;">로그아웃</button>
+                </form>
+            </li>
             <li class="menu-item"><a href="/member/readme">내정보</a></li>
             <li class="menu-item dropdown">
                 <a class="nav-link dropdown-button" href="#">고객센터</a>
@@ -138,14 +138,19 @@
                     <a href="/board/list?cno=1002">Q&A</a>
                 </div>
             </li>
-            <li class="menu-item"><a href="/cart/cart-view">장바구니</a></li>
-            <li class="menu-item"><a href="/order/list">주문목록</a></li>
+            <li class="menu-item"><a href="/cart/list">장바구니</a></li>
+            <li class="menu-item"><a href="/order/order_payment_summary">주문목록</a></li>
             <li class="menu-item"><a href="/member/delete">회원탈퇴</a></li>
         </ul>
 
         <!-- 관리자 전용 메뉴 -->
         <ul sec:authorize="hasRole('ROLE_admin')" style="display: flex;">
-            <li class="menu-item"><a href="#" id="logout">로그아웃</a></li>
+            <li class="menu-item">
+                <form action="/member/logout" method="post" th:action="@{/member/logout}" style="display: inline;">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                    <button type="submit" style="background: none; border: none; color: black; cursor: pointer;">로그아웃</button>
+                </form>
+            </li>
             <li class="menu-item"><a href="/admin/members">회원 관리</a></li>
             <li class="menu-item"><a href="/admin/orders">주문 관리</a></li>
             <li class="menu-item"><a href="/item/add">상품 추가</a></li>
@@ -156,25 +161,14 @@
 
     <!-- 하단 로고 -->
     <div class="bottom-info">
-        <div class="logo" onclick="window.location.href='/'">쇼핑몰</div>
+        <div class="logo" onclick="window.location.href='/'">스노우 브라더스 </div>
     </div>
 
     <!-- 고정된 배경 이미지 -->
     <div class="fixed-image"></div>
 
-    <!-- 로그아웃 스크립트 -->
-    <script>
-        // 로그아웃 처리
-        document.querySelector('#logout').addEventListener('click', function () {
-            const token = '[[${_csrf.token}]]';
-            const html = `
-                <form action="/member/logout" method="post">
-                    <input type='hidden' name='_csrf' value='${token}'>
-                </form>
-            `;
-            document.body.insertAdjacentHTML('beforeend', html);
-            document.body.querySelector('form').submit();
-        });
-    </script>
+    <!-- CSRF 메타태그 (디버깅용) -->
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 </body>
 </html>

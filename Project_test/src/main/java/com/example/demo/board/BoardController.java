@@ -30,12 +30,6 @@ public class BoardController {
 	@Autowired
 	public MemberService memberService;
 	
-	//메인 페이지로 보내기
-	@GetMapping("/")
-	public ModelAndView Main() {
-		return new ModelAndView("index");
-	}
-	
 	//게시글 작성
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/board/write")
