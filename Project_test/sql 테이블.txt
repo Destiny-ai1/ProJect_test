@@ -41,11 +41,11 @@ create table member (
     constraint member_pk_username primary key(username)
 );
 
---카테고리
+-- category 테이블 생성
 create table category(
-    cno number(5),                                          --카테고리 번호
-    cname varchar2(20 char),                                --카테고리 이름
-    pno number(5),                                          --상위 카테고리
+    cno number(5),                                          -- 카테고리 번호
+    cname varchar2(20 char),                                -- 카테고리 이름
+    pno number(5),                                          -- 상위 카테고리
     constraint category_pk_cno primary key(cno),
     constraint category_fk_parent foreign key (pno) references category (cno)
 );
@@ -145,19 +145,19 @@ GRANT SELECT ON item_image_seq TO c##winter_shop;           -- 권한 부여
 SELECT sequence_name FROM user_sequences;
 GRANT EXECUTE ON add_item_sizes TO C##WINTER_SHOP;
 
--- 장바구니 테이블
-create table cart(
-    item_no number(10),                                                       -- 상품 번호 (외래 키)+(기본키)
-    username varchar2(50 CHAR),                                               -- 회원 아이디 (외래 키)
-    cart_ea number(2),                                                        -- 장바구니 구매 갯수
-    cart_price number(7),                                                     -- 장바구니 구매 가격
-    cart_totalprice number(10),                                               -- 장바구니 구매 총 가격
-    item_size varchar2(20 Char),                                             -- 상품 사이즈
-    constraint cart_pk_item_no primary key (item_no, username, item_size),    -- 기본키: item_no, username, item_size
-    constraint fk_cart_member foreign key (username) references member (username),  -- 회원 테이블과의 외래 키 관계
-    constraint fk_cart_item foreign key (item_no) references item (item_no)         -- 상품 테이블과의 외래 키 관계
+CREATE TABLE cart (
+    item_no NUMBER(10),                             -- 상품 번호 (외래 키) + 기본 키
+    username VARCHAR2(50 CHAR),                     -- 회원 아이디 (외래 키)
+    cart_ea NUMBER(2),                              -- 장바구니 구매 갯수
+    cart_price NUMBER(7),                           -- 장바구니 구매 가격
+    cart_totalprice NUMBER(10),                     -- 장바구니 구매 총 가격
+    item_size VARCHAR2(20 CHAR),                    -- 상품 사이즈 (item_size와 연계)
+    CONSTRAINT cart_pk_item_no PRIMARY KEY (item_no, username, item_size),  -- 복합 기본키
+    CONSTRAINT fk_cart_member FOREIGN KEY (username) REFERENCES member (username), -- 회원 테이블과의 외래 키
+    CONSTRAINT fk_cart_item FOREIGN KEY (item_no) REFERENCES item (item_no)       -- 상품 테이블과의 외래 키
 );
 
+-- 상품 번호에 대한 인덱스
 create index idx_cart_item_no on cart(item_no);
 
 --배송지
