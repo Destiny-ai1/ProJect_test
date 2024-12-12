@@ -13,14 +13,21 @@ import com.example.demo.item.ItemDto.ItemList;
 
 @Mapper
 public interface ItemDao {
+
     // item 목록 insert
     public Integer save(Item item);
 
+    // 상품 사이즈 저장 (item_size 테이블에 삽입)
+    public Integer saveItemSize(@Param("itemNo") Long itemNo, @Param("itemSize") String itemSize, @Param("itemJango") Integer itemJango);
+
     // 아이템을 리스트로 선택
-    @Select("SELECT item_no, item_irum, item_info, item_price, item_jango, item_sell_qty, review_ea, cno, "
-            + "   #{imageUrl} || COALESCE((SELECT ii.image_name FROM item_image ii WHERE it.item_no = ii.item_no AND ROWNUM = 1), 'normal/default-image.jpg') AS item_image "
+    @Select("SELECT it.item_no, it.item_irum, it.item_info, it.item_price, it.item_jango, it.item_sell_qty, "
+            + "it.review_ea, it.cno, "
+            + "#{imageUrl} || COALESCE((SELECT ii.image_name "
+            + "FROM item_image ii "
+            + "WHERE it.item_no = ii.item_no AND ROWNUM = 1), 'normal/default-image.jpg') AS item_image "
             + "FROM item it "
-            + "ORDER BY it.item_no ASC")  // itemNo 기준 오름차순 정렬
+            + "ORDER BY it.item_no ASC")
     public List<ItemDto.ItemList> findAll(@Param("imageUrl") String imageUrl);
 
     // 상품 번호로 상품 찾기
@@ -43,26 +50,22 @@ public interface ItemDao {
     public Integer deleteItemByItemNo(Long itemNo);
     
     // itemNo로 이미지 목록을 조회
-    @Select("select * from item_image where item_no = #{itemNo}")
-    public List<ItemImage> findByItemNo(Long itemNo);
-    
+    @Select("SELECT * FROM item_image WHERE item_no = #{itemNo}")
+    public List<ItemImage> findByItemNo(Long itemNo); // 이 부분을 추가
+
     // itemNo에 해당하는 모든 이미지를 삭제
-    @Delete("delet from item_image where item_no = #{itemNo}")
+    @Delete("delete from item_image where item_no = #{itemNo}")
     public void deleteByItemNo(Long itemNo);
 
     // 카테고리 번호에 해당하는 상품들을 조회하는 메서드
-	public List<ItemList> findItemsByCategory(Long cno, String imageUrl);
+    public List<ItemList> findItemsByCategory(Long cno, String imageUrl);
     
-	// 상품별 평균 평점 조회
+    // 상품별 평균 평점 조회
     public Double findAverageRatingByItemNo(Long itemNo);
     
     // 재고 수량 조회 (상품 번호로 조회)
-    @Select("SELECT item_jango FROM item WHERE item_no = #{itemNo} AND rownum = 1")
-    public Integer getAvailableJango(Long itemNo);
-    
-    // itemNo에 해당하는 모든 이미지를 조회하는 메서드
-    @Select("SELECT * FROM item_image WHERE item_no = #{itemNo}")
-    public List<ItemImage> findItemImagesByItemNo(Long itemNo);
+    @Select("SELECT item_jango FROM item_size WHERE item_no = #{itemNo} AND item_size = #{itemSize}")
+    Integer getStockByItemSize(@Param("itemNo") Long itemNo, @Param("itemSize") String itemSize);
     
     // 상품의 가격을 변경
     @Update("UPDATE item SET item_price = #{itemPrice} WHERE item_no = #{itemNo}")

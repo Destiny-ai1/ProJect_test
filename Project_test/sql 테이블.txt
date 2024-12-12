@@ -50,23 +50,87 @@ create table category(
     constraint category_fk_parent foreign key (pno) references category (cno)
 );
 
---상품
-create table item (
-    item_no number(10),                                     -- 상품 고유 번호 (primary Key)
-    item_irum varchar2(50 CHAR),                            -- 상품 이름
-    item_info clob,                                         -- 상품 정보
-    item_price number(10),                                  -- 상품 가격
-    item_jango number(5),                                   -- 재고 수량
-    item_sell_qty number(5),                                -- 판매된 상품의 수량
-    review_ea number(7),                                    -- 리뷰 갯수
-    constraint item_pk_item_no primary Key(item_no),
-    cno number(5),                                          -- 카테고리 ID (외래 키)
-    constraint fk_item_category foreign key (cno) references category (cno) -- 카테고리와의 관계
+-- item 테이블 생성
+CREATE TABLE item (
+    item_no NUMBER(10),                                     -- 상품 고유 번호 (primary Key)
+    item_irum VARCHAR2(50 CHAR),                            -- 상품 이름
+    item_info CLOB,                                         -- 상품 정보
+    item_price NUMBER(10),                                  -- 상품 가격
+    item_jango NUMBER(5),                                   -- 재고 수량
+    item_sell_qty NUMBER(5),                                -- 판매된 상품의 수량
+    review_ea NUMBER(7),                                    -- 리뷰 갯수
+    cno NUMBER(5),                                          -- 카테고리 ID (외래 키)
+    CONSTRAINT fk_item_category FOREIGN KEY (cno) REFERENCES category (cno), -- 카테고리와의 관계
+    CONSTRAINT pk_item PRIMARY KEY (item_no)                 -- item_no를 기본키로 사용
 );
 
 create sequence item_seq;
 GRANT SELECT ON item_seq TO c##winter_shop;
 SELECT sequence_name FROM user_sequences WHERE sequence_name = 'ITEM_SEQ';
+
+-- 상품 사이즈 테이블
+create table item_size (
+    item_no number(10),                                     -- 상품 고유 번호 (외래 키)
+    item_size varchar2(10 CHAR),                            -- 상품 사이즈 (small, medium, large 등)
+    item_jango number(5),                                   -- 해당 사이즈의 재고 수량
+    constraint item_size_pk primary key (item_no, item_size), -- 복합 기본키: item_no, item_size
+    constraint fk_item_size_item foreign key (item_no) references item (item_no) -- 외래 키: item_no
+);
+
+-- 상품 사이즈 기본값 추가를 위한 프로시저
+CREATE OR REPLACE PROCEDURE add_item_sizes(p_item_no IN NUMBER, p_item_irum IN VARCHAR2, p_item_info IN CLOB, 
+                                            p_item_price IN NUMBER, p_item_jango IN NUMBER, p_item_sell_qty IN NUMBER, 
+                                            p_review_ea IN NUMBER, p_cno IN NUMBER) IS
+    -- 로컬 변수로 p_item_jango 복사
+    v_item_jango NUMBER;
+BEGIN
+    -- p_item_jango 값이 NULL이면 0으로 설정
+    IF p_item_jango IS NULL THEN
+        v_item_jango := 0;  -- 로컬 변수에 값을 설정
+    ELSE
+        v_item_jango := p_item_jango;  -- 입력값을 로컬 변수에 할당
+    END IF;
+
+    -- 4개의 사이즈 항목을 각각 삽입 (각 사이즈에 0 재고 수량)
+    INSERT INTO item_size (item_no, item_size, item_jango) VALUES (p_item_no, 'small', v_item_jango);
+    INSERT INTO item_size (item_no, item_size, item_jango) VALUES (p_item_no, 'medium', v_item_jango);
+    INSERT INTO item_size (item_no, item_size, item_jango) VALUES (p_item_no, 'large', v_item_jango);
+    INSERT INTO item_size (item_no, item_size, item_jango) VALUES (p_item_no, 'xlarge', v_item_jango);
+
+    -- 로그 출력 (삽입된 데이터 확인용)
+    DBMS_OUTPUT.PUT_LINE('아이템 사이즈 추가 완료: ' || p_item_no);
+END add_item_sizes;
+/
+
+-- 트리거 재작성 (다시 실행)
+CREATE OR REPLACE TRIGGER trg_item_size_default
+AFTER INSERT ON item
+FOR EACH ROW
+DECLARE
+    new_item_no NUMBER;
+BEGIN
+    -- item_no가 NULL이 아니면 프로시저 호출하여 기본 사이즈 추가
+    IF :NEW.item_no IS NOT NULL THEN
+        new_item_no := :NEW.item_no;
+
+        -- 로그 출력
+        DBMS_OUTPUT.PUT_LINE('트리거 실행: ' || new_item_no);
+
+        -- 프로시저 호출
+        BEGIN
+            -- 사이즈를 추가하는 프로시저 호출
+            add_item_sizes(new_item_no, :NEW.item_irum, :NEW.item_info, :NEW.item_price, :NEW.item_jango, 
+                           :NEW.item_sell_qty, :NEW.review_ea, :NEW.cno);
+
+            DBMS_OUTPUT.PUT_LINE('사이즈 추가 완료: ' || new_item_no);
+        EXCEPTION
+            WHEN OTHERS THEN
+                -- 예외 처리, 예를 들어 외래 키 오류시 예외 처리
+                DBMS_OUTPUT.PUT_LINE('에러 발생: ' || SQLERRM);
+        END;
+    END IF;
+END;
+/
 
 -- 상품 이미지 테이블 생성
 create table item_image (
@@ -79,16 +143,17 @@ create table item_image (
 create sequence item_image_seq;                              -- 시퀀스 생성
 GRANT SELECT ON item_image_seq TO c##winter_shop;           -- 권한 부여
 SELECT sequence_name FROM user_sequences;
+GRANT EXECUTE ON add_item_sizes TO C##WINTER_SHOP;
 
---장바구니
-create table cart(      
+-- 장바구니 테이블
+create table cart(
     item_no number(10),                                                       -- 상품 번호 (외래 키)+(기본키)
     username varchar2(50 CHAR),                                               -- 회원 아이디 (외래 키)
     cart_ea number(2),                                                        -- 장바구니 구매 갯수
     cart_price number(7),                                                     -- 장바구니 구매 가격
     cart_totalprice number(10),                                               -- 장바구니 구매 총 가격
-    item_size varchar2 (20 Char),                                             -- 상품의 사이즈
-    constraint cart_pk_item_no primary key (item_no, username, item_size),    -- 상품번호, 회원 아이디, 상품사이즈 외래키 +기본키로(1명이 여러상품을 장바구니로 지정 가능)
+    item_size varchar2(20 Char),                                             -- 상품 사이즈
+    constraint cart_pk_item_no primary key (item_no, username, item_size),    -- 기본키: item_no, username, item_size
     constraint fk_cart_member foreign key (username) references member (username),  -- 회원 테이블과의 외래 키 관계
     constraint fk_cart_item foreign key (item_no) references item (item_no)         -- 상품 테이블과의 외래 키 관계
 );

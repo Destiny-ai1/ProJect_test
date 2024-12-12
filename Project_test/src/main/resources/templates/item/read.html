@@ -24,16 +24,16 @@
 }
 </style>
 <script>
-		$(document).ready(function() {
-           // 기본 썸네일 선택 (첫 번째 이미지 선택)
-            $('.thumbnail:first-of-type').addClass("choice");
+	$(document).ready(function() {
+		// 기본 썸네일 선택 (첫 번째 이미지 선택)
+		$('.thumbnail:first-of-type').addClass("choice");
 
-            $('.thumbnail').click(function() {
-                $('.thumbnail').removeClass("choice");
-                $(this).addClass("choice");
-                $('#image').attr('src', $(this).attr('src'));
-            });
-        });
+		$('.thumbnail').click(function() {
+			$('.thumbnail').removeClass("choice");
+			$(this).addClass("choice");
+			$('#image').attr('src', $(this).attr('src'));
+		});
+	});
 </script>
 <title>상품 상세</title>
 </head>
@@ -53,8 +53,9 @@
 						<div>
 							<!-- 썸네일 이미지 출력 -->
 							<div class="d-flex">
-								<span th:each="image : ${result.itemImages}" th:if="${image != null}">
-									<img th:src="@{${image != null ? image : '/api/images?imagename=normal/default-image.jpg'}}"
+								<span th:each="image : ${result.itemImages}"
+									th:if="${image != null}"> <img
+									th:src="@{${image != null ? image : '/api/images?imagename=normal/default-image.jpg'}}"
 									class="thumbnail" style="height: 100px; margin-right: 10px;">
 								</span>
 							</div>
@@ -64,7 +65,8 @@
 						<h3 th:text="${result.itemIrum}">상품명</h3>
 						<h4 id="item-price" th:text="${result.itemPrice + '원'}">₩ 가격</h4>
 						<div>
-							<button class="btn btn-outline-primary btn-sm" id="update-price">가격 변경하기</button>
+							<button class="btn btn-outline-primary btn-sm" id="update-price">가격
+								변경하기</button>
 						</div>
 
 						<div th:if="${result.avgRating != null}">
@@ -79,10 +81,16 @@
 						</div>
 
 						<p id="info" th:utext="${result.itemInfo}">상품 정보</p>
-
+						<!-- 재고 메시지를 출력할 부분 -->
+						<div id="stock-message" class="text-danger">
+							<!-- 상품 상세 페이지 로드 시 기본 재고 메시지가 있으면 여기 표시 -->
+							<p th:text="${result.stockMessage}"></p>
+						</div>
 						<div class="form-group">
-							<label for="item-size">사이즈 선택</label>
-							<select class="form-control" id="item-size">
+							<label for="item-size">사이즈 선택</label> <select
+								class="form-control" id="item-size">
+								<option value="" selected disabled>사이즈를 선택하세요...</option>
+								<!-- 기본 선택 옵션에 disabled 추가 -->
 								<option value="small">Small</option>
 								<option value="medium">Medium</option>
 								<option value="large">Large</option>
@@ -105,67 +113,96 @@
 	</div>
 
 	<script>
-        $(document).ready(function() {
-            $('#add-cart').click(function() {
-                const itemNo = '[[${result.itemNo}]]'; // 상품 번호
-                const itemSize = $('#item-size').val(); // 선택한 사이즈
+		$(document).ready(function() {
+			$('#add-cart').click(function() {
+				const itemNo = '[[${result.itemNo}]]'; // 상품 번호
+				const itemSize = $('#item-size').val(); // 선택한 사이즈
 
-                // 필수 정보 체크
-                if (!itemNo || !itemSize) {
-                    alert("필수 정보를 모두 입력해주세요.");
-                    return;
-                }
+				if (!itemNo || !itemSize) {
+					alert("필수 정보를 모두 입력해주세요.");
+					return;
+				}
 
-                // 장바구니에 상품 추가 AJAX 요청
-                $.ajax({
-                    type: "POST",
-                    url: "/api/cart",  // 서버 API URL
-                    data: {
-                        itemNo: itemNo,     // 상품 번호
-                        itemSize: itemSize, // 선택한 사이즈
-                    },
-                    success: function(response) {
-                        alert("장바구니에 추가되었습니다.");
-                    },
-                    error: function() {
-                        alert("장바구니 추가에 실패했습니다.");
-                    }
-                });
-            });
-        });
-    </script>
+				$.ajax({
+					type : "POST",
+					url : "/api/cart/addToCart", // 서버 API URL
+					data : {
+						itemNo : itemNo,
+						itemSize : itemSize
+					},
+					success : function(response) {
+						alert("장바구니에 추가되었습니다.");
+					},
+					error : function(response) {
+						console.log("Error:", response);
+						if (response.status === 409) {
+							alert("재고가 부족합니다.");
+						} else {
+							alert("장바구니 추가에 실패했습니다.");
+						}
+					}
+				});
+			});
+		});
+	</script>
+
 
 	<script>
-    $('#update-price').click(function() {
-        const newPrice = prompt("변경할 가격을 입력하세요:");
-        console.log("변경 요청된 가격:", newPrice);
-        if (newPrice != null && newPrice.trim() !== "") {
-            $.ajax({
-                url: '/item/' + '[[${result.itemNo}]]' + '/update-price',
-                method: 'PATCH',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    itemPrice: newPrice
-                }),
-                success: function() {
-                    alert("가격이 성공적으로 변경되었습니다.");
-                    
-                    // 1. 실시간으로 가격 갱신
-                    $('#item-price').text(newPrice + "원");
-                    
-                    // 2. 화면을 새로 고침하여 갱신된 데이터를 받아옴
-                    location.reload();
-                    
-                    // 장바구니에 담긴 해당 상품 가격 업데이트
-                    updateCartPrice('[[${result.itemNo}]]', newPrice);
-                },
-                error: function() {
-                    alert("가격을 변경할 수 없습니다.");
-                }
-            });
-        }
-    });
-</script>
+		$('#update-price').click(function() {
+			const newPrice = prompt("변경할 가격을 입력하세요:");
+			console.log("변경 요청된 가격:", newPrice);
+			if (newPrice != null && newPrice.trim() !== "") {
+				$.ajax({
+					url : '/item/' + '[[${result.itemNo}]]' + '/update-price',
+					method : 'PATCH',
+					contentType : 'application/json',
+					data : JSON.stringify({
+						itemPrice : newPrice
+					}),
+					success : function() {
+						alert("가격이 성공적으로 변경되었습니다.");
 
+						// 1. 실시간으로 가격 갱신
+						$('#item-price').text(newPrice + "원");
+
+						// 2. 화면을 새로 고침하여 갱신된 데이터를 받아옴
+						location.reload();
+
+						// 장바구니에 담긴 해당 상품 가격 업데이트
+						updateCartPrice('[[${result.itemNo}]]', newPrice);
+					},
+					error : function() {
+						alert("가격을 변경할 수 없습니다.");
+					}
+				});
+			}
+		});
+	</script>
+	<script>
+		$(document).ready(function() {
+			// 사이즈 선택 변경 시 재고 메시지 업데이트
+			$('#item-size').change(function() {
+				const itemNo = '[[${result.itemNo}]]';
+				const itemSize = $(this).val();
+
+				// 선택한 사이즈에 맞는 재고 메시지 AJAX 요청
+				$.ajax({
+					type : "POST",
+					url : "/get-stock-message",
+					data : {
+						itemNo : itemNo,
+						itemSize : itemSize
+					},
+					success : function(response) {
+						// 재고 메시지가 반환되면 페이지에 업데이트
+						$('#stock-message').text(response);
+					},
+					error : function() {
+						alert("재고 정보를 불러올 수 없습니다.");
+					}
+				});
+			});
+		});
+	</script>
 </body>
 </html>

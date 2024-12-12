@@ -38,14 +38,6 @@ public class CartDto { // 장바구니 관련 데이터 전달 객체
         private String itemImage; // 상품 이미지 URL (image 패키지에서 가져옴)
         private String itemSize;    // 상품 사이즈
     }
-
-    @Data
-    public static class CartUpdateRequest {
-        private Long itemNo; // 상품 번호는 Long 타입으로 변경
-        private String username; // 사용자 이름(회원 ID)
-        // private String itemSize; // 상품 사이즈
-        private Long cartEa; // 수량
-    }
     
     @Data
     public static class Update	{

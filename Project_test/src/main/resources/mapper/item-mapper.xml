@@ -2,34 +2,37 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.item.ItemDao">
 
-	<select id="countImagesByItemNo" resultType="Long">
-		SELECT COUNT(*)
-		FROM item_image
-		WHERE item_no = #{itemNo}
-	</select>
+	<!-- 상품 사이즈 저장 -->
+	<insert id="saveItemSize">
+		<foreach collection="itemSizes" item="itemSize" separator=";">
+			insert into item_size(
+			item_no, item_size, item_jango
+			) values(
+			#{itemNo, jdbcType=NUMERIC},
+			#{itemSize.itemSize, jdbcType=VARCHAR},
+			#{itemSize.itemJango, jdbcType=NUMERIC}
+			)
+		</foreach>
+	</insert>
 
-
-	<!-- ItemDao save 메서드 (item 저장) -->
-	<insert id="save" useGeneratedKeys="true" keyProperty="itemNo">
+	<!-- 상품 저장 -->
+	<insert id="save">
 		<selectKey keyProperty="itemNo" order="BEFORE"
 			resultType="long">
 			select ITEM_SEQ.nextval from dual
 		</selectKey>
-		insert into item(item_no, item_irum, item_info, item_price,
-		item_jango, item_sell_qty, review_ea, cno)
-		values(
-		#{itemNo,
-		jdbcType=NUMERIC},
+		insert into item(
+		item_no, item_irum, item_info, item_price,
+		item_jango, item_sell_qty, review_ea, cno
+		) values(
+		#{itemNo, jdbcType=NUMERIC},
 		#{itemIrum, jdbcType=VARCHAR},
-		#{itemInfo,
-		jdbcType=VARCHAR},
+		#{itemInfo, jdbcType=VARCHAR},
 		#{itemPrice, jdbcType=NUMERIC},
-		#{itemJango,
-		jdbcType=NUMERIC},
+		#{itemJango, jdbcType=NUMERIC},
 		#{itemSellQty, jdbcType=INTEGER},
 		#{reviewEa, jdbcType=INTEGER},
-		#{cno,
-		jdbcType=INTEGER}
+		#{cno, jdbcType=INTEGER}
 		)
 	</insert>
 
@@ -63,6 +66,7 @@
 		<result property="reviewEa" column="review_ea" />
 		<result property="cno" column="cno" />
 		<result property="itemImage" column="item_image" />
+		<result property="itemSize" column="item_size" /> <!-- item_size 추가 -->
 	</resultMap>
 
 	<!-- 카테고리 번호에 해당하는 상품들을 조회하는 SQL 쿼리 -->
@@ -76,17 +80,17 @@
 		it.item_sell_qty,
 		it.review_ea,
 		it.cno,
-		COALESCE(#{imageUrl, jdbcType=VARCHAR} || im.image_name,
-		'normal/default-image.jpg') AS
-		item_image
+		COALESCE(#{imageUrl, jdbcType=VARCHAR} || im.image_name, 'normal/default-image.jpg') AS
+		item_image,
+		it.item_size  <!-- item_size 추가 -->
 		FROM item it
-		LEFT JOIN
-		item_image im ON it.item_no = im.item_no
-		WHERE it.cno IN (
+		LEFT JOIN item_image im ON it.item_no = im.item_no
+		WHERE
+		it.cno IN (
 		<!-- 대분류(cno)와 연결된 소분류를 조회 -->
 		SELECT c.cno
 		FROM category c
-		WHERE c.pno = #{cno} -- 소분류의 cno를 찾기 위한 조건
+		WHERE c.pno = #{cno}
 		UNION ALL
 		<!-- 대분류 자체도 포함 -->
 		SELECT g.cno
@@ -97,32 +101,26 @@
 
 	<!-- 상품 정보 조회 (여러 이미지를 반환) -->
 	<select id="findById" resultMap="joinMap">
-		SELECT it.item_no, it.item_irum,
+		SELECT
+		it.item_no, it.item_irum,
 		it.item_info, it.item_price, it.item_jango,
-		it.item_sell_qty,
-		it.review_ea, it.cno,
-		COALESCE(#{imageUrl} ||
-		im.image_name, 'normal/default-image.jpg') AS
-		item_image
+		it.item_sell_qty, it.review_ea, it.cno,
+		COALESCE(#{imageUrl} || im.image_name, 'normal/default-image.jpg') AS item_image
 		FROM item it
 		LEFT JOIN item_image im ON it.item_no = im.item_no
-		WHERE it.item_no =
-		#{itemNo}
+		WHERE it.item_no = #{itemNo}
 	</select>
 
 	<!-- 상품에 따른 평균 평점 계산 -->
 	<select id="findAverageRatingByItemNo" resultType="double">
 		select
-		case
-		when count(r.review_no) > 0 then
-		round(sum(r.review_good_cnt) /
-		count(r.review_no), 1)
-		else
-		0
+		case when count(r.review_no) > 0 then
+		round(sum(r.review_good_cnt) / count(r.review_no), 1)
+		else 0
 		end as avg_rating
 		from item i
-		left join
-		review r on i.item_no = r.item_no
+		left join review r on i.item_no = r.item_no
 		where i.item_no = #{itemNo}
 	</select>
+
 </mapper>

@@ -9,13 +9,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // FailException을 처리하는 핸들러
-    @ExceptionHandler(FailException.class)
-    public ResponseEntity<String> handleFailException(FailException ex) {
-        // 메시지만 클라이언트에 전달 (단순히 ex.getMessage()만 전달)
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);  // 400 Bad Request
-    }
-    
+	// FailException을 처리하는 핸들러
+	@ExceptionHandler(FailException.class)
+	public ResponseEntity<String> handleFailException(FailException ex) {
+	    // 메시지만 클라이언트에 전달 (단순히 ex.getMessage()만 전달)
+	    return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);  // 409 Conflict
+	}
     /*
     // 다른 예외를 처리할 수 있는 핸들러 추가 가능
     @ExceptionHandler(Exception.class)

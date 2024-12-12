@@ -22,6 +22,7 @@ public class ItemDto {
         private String itemInfo;  // 상품 정보
         private Integer itemPrice; // 가격
         private Integer itemJango;	// 상품 재고
+        private String itemSize;	// 상품 사이즈
         private Integer itemSellQty; // 상품 판매수
         private Long reviewEa;		// 리뷰 갯수
         private String itemImage; // 이미지 URL
@@ -40,7 +41,7 @@ public class ItemDto {
         private Integer itemPrice; // 가격
         private Integer itemJango; // 잔고
         private Integer itemSellQty; // 판매 수량
-        private String  itemSize; // 좋아요 수
+        private String  itemSize; 	// 상품 사이즈
         private Integer reviewEa;   // 리뷰 수
         private Integer cno;        // 카테고리 번호 (cno 추가)
         // 이미지를 담을 리스트
@@ -66,17 +67,33 @@ public class ItemDto {
         @DecimalMin(value="1", message="잔고는 1개이상이어야 합니다")
         private Integer itemJango;  // 잔고
         private Integer itemSellQty; // 판매 수량
-        private String itemSize; // 좋아요 수
+        private String itemSize; 	// 상품 사이즈
         private Integer reviewEa;   // 리뷰 수
         private Integer cno;        // 카테고리 번호 (cno 추가)
 
         private List<MultipartFile> itemImages; // 이미지 파일 리스트
+        
+        // 새로 추가된 필드
+        private List<ItemSizeDto> itemSizes;  // 상품 사이즈와 재고 정보를 담을 리스트
 
         // Entity 객체로 변환
         public Item toEntity() {
             return new Item(null, itemIrum, itemInfo, itemPrice, itemJango, itemSellQty, itemSize, reviewEa, cno);
         }
+
+        // ItemSizeDto 리스트의 getter 메서드 추가
+        public List<ItemSizeDto> getItemSizes() {
+            return itemSizes;
+        }
+
+        // ItemSizeDto 클래스 정의
+        @Data
+        public static class ItemSizeDto {
+            private String itemSize;  // 상품 사이즈
+            private Integer itemJango; // 해당 사이즈의 재고
+        }
     }
+
 
     // 상품 삭제를 위한 DTO
     @Data
@@ -109,5 +126,12 @@ public class ItemDto {
     public static class price_update {
     	private Long itemNo;
     	private Integer itemPrice;
+    }
+    
+    @Data
+    public static class stockMessage {
+    	private Long itemNo;
+    	private Integer itemJango;
+    	private String itemSize;
     }
 }
