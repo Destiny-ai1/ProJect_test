@@ -1,41 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.admin.AdminDao">
-
-    <!-- 모든 사용자 정보를 가져오는 쿼리 -->
+    <!-- 사용자 관리 -->
     <select id="getAllUser" resultType="com.example.demo.admin.AdminDto$User">
         SELECT username, name, email, phone, grade, joinday AS joinDate, enabled, LOWER(role) AS role
         FROM member
     </select>
 
-    <!-- 특정 사용자 정보를 가져오는 쿼리 -->
     <select id="findUserByUsername" resultType="com.example.demo.admin.AdminDto$User">
         SELECT username, name, email, phone, grade, joinday AS joinDate, enabled, LOWER(role) AS role
-        FROM member
-        WHERE LOWER(username) = LOWER(#{username})
+        FROM member WHERE LOWER(username) = LOWER(#{username})
     </select>
 
-    <!-- 사용자 상태를 업데이트하는 쿼리 -->
     <update id="updateUserStatus" parameterType="map">
-        UPDATE member
-        SET enabled = #{enabled}
-        WHERE username = #{username}
+        UPDATE member SET enabled = #{enabled} WHERE username = #{username}
     </update>
 
-    <!-- 검색 조건에 따라 사용자 정보를 가져오는 동적 SQL -->
-   <select id="findUsersByCriteria" parameterType="map" resultType="com.example.demo.admin.AdminDto$User">
-    SELECT username, name, email, phone, grade, joinday AS joinDate, enabled, LOWER(role) AS role
-    FROM member
-    WHERE 1=1
-      <if test="search != null and !search.isEmpty()">
-        AND (
-          LOWER(name) LIKE '%' || LOWER(#{search}) || '%'
-        )
-      </if>
-      <if test="status != null and !status.isEmpty()">
-        AND (enabled = #{status})
-      </if>
-</select>
+    <select id="findUsersByCriteria" parameterType="map" resultType="com.example.demo.admin.AdminDto$User">
+        SELECT username, name, email, phone, grade, joinday AS joinDate, enabled, LOWER(role) AS role
+        FROM member WHERE 1=1
+        <if test="search != null and !search.isEmpty()">
+            AND LOWER(name) LIKE '%' || LOWER(#{search}) || '%'
+        </if>
+        <if test="status != null and !status.isEmpty()">
+            AND enabled = #{status}
+        </if>
+    </select>
 
+    <!-- 주문 관리 -->
+    <select id="getAllOrders" resultType="com.example.demo.admin.AdminDto$Order">
+        SELECT order_no AS orderId, TO_CHAR(order_date, 'YYYY-MM-DD') AS orderDate,
+               (SELECT name FROM member WHERE username = orders.member_username) AS customerName,
+               order_status AS orderStatus, total_price AS totalAmount
+        FROM orders
+    </select>
 
+    <update id="updateOrderStatus" parameterType="map">
+        UPDATE orders SET order_status = #{status} WHERE order_no = #{orderId}
+    </update>
+
+    <select id="findOrdersByCriteria" parameterType="map" resultType="com.example.demo.admin.AdminDto$Order">
+        SELECT order_no AS orderId, TO_CHAR(order_date, 'YYYY-MM-DD') AS orderDate,
+               (SELECT name FROM member WHERE username = orders.member_username) AS customerName,
+               order_status AS orderStatus, total_price AS totalAmount
+        FROM orders WHERE 1=1
+        <if test="search != null and !search.isEmpty()">
+            AND (LOWER(order_status) LIKE '%' || LOWER(#{search}) || '%')
+        </if>
+    </select>
 </mapper>
+

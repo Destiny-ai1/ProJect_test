@@ -1,17 +1,17 @@
 package com.example.demo.admin;
 
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
-import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
+@PreAuthorize("hasRole('admin')") // 관리자 권한 제한
 public class AdminController {
 
     @Autowired
@@ -19,7 +19,6 @@ public class AdminController {
 
     // 사용자 관리 페이지
     @GetMapping("/members")
-    @PreAuthorize("hasRole('admin')")
     public String userManagementPage(Model model) {
         List<AdminDto.User> users = adminService.getAllUser();
         model.addAttribute("user", users);
@@ -29,7 +28,6 @@ public class AdminController {
     // 사용자 상태 활성화/비활성화
     @PatchMapping("/members/toggleStatus")
     @ResponseBody
-    @PreAuthorize("hasRole('admin')")
     public String toggleUserStatus(@RequestParam String username) {
         try {
             adminService.toggleUserStatus(username);
@@ -42,10 +40,37 @@ public class AdminController {
     // 사용자 검색 및 필터링
     @GetMapping("/members/search")
     @ResponseBody
-    @PreAuthorize("hasRole('admin')")
     public List<AdminDto.User> getFilteredUsers(@RequestParam(required = false) String search,
                                                 @RequestParam(required = false) String status) {
         return adminService.searchMembers(search, status);
+    }
+
+    // 주문 관리 페이지
+    @GetMapping("/orders")
+    public String orderManagementPage(Model model) {
+        List<AdminDto.Order> orders = adminService.getAllOrders();
+        model.addAttribute("ordersList", orders != null ? orders : new ArrayList<>());
+        return "admin/orders";
+    }
+
+    // 주문 상태 변경
+    @PatchMapping("/updateStatus")
+    @ResponseBody
+    public String updateOrderStatus(@RequestParam Long orderId, @RequestParam String status) {
+        try {
+            adminService.updateOrderStatus(orderId, status);
+            return "success";
+        } catch (IllegalArgumentException e) {
+            return "error: " + e.getMessage();
+        }
+    }
+
+    // 주문 검색 및 필터링
+    @GetMapping("/search")
+    @ResponseBody
+    public List<AdminDto.Order> getFilteredOrders(@RequestParam(required = false) String search,
+                                                  @RequestParam(required = false) String status) {
+        return adminService.searchOrders(search, status);
     }
 }
 

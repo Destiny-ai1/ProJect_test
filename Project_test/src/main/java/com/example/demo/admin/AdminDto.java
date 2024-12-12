@@ -18,4 +18,14 @@ public class AdminDto {
         private String role;
         private String status;
     }
+
+    @Data
+    @NoArgsConstructor
+    public static class Order {
+        private Long orderId;
+        private String orderDate;
+        private String customerName;
+        private String orderStatus;
+        private Double totalAmount;
+    }
 }
