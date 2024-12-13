@@ -41,6 +41,14 @@ public interface ItemDao {
     @Select("select case when item_jango>#{cartEa} then 1 else 0 end from item where item_no=#{itemNo} and rownum=1")
     public Boolean availableToOrder(Long itemNo, Integer cart_ea);
     
+    // 상품 번호가 장바구니에 존재하는 모든 항목 삭제 (모든 사용자)
+    @Delete("DELETE FROM cart WHERE item_no = #{itemNo}")
+    public void deleteFromCartByItemNo(Long itemNo);
+    
+    // 상품 번호가 일치하는 상품의 사이즈 정보 삭제
+    @Delete("DELETE FROM item_size WHERE item_no = #{itemNo}")
+    public Integer deleteItemSizeByItemNo(Long itemNo);
+    
     // 상품 번호가 일치하는 상품의 이미지정보 삭제
     @Delete("delete from item_image where item_no = #{itemNo}")
     public Integer deleteItemImageByItemNo(Long itemNo);
@@ -52,10 +60,6 @@ public interface ItemDao {
     // itemNo로 이미지 목록을 조회
     @Select("SELECT * FROM item_image WHERE item_no = #{itemNo}")
     public List<ItemImage> findByItemNo(Long itemNo); // 이 부분을 추가
-
-    // itemNo에 해당하는 모든 이미지를 삭제
-    @Delete("delete from item_image where item_no = #{itemNo}")
-    public void deleteByItemNo(Long itemNo);
 
     // 카테고리 번호에 해당하는 상품들을 조회하는 메서드
     public List<ItemList> findItemsByCategory(Long cno, String imageUrl);

@@ -23,4 +23,12 @@ public interface CategoryDao {
 	
 	// 특정 대분류에 해당하는 중간분류와 소분류를 조회
 	public List<Map> findCategoryByParentCno(Long cno);
+	
+	// 특정 카테고리에서 제외할 상품을 제외한 상품 목록 조회
+    @Select("SELECT * FROM items WHERE category_cno = #{categoryCno} AND cno != #{excludeCno}")
+    public List<Map> findItemsByCategoryExcluding(Long categoryCno, Long excludeCno);
+    
+    //  부모 cno가 2인 상품을 먼저 불러오고, 제외할 cno를 제외하는 쿼리
+    @Select("SELECT * FROM items WHERE category_cno IN (SELECT cno FROM category WHERE pno = 2) AND cno != #{excludeCno}")
+    public List<Map> findItemsByParentCategoryExcluding(Long excludeCno);
 }

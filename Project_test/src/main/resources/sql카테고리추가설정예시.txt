@@ -1,38 +1,30 @@
 --메인 대분류
 insert into category values(1, '스키', null);
-insert into category values(2, '스키용품', null);
+insert into category values(2, '스키/스노우보드 용품', null);
 insert into category values(3, '스노우보드', null);
-insert into category values(4, '스노우보드용품', null);
 insert into category values(1000, '고객센터', null);
 
---스키중분류
+--스키 소분류
 insert into category values(11, '폴', 1);
 insert into category values(12, '플레이트', 1);
 insert into category values(13, '부츠', 1);
 insert into category values(14, '스키의류', 1);
 
---스키용품 중분류
+--스키/보드 용품 소분류
 insert into category values(21, '고글', 2);
 insert into category values(22, '장갑', 2);
 insert into category values(23, '헬멧', 2);
-insert into category values(24, '스키가방', 2);
-insert into category values(25, '보호장비', 2);
-insert into category values(26, '악세서리', 2);
+insert into category values(24, '보호장비', 2);
+insert into category values(25, '악세서리', 2);
+insert into category values(26, '스키가방', 2);
+insert into category values(27, '보드가방', 2);
 
---스노우보드 중분류
+--스노우보드 소분류
 insert into category values(31, '데크', 3);
 insert into category values(32, '바인딩', 3);
 insert into category values(33, '부츠', 3);
 insert into category values(34, '보드용상의', 3);
 insert into category values(35, '보드용하의', 3);
-
---스키용품 중분류
-insert into category values(21, '고글', 4);
-insert into category values(22, '장갑', 4);
-insert into category values(23, '헬멧', 4);
-insert into category values(27, '보드가방', 4);
-insert into category values(25, '보호장비', 4);
-insert into category values(26, '악세서리', 4);
 
 --고객센터 중분류
 insert into category values(1001, '공지사항', 1000);

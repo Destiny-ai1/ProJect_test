@@ -8,7 +8,8 @@ alter user c##winter_shop default tablespace users quota unlimited on users;
 drop table member;
 drop table category;
 drop table item;
-drop table image;
+drop table item_image;
+drop table item_size;
 drop table cart;
 drop table address;
 drop table board;
@@ -18,7 +19,15 @@ drop table card;
 drop table payment;
 drop table review;
 
-drop sequence item_seq;
+-- 프로시저 삭제
+DROP PROCEDURE add_item_sizes;
+
+-- 트리거 삭제
+DROP TRIGGER trg_item_size_default;
+
+-- 시퀀스 삭제
+DROP SEQUENCE item_seq;
+DROP SEQUENCE item_image_seq;
 
 PURGE RECYCLEBIN;
 

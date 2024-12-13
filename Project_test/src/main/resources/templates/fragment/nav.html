@@ -85,64 +85,64 @@ body {
 </style>
 </head>
 <body>
-   <!-- 스크롤 시 고정되는 메뉴 -->
-   <div class="fixed-menu" id="navigator">
-      <div class="dropdown">
-         <p><a href="/category/1/items" class="nav-link">스키</a></p>
-         <div class="dropdown-content">
-            <p><a href="/category/11/items" class="nav-link">폴</a></p>
-            <p><a href="/category/12/items" class="nav-link">플레이트</a></p>
-            <p><a href="/category/13/items" class="nav-link">부츠</a></p>
-            <p><a href="/category/14/items" class="nav-link">스키의류</a></p>
-         </div>
-      </div>
-      <div class="dropdown">
-         <p><a href="/category/2/items" class="nav-link">스키용품</a></p>
-         <div class="dropdown-content">
-            <p><a href="/category/21/items" class="nav-link">고글</a></p>
-            <p><a href="/category/22/items" class="nav-link">장갑</a></p>
-            <p><a href="/category/23/items" class="nav-link">헬멧</a></p>
-            <p><a href="/category/24/items" class="nav-link">스키가방</a></p>
-            <p><a href="/category/25/items" class="nav-link">보호장비</a></p>
-            <p><a href="/category/26/items" class="nav-link">악세서리</a></p>
-         </div>
-      </div>
-      <div class="dropdown">
-         <p><a href="/category/3/items" class="nav-link">스노우보드</a></p>
-         <div class="dropdown-content">
-            <p><a href="/category/31/items" class="nav-link">데크</a></p>
-            <p><a href="/category/32/items" class="nav-link">바인딩</a></p>
-            <p><a href="/category/33/items" class="nav-link">부츠</a></p>
-            <p><a href="/category/34/items" class="nav-link">보드용상의</a></p>
-            <p><a href="/category/35/items" class="nav-link">보드용하의</a></p>
-         </div>
-      </div>
-      <div class="dropdown">
-         <p><a href="/category/4/items" class="nav-link">스노우보드용품</a></p>
-         <div class="dropdown-content">
-            <p><a href="/category/21/items" class="nav-link">고글</a></p>
-            <p><a href="/category/22/items" class="nav-link">장갑</a></p>
-            <p><a href="/category/23/items" class="nav-link">헬멧</a></p>
-            <p><a href="/category/27/items" class="nav-link">보드가방</a></p>
-            <p><a href="/category/25/items" class="nav-link">보호장비</a></p>
-            <p><a href="/category/26/items" class="nav-link">악세서리</a></p>
-         </div>
-      </div>
-   </div>
+    <div class="fixed-menu">
+        <!-- 스키 카테고리 -->
+        <div class="dropdown">
+            <p>
+                <a href="/category/1/items" class="nav-link">스키</a>
+            </p>
+            <div class="dropdown-content" id="ski-items-list">
+                <p><a href="/category/11/items" class="nav-link">폴</a></p>
+                <p><a href="/category/12/items" class="nav-link">플레이트</a></p>
+                <p><a href="/category/13/items" class="nav-link">부츠</a></p>
+                <p><a href="/category/14/items" class="nav-link">스키의류</a></p>
+            </div>
+        </div>
 
-<script>
-$(document).ready(function () {
-   // 네비게이션 바의 초기 위치 저장
-   var navOffset = $("#navigator").offset().top;
+        <!-- 스키용품 카테고리 -->
+        <div class="dropdown">
+            <p>
+                <a href="/category/2/items?excludeCno=27" class="nav-link" id="ski-items">스키용품</a>
+            </p>
+            <div class="dropdown-content" id="ski-products-list">
+                <p><a href="/category/21/items" class="nav-link">고글</a></p>
+                <p><a href="/category/22/items" class="nav-link">장갑</a></p>
+                <p><a href="/category/23/items" class="nav-link">헬멧</a></p>
+                <p><a href="/category/24/items" class="nav-link">스키가방</a></p>
+                <p><a href="/category/25/items" class="nav-link">보호장비</a></p>
+                <p><a href="/category/26/items" class="nav-link">악세서리</a></p>
+            </div>
+        </div>
+        
+        <!-- 스노우보드 카테고리 -->
+        <div class="dropdown">
+            <p>
+                <a href="/category/3/items" class="nav-link">스노우보드</a>
+            </p>
+            <div class="dropdown-content" id="snowboard-items-list">
+                <!-- 항상 표시되는 하위 카테고리들 -->
+                <p><a href="/category/31/items" class="nav-link">데크</a></p>
+                <p><a href="/category/32/items" class="nav-link">바인딩</a></p>
+                <p><a href="/category/33/items" class="nav-link">부츠</a></p>
+                <p><a href="/category/34/items" class="nav-link">보드용상의</a></p>
+                <p><a href="/category/35/items" class="nav-link">보드용하의</a></p>
+            </div>
+        </div>
 
-   $(window).on("scroll", function () {
-      if ($(window).scrollTop() >= navOffset) {
-         $("#navigator").addClass("fixed");
-      } else {
-         $("#navigator").removeClass("fixed");
-      }
-   });
-});
-</script>
+        <!-- 보드용품 카테고리 -->
+        <div class="dropdown">
+            <p>
+                <a href="/category/2/items?excludeCno=26" class="nav-link">보드용품</a>
+            </p>
+            <div class="dropdown-content" id="board-products-list">
+                <p><a href="/category/21/items" class="nav-link">고글</a></p>
+                <p><a href="/category/22/items" class="nav-link">장갑</a></p>
+                <p><a href="/category/23/items" class="nav-link">헬멧</a></p>
+                <p><a href="/category/27/items" class="nav-link">보드가방</a></p>
+                <p><a href="/category/25/items" class="nav-link">보호장비</a></p>
+                <p><a href="/category/26/items" class="nav-link">악세서리</a></p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

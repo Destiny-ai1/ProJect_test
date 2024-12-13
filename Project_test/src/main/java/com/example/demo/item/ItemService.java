@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,32 +121,44 @@ public class ItemService {
 
 	// 상품 번호에 해당하는 이미지 정보 삭제
 	// 상품 정보 삭제
-	@Transactional
-	public boolean deleteItem(Long itemNo) {
-		// 1. 상품에 관련된 이미지들 조회 (item_image 테이블에서 해당 itemNo로 이미지 찾기)
-		List<ItemImage> itemImages = itemDao.findByItemNo(itemNo); // imageDao가 아니라 itemDao에서 findByItemNo 호출
+	 @Transactional
+	    public boolean deleteItem(Long itemNo) {
+	        try {
+	            // 1. 장바구니에서 해당 상품 삭제
+	            itemDao.deleteFromCartByItemNo(itemNo);  // 장바구니에서 모든 사용자의 해당 상품 삭제
 
-		// 2. 이미지 파일 시스템에서 삭제
-		for (ItemImage itemImage : itemImages) {
-			String imagePath = ItemImageSaveLoad.IMAGE_FOLDER + itemImage.getImageName();
-			File imageFile = new File(imagePath);
+	            // 2. 상품 사이즈 정보 삭제 (item_size 테이블에서 해당 itemNo에 맞는 사이즈 정보 삭제)
+	            itemDao.deleteItemSizeByItemNo(itemNo);
 
-			if (imageFile.exists()) {
-				boolean isDeleted = imageFile.delete(); // 실제 파일 삭제
-				if (!isDeleted) {
-					throw new RuntimeException("이미지 파일 삭제 실패: " + imagePath);
-				}
-			}
-		}
+	            // 3. 상품에 관련된 이미지들 조회 (item_image 테이블에서 해당 itemNo로 이미지 찾기)
+	            List<ItemImage> itemImages = itemDao.findByItemNo(itemNo); // itemDao에서 findByItemNo 호출
 
-		// 3. DB에서 이미지 정보 삭제 (item_image 테이블에서 해당 itemNo에 맞는 이미지 삭제)
-		itemDao.deleteItemImageByItemNo(itemNo); // imageDao가 아니라 itemDao의 deleteItemImageByItemNo 호출
+	            // 4. 이미지 파일 시스템에서 삭제
+	            for (ItemImage itemImage : itemImages) {
+	                String imagePath = ItemImageSaveLoad.IMAGE_FOLDER + itemImage.getImageName();
+	                File imageFile = new File(imagePath);
 
-		// 4. 상품 정보 삭제
-		itemDao.deleteItemByItemNo(itemNo); // 상품 삭제 (상품 테이블에서 itemNo로 삭제)
+	                if (imageFile.exists()) {
+	                    boolean isDeleted = imageFile.delete(); // 실제 파일 삭제
+	                    if (!isDeleted) {
+	                        throw new RuntimeException("이미지 파일 삭제 실패: " + imagePath);
+	                    }
+	                }
+	            }
 
-		return true; // 삭제 성공 시 true 반환
-	}
+	            // 5. DB에서 이미지 정보 삭제 (item_image 테이블에서 해당 itemNo에 맞는 이미지 삭제)
+	            itemDao.deleteItemImageByItemNo(itemNo); // item_image 테이블에서 이미지 삭제
+
+	            // 6. 상품 정보 삭제 (item 테이블에서 itemNo로 삭제)
+	            itemDao.deleteItemByItemNo(itemNo); // 상품 삭제 (상품 테이블에서 itemNo로 삭제)
+
+	            return true; // 삭제 성공 시 true 반환
+	        } catch (Exception e) {
+	            // 예외 발생 시 롤백 처리 (트랜잭션)
+	            throw new RuntimeException("상품 삭제 실패", e);
+	        }
+	    }
+
 
 	// 상품 상세 조회
 	public ItemDto.Read read(Long itemNo, String imageUrl, String itemSize) {
@@ -187,38 +200,43 @@ public class ItemService {
 		}
 	}
 
-	public List<ItemDto.ItemList> findItemsByCategory(Long cno, String imageUrl) {
-		if (imageUrl == null || imageUrl.trim().isEmpty()) {
-			imageUrl = "/api/images?imagename="; // 기본 이미지 URL
-		}
+	public List<ItemDto.ItemList> findItemsByCategory(Long cno, String imageUrl, Long excludeCno) {
+	    if (imageUrl == null || imageUrl.trim().isEmpty()) {
+	        imageUrl = "/api/images?imagename="; // 기본 이미지 URL
+	    }
 
-		// 카테고리별 상품 목록 조회
-		List<ItemDto.ItemList> items = itemDao.findItemsByCategory(cno, imageUrl);
+	    // 카테고리별 상품 목록 조회
+	    List<ItemDto.ItemList> items = itemDao.findItemsByCategory(cno, imageUrl);
 
-		// 상품 번호를 기준으로 중복 제거
-		Map<Long, ItemDto.ItemList> uniqueItems = new LinkedHashMap<>();
+	    // 'excludeCno'가 주어졌다면 해당 카테고리 제외
+	    if (excludeCno != null) {
+	        items.removeIf(item -> item.getCno().equals(excludeCno)); // cno가 excludeCno와 일치하는 항목 제거
+	    }
 
-		for (ItemDto.ItemList item : items) {
-			if (!uniqueItems.containsKey(item.getItemNo())) {
-				uniqueItems.put(item.getItemNo(), item);
-			} else {
-				// 기존 항목에 이미지를 추가
-				uniqueItems.get(item.getItemNo()).setItemImage(item.getItemImage());
-			}
-		}
+	    // 상품 번호를 기준으로 중복 제거
+	    Map<Long, ItemDto.ItemList> uniqueItems = new LinkedHashMap<>();
 
-		// 중복 제거된 상품 목록
-		List<ItemDto.ItemList> itemList = new ArrayList<>(uniqueItems.values());
+	    for (ItemDto.ItemList item : items) {
+	        if (!uniqueItems.containsKey(item.getItemNo())) {
+	            uniqueItems.put(item.getItemNo(), item);
+	        } else {
+	            // 기존 항목에 이미지를 추가
+	            uniqueItems.get(item.getItemNo()).setItemImage(item.getItemImage());
+	        }
+	    }
 
-		// 각 상품에 대해 평균 평점 계산
-		for (ItemDto.ItemList item : itemList) {
-			// 상품 번호를 기준으로 평균 평점 조회
-			Double avgRating = itemDao.findAverageRatingByItemNo(item.getItemNo());
-			// 평점이 null이면 '평점 없음' 혹은 0.0 처리
-			item.setAvgRating(avgRating != null ? avgRating : 0.0);
-		}
+	    // 중복 제거된 상품 목록
+	    List<ItemDto.ItemList> itemList = new ArrayList<>(uniqueItems.values());
 
-		return itemList;
+	    // 각 상품에 대해 평균 평점 계산
+	    for (ItemDto.ItemList item : itemList) {
+	        // 상품 번호를 기준으로 평균 평점 조회
+	        Double avgRating = itemDao.findAverageRatingByItemNo(item.getItemNo());
+	        // 평점이 null이면 '평점 없음' 혹은 0.0 처리
+	        item.setAvgRating(avgRating != null ? avgRating : 0.0);
+	    }
+
+	    return itemList;
 	}
 
 	// 상품 가격 변경-어드민 권한

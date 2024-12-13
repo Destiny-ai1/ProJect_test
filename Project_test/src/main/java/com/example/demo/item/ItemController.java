@@ -76,14 +76,6 @@ public class ItemController {
 
         return new ModelAndView("item/read").addObject("result", result); // 상품 상세 정보와 재고 메시지 전달
     }
-    
-    // 하위 카테고리에 해당하는 상품페이지로 이동
-    @GetMapping("/category/{cno}/items")
-    public ModelAndView getItemsByCategory(@PathVariable Long cno, @RequestParam(required = false) String imageUrl) {
-        List<ItemDto.ItemList> categoryResult = itemService.findItemsByCategory(cno, imageUrl);
-        return new ModelAndView("item/miniCategory/list")
-                .addObject("categoryResult", categoryResult);
-    }
 
     // 재고 메시지 조회 (사이즈 선택에 따른 재고 상태)
     @PostMapping("/get-stock-message")
