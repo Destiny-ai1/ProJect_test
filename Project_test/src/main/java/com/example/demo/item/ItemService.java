@@ -124,6 +124,9 @@ public class ItemService {
 	 @Transactional
 	    public boolean deleteItem(Long itemNo) {
 	        try {
+	        	// 0. 리뷰에서 해당하는 리뷰 삭제
+	        	itemDao.deletereviewByItemNo(itemNo);	// 해당 상품번호의 리뷰 모두 삭제
+	        	
 	            // 1. 장바구니에서 해당 상품 삭제
 	            itemDao.deleteFromCartByItemNo(itemNo);  // 장바구니에서 모든 사용자의 해당 상품 삭제
 

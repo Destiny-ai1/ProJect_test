@@ -41,9 +41,14 @@ public interface ItemDao {
     @Select("select case when item_jango>#{cartEa} then 1 else 0 end from item where item_no=#{itemNo} and rownum=1")
     public Boolean availableToOrder(Long itemNo, Integer cart_ea);
     
+    // 상품 번호가 일치하는 리뷰 정보 삭제
+    @Delete("DELETE FROM review WHERE item_no = #{itemNo}")
+    public Integer deletereviewByItemNo(Long itemNo);
+    
     // 상품 번호가 장바구니에 존재하는 모든 항목 삭제 (모든 사용자)
     @Delete("DELETE FROM cart WHERE item_no = #{itemNo}")
     public void deleteFromCartByItemNo(Long itemNo);
+    
     
     // 상품 번호가 일치하는 상품의 사이즈 정보 삭제
     @Delete("DELETE FROM item_size WHERE item_no = #{itemNo}")
