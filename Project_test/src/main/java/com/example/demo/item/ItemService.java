@@ -281,6 +281,36 @@ public class ItemService {
 
 		return true;
 	}
+	
+	// 상품 사이즈 목록 조회
+    public List<String> getItemSizes(Long itemNo) {
+        return itemDao.findSizesByItemNo(itemNo);
+    }
+
+    // 상품 사이즈별 재고 조회
+    public Long getItemStock(Long itemNo, String itemSize) {
+        return itemDao.findJangoByItemNoAndItemSize(itemNo, itemSize);
+    }
+	
+	// 재고 업데이트
+	@Transactional
+    public boolean updateJango(ItemDto.jango_update jangoUpdateDto, String username) {
+        Long itemNo = jangoUpdateDto.getItemNo();
+        String itemSize = jangoUpdateDto.getItemSize();
+        Long newJango = jangoUpdateDto.getItemJango();
+
+        // 1. 현재 재고 값 조회
+        Long currentJango = itemDao.findJangoByItemNoAndItemSize(itemNo, itemSize);
+        if (currentJango == null) {
+            return false; // 해당 사이즈에 대한 재고 정보가 없을 경우
+        }
+
+        // 2. 재고 값 업데이트
+        itemDao.updateJango(itemNo, itemSize, newJango);
+        
+        // 3. 업데이트 성공
+        return true;
+    }
 
 	// 상품 번호로 전체 상품 정보를 반환하는 메소드
 	public ItemDto.Read getItemByNo(Long itemNo, String language) {

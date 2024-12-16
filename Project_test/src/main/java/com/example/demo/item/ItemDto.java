@@ -128,6 +128,13 @@ public class ItemDto {
     }
     
     @Data
+    public static class jango_update {
+    	private Long itemNo;
+    	private String itemSize;
+    	private Long itemJango;
+    }
+    
+    @Data
     public static class stockMessage {
     	private Long itemNo;
     	private Integer itemJango;

@@ -31,11 +31,7 @@ public interface ItemDao {
     public List<ItemDto.ItemList> findAll(@Param("imageUrl") String imageUrl);
 
     // 상품 번호로 상품 찾기
-    public ItemDto.Read findById(Long itemNo, String imageUrl);
-    
-    // 상품에 해당하는 가격 찾기
-    @Select("select item_price from item where item_no=#{itemNo} and rownum=1")
-    public Integer findPriceByItemNo(Long itemNo);
+    public ItemDto.Read findById(Long itemNo, String imageUrl);    
     
     // 재고가 1개 이상인 상품은 주문 가능
     @Select("select case when item_jango>#{cartEa} then 1 else 0 end from item where item_no=#{itemNo} and rownum=1")
@@ -76,7 +72,23 @@ public interface ItemDao {
     @Select("SELECT item_jango FROM item_size WHERE item_no = #{itemNo} AND item_size = #{itemSize}")
     Integer getStockByItemSize(@Param("itemNo") Long itemNo, @Param("itemSize") String itemSize);
     
+    // 상품에 해당하는 가격 찾기
+    @Select("select item_price from item where item_no=#{itemNo} and rownum=1")
+    public Integer findPriceByItemNo(Long itemNo);
+    
+    // 상품 사이즈 목록 조회
+    @Select("SELECT item_size FROM item_size WHERE item_no = #{itemNo}")
+    List<String> findSizesByItemNo(Long itemNo);
+    
+    // 상품에 해당하는 재고 찾기
+    @Select("SELECT item_jango FROM item_size WHERE item_no = #{itemNo} AND item_size = #{itemSize} AND ROWNUM = 1")
+    public Long findJangoByItemNoAndItemSize(Long itemNo, String itemSize);
+
     // 상품의 가격을 변경
     @Update("UPDATE item SET item_price = #{itemPrice} WHERE item_no = #{itemNo}")
     void updatePrice(@Param("itemNo") Long itemNo, @Param("itemPrice") Integer itemPrice);
+    
+    // 상품의 재고 변경
+    @Update("UPDATE item_size SET item_jango = #{itemJango} WHERE item_no = #{itemNo} AND item_size = #{itemSize}")
+    void updateJango(Long itemNo, String itemSize, Long itemJango);
 }
