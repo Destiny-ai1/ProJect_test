@@ -75,49 +75,51 @@ public class ItemService {
 
 	@Transactional
 	public void save(ItemDto.Create dto) {
-		// 1. 상품 정보를 DB에 저장
-		Item item = dto.toEntity();
-		itemDao.save(item);
+	    // 1. 상품 정보를 DB에 저장
+	    Item item = dto.toEntity();  // DTO에서 엔티티로 변환
+	    item.setItemInfo(dto.getItemInfo());  // CKEditor에서 입력한 HTML을 그대로 저장
+	    itemDao.save(item);  // DB에 저장
 
-		Long itemNo = item.getItemNo();
-		if (itemNo == null) {
-			throw new RuntimeException("상품 저장 실패: itemNo가 생성되지 않았습니다.");
-		}
+	    Long itemNo = item.getItemNo();
+	    if (itemNo == null) {
+	        throw new RuntimeException("상품 저장 실패: itemNo가 생성되지 않았습니다.");
+	    }
 
-		// 2. 이미지 저장
-		List<MultipartFile> images = dto.getItemImages();
-		if (images == null || images.isEmpty()) {
-			images = new ArrayList<>();
-		}
+	    // 2. 이미지 저장
+	    List<MultipartFile> images = dto.getItemImages();
+	    if (images == null || images.isEmpty()) {
+	        images = new ArrayList<>();
+	    }
 
-		for (long i = 0; i < images.size(); i++) {
-			MultipartFile imageFile = images.get((int) i);
-			if (imageFile.isEmpty()) {
-				continue;
-			}
+	    for (long i = 0; i < images.size(); i++) {
+	        MultipartFile imageFile = images.get((int) i);
+	        if (imageFile.isEmpty()) {
+	            continue;
+	        }
 
-			// 파일 확장자 추출
-			String extension = FilenameUtils.getExtension(imageFile.getOriginalFilename());
-			String saveFilename = UUID.randomUUID().toString() + "." + extension;
+	        // 파일 확장자 추출
+	        String extension = FilenameUtils.getExtension(imageFile.getOriginalFilename());
+	        String saveFilename = UUID.randomUUID().toString() + "." + extension;
 
-			// 저장할 파일 경로 지정
-			File file = new File(ItemImageSaveLoad.IMAGE_FOLDER, saveFilename);
-			try {
-				// 이미지 파일을 실제 디스크에 저장
-				imageFile.transferTo(file);
+	        // 저장할 파일 경로 지정
+	        File file = new File(ItemImageSaveLoad.IMAGE_FOLDER, saveFilename);
+	        try {
+	            // 이미지 파일을 실제 디스크에 저장
+	            imageFile.transferTo(file);
 
-				// item_image 테이블에 이미지 저장
-				ItemImage itemImage = new ItemImage(null, itemNo, saveFilename);
-				imageDao.save(itemImage);
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new RuntimeException("이미지 저장 중 오류 발생", e);
-			}
-		}
+	            // item_image 테이블에 이미지 저장
+	            ItemImage itemImage = new ItemImage(null, itemNo, saveFilename);
+	            imageDao.save(itemImage);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	            throw new RuntimeException("이미지 저장 중 오류 발생", e);
+	        }
+	    }
 
-		// 3. 상품 사이즈별 재고 정보 저장
-		saveItemSizes(itemNo, dto.getItemSizes());
+	    // 3. 상품 사이즈별 재고 정보 저장
+	    saveItemSizes(itemNo, dto.getItemSizes());
 	}
+
 
 	// 상품 번호에 해당하는 이미지 정보 삭제
 	// 상품 정보 삭제
@@ -163,32 +165,51 @@ public class ItemService {
 	    }
 
 
-	// 상품 상세 조회
-	public ItemDto.Read read(Long itemNo, String imageUrl, String itemSize) {
-		if (imageUrl == null || imageUrl.trim().isEmpty()) {
-			imageUrl = "/api/images?imagename="; // 기본 이미지 URL
-		}
+	 // itemService의 read 메소드
+	 public ItemDto.Read read(Long itemNo, String imageUrl, String itemSize) {
+	     // 이미지 URL이 비어있으면 기본 이미지 URL을 설정
+	     if (imageUrl == null || imageUrl.trim().isEmpty()) {
+	         imageUrl = "/api/images?imagename="; // 기본 이미지 URL
+	     }
 
-		// DB에서 상품 정보를 조회하며, 이미지 URL도 함께 가져옵니다.
-		ItemDto.Read itemDto = itemDao.findById(itemNo, imageUrl);
+	     // DB에서 상품 정보를 조회하며, 이미지 URL도 함께 가져옵니다.
+	     ItemDto.Read itemDto = itemDao.findById(itemNo, imageUrl);
 
-		// 만약 아이템에 이미지가 없다면 기본 이미지 경로 설정
-		if (itemDto != null && (itemDto.getItemImages() == null || itemDto.getItemImages().isEmpty())) {
-			itemDto.setItemImages(List.of("normal/default-image.jpg"));
-		}
+	     // 만약 아이템에 이미지가 없다면 기본 이미지 경로 설정
+	     if (itemDto != null && (itemDto.getItemImages() == null || itemDto.getItemImages().isEmpty())) {
+	         itemDto.setItemImages(List.of("normal/default-image.jpg")); // 기본 이미지 설정
+	     }
 
-		// 평균 평점 계산
-		Double avgRating = itemDao.findAverageRatingByItemNo(itemNo);
-		itemDto.setAvgRating(avgRating); // 평점 추가
+	     // 평균 평점 계산 (null이면 0으로 설정)
+	     Double avgRating = itemDao.findAverageRatingByItemNo(itemNo);
+	     itemDto.setAvgRating(avgRating != null ? avgRating : 0.0); // 평균 평점이 없으면 0으로 설정
 
-		// 사이즈 선택이 있을 경우, 해당 사이즈에 대한 재고 상태 확인
-		if (itemDto != null && itemSize != null) {
-			String stockMessage = getStockMessage(itemNo, itemSize);
-			itemDto.setStockMessage(stockMessage);
-		}
+	     // `itemInfo` 줄바꿈을 <br> 태그로 변환하여 처리
+	     if (itemDto != null) {
+	         String itemInfo = itemDto.getItemInfo();
+	         
+	         // 줄바꿈을 <br> 태그로 변환
+	         if (itemInfo != null) {
+	             itemInfo = itemInfo.replace("\n", "<br>");  // 줄바꿈을 <br> 태그로 변환
 
-		return itemDto;
-	}
+	             // 중복된 <p> 태그 제거
+	             itemInfo = itemInfo.replaceAll("(<p>\\s*)+","<p>").replaceAll("(\\s*</p>)+", "</p>");
+
+	             itemDto.setItemInfo(itemInfo);  // 변환된 itemInfo 설정
+	         }
+	     }
+
+	     // 사이즈 선택이 있을 경우, 해당 사이즈에 대한 재고 상태 확인
+	     if (itemDto != null && itemSize != null && !itemSize.trim().isEmpty()) {
+	         String stockMessage = getStockMessage(itemNo, itemSize);
+	         itemDto.setStockMessage(stockMessage); // 사이즈별 재고 메시지 설정
+	     } else {
+	         // 사이즈가 없거나 비어있으면 기본 재고 메시지 처리 (예: '전체 재고')
+	         itemDto.setStockMessage("전체 재고 확인");
+	     }
+
+	     return itemDto;
+	 }
 
 	// 재고 수량이 10개 미만이면 메시지 출력
 	public String getStockMessage(Long itemNo, String itemSize) {

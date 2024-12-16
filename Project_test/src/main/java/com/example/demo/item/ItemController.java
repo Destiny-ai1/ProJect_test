@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.util.HtmlUtils;
 
 import com.example.demo.category.CategoryService;
 
@@ -43,7 +45,7 @@ public class ItemController {
         return new ModelAndView("item/add").addObject("category", majorCategory); // 카테고리 추가
     }
 
-    // 관리자의 상품 추가 후 루트페이지로 이동
+    // 상품 추가 후 루트 페이지로 이동
     @PostMapping("/item/add")
     public ModelAndView addItem(@Valid ItemDto.Create dto, BindingResult br) {
         if (br.hasErrors()) {
@@ -52,22 +54,32 @@ public class ItemController {
                 .addObject("category", majorCategory)  // 카테고리 추가
                 .addObject("dto", dto);  // 입력된 데이터를 폼에 다시 채우기
         }
+
+        // 상품 저장 로직 처리
         itemService.save(dto);  // 유효성 검사 통과 시, 상품 저장
+
         return new ModelAndView("redirect:/");  // 상품 리스트로 리다이렉트
     }
 
-    // 상품 상세 정보 페이지 이동
+ // 상품 상세 정보 페이지 이동
     @GetMapping("/item/read/{itemNo}")
     public ModelAndView read(@PathVariable Long itemNo, 
                              @RequestParam(required = false) String imageUrl, 
                              @RequestParam(required = false) String itemSize) {
         ItemDto.Read result = itemService.read(itemNo, imageUrl, itemSize);
 
-        // 상품이 없다면 에러 페이지로 리다이렉트
+        // 만약 itemInfo가 존재하면, HTML 태그를 제거
+        if (result != null && result.getItemInfo() != null) {
+            // HTML 태그 제거
+            String itemInfoWithoutTags = result.getItemInfo().replaceAll("<[^>]*>", "");
+            result.setItemInfo(itemInfoWithoutTags); // HTML 태그 제거된 값으로 업데이트
+        }
+
+        // 상품이 없으면 아이템 추가 페이지로 리다이렉트
         if (result == null) {
             return new ModelAndView("redirect:/item/add"); // 상품이 없으면 아이템 추가 페이지로 리다이렉트
         }
-        
+
         // 선택된 사이즈에 맞는 재고 메시지 설정
         if (itemSize != null) {
             String stockMessage = itemService.getStockMessage(itemNo, itemSize);

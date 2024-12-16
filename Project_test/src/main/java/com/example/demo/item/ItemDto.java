@@ -26,7 +26,7 @@ public class ItemDto {
         private Integer itemSellQty; // 상품 판매수
         private Long reviewEa;		// 리뷰 갯수
         private String itemImage; // 이미지 URL
-        private Long cno;         // 카테고리 번호 (cno 추가)
+        private Long cno;         // 카테고리 번호
         private Double avgRating;	// 리뷰 평균 평점
         // 재고 상태 메시지
      	private String stockMessage; 
@@ -64,8 +64,8 @@ public class ItemDto {
         private String itemInfo;    // 상품 정보
         @DecimalMin(value="1000", message="가격은 1000원이상이어야합니다")
         private Integer itemPrice;  // 가격
-        @DecimalMin(value="1", message="잔고는 1개이상이어야 합니다")
-        private Integer itemJango;  // 잔고
+        @DecimalMin(value="1", message="재고는 1개이상이어야 합니다")
+        private Integer itemJango;  // 재고
         private Integer itemSellQty; // 판매 수량
         private String itemSize; 	// 상품 사이즈
         private Integer reviewEa;   // 리뷰 수
@@ -73,7 +73,6 @@ public class ItemDto {
 
         private List<MultipartFile> itemImages; // 이미지 파일 리스트
         
-        // 새로 추가된 필드
         private List<ItemSizeDto> itemSizes;  // 상품 사이즈와 재고 정보를 담을 리스트
 
         // Entity 객체로 변환

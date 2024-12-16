@@ -24,16 +24,27 @@
 }
 </style>
 <script>
-	$(document).ready(function() {
-		// 기본 썸네일 선택 (첫 번째 이미지 선택)
-		$('.thumbnail:first-of-type').addClass("choice");
+	$(document).ready(
+			function() {
+				// 기본 썸네일 선택 (첫 번째 이미지 선택)
+				$('.thumbnail:first-of-type').addClass("choice");
 
-		$('.thumbnail').click(function() {
-			$('.thumbnail').removeClass("choice");
-			$(this).addClass("choice");
-			$('#image').attr('src', $(this).attr('src'));
-		});
-	});
+				$('.thumbnail').click(function() {
+					$('.thumbnail').removeClass("choice");
+					$(this).addClass("choice");
+					$('#image').attr('src', $(this).attr('src'));
+				});
+
+				// itemInfo에서 중복된 <p> 태그를 제거하는 작업
+				var itemInfo = $('#info').html();
+
+				// <p> 태그 중복 제거 (연속된 <p> 태그를 하나로 합침)
+				itemInfo = itemInfo.replace(/(<p>\s*)+/g, "<p>").replace(
+						/(\s*<\/p>)+/g, "</p>");
+
+				// 수정된 HTML을 다시 #info에 삽입
+				$('#info').html(itemInfo);
+			});
 </script>
 <title>상품 상세</title>
 </head>
@@ -74,13 +85,9 @@
 								<strong>평균 평점:</strong> <span th:text="${result.avgRating}"></span>
 							</p>
 						</div>
-
-						<!-- 재고 상태 메시지 표시 -->
-						<div th:if="${result.stockMessage != null}">
-							<p th:text="${result.stockMessage}" class="text-danger"></p>
-						</div>
-
+						
 						<p id="info" th:utext="${result.itemInfo}">상품 정보</p>
+
 						<!-- 재고 메시지를 출력할 부분 -->
 						<div id="stock-message" class="text-danger">
 							<!-- 상품 상세 페이지 로드 시 기본 재고 메시지가 있으면 여기 표시 -->
@@ -188,7 +195,7 @@
 				// 선택한 사이즈에 맞는 재고 메시지 AJAX 요청
 				$.ajax({
 					type : "POST",
-					url : "/get-stock-message",
+					url : "/get-stock-message", // 서버 API URL
 					data : {
 						itemNo : itemNo,
 						itemSize : itemSize
@@ -203,6 +210,26 @@
 				});
 			});
 		});
+	</script>
+	<script>
+		$(document).ready(
+				function() {
+					// #info 요소 내에서 중복된 <p> 태그 처리
+					var itemInfoContent = $('#info').html();
+
+					// <p> 태그가 중복된 경우 정리 (여러 개의 <p> 태그를 하나로 합침)
+					if (itemInfoContent) {
+						// <p> 태그 사이에 불필요한 공백이나 다른 태그가 들어간 경우를 모두 정리
+						itemInfoContent = itemInfoContent.replace(/(<p>\s*)+/g,
+								"<p>").replace(/(\s*<\/p>)+/g, "</p>");
+
+						// <p> 태그 내부의 불필요한 내용까지 처리하려면 아래와 같은 방법을 사용할 수 있음
+						itemInfoContent = itemInfoContent
+								.replace(/<\/?p>/g, ""); // 모든 <p> 태그를 제거
+
+						$('#info').html(itemInfoContent); // 수정된 내용으로 다시 설정
+					}
+				});
 	</script>
 </body>
 </html>

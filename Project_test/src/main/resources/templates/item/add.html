@@ -133,15 +133,19 @@ $(document).ready(function() {
 				<div>
 					<select id="major" class="form-select">
 						<option disabled selected>대분류 선택</option>
-						<option th:each="m:${category}" th:if="${m.CNO} != 1000" th:text="${m.CNAME}" th:value="${m.CNO}"></option>
+						<option th:each="m:${category}" th:if="${m.CNO} != 1000"
+							th:text="${m.CNAME}" th:value="${m.CNO}"></option>
 					</select> <select id="small" class="form-select" name="cno">
 						<option disabled selected>소분류 선택</option>
 					</select>
 				</div>
 				<div class="mb-3 mt-3">
-					<input type="file" name="itemImages" class="images form-control" accept=".jpg,.jpeg,.png,.gif,.webp">
-					<input type="file" name="itemImages" class="images form-control" accept=".jpg,.jpeg,.png,.gif,.webp">
-					<input type="file" name="itemImages" class="images form-control" accept=".jpg,.jpeg,.png,.gif,.webp">
+					<input type="file" name="itemImages" class="images form-control"
+						accept=".jpg,.jpeg,.png,.gif,.webp"> <input type="file"
+						name="itemImages" class="images form-control"
+						accept=".jpg,.jpeg,.png,.gif,.webp"> <input type="file"
+						name="itemImages" class="images form-control"
+						accept=".jpg,.jpeg,.png,.gif,.webp">
 				</div>
 				<div class="mb-3 mt-3">
 					<label for="name" class="form-label">제품명:</label> <input
@@ -159,17 +163,10 @@ $(document).ready(function() {
 						placeholder="재고..." name="itemJango">
 				</div>
 				<div class="mb-3 mt-3">
-					<label for="item_size" class="form-label">사이즈:</label> <select
-						id="item_size" class="form-select" name="itemSize">
-						<option value="Small">Small</option>
-						<option value="Middle">Middle</option>
-						<option value="Large">Large</option>
-						<option value="XLarge">XLarge</option>
-					</select>
-				</div>
-				<div class="mb-3 mt-3">
+					<label for="itemInfo" class="form-label">상품 설명:</label>
 					<textarea id="itemInfo" name="itemInfo"></textarea>
 				</div>
+
 				<div class="d-grid mb-3 mt-3">
 					<button type="submit" class="btn btn-primary" id="add">추가</button>
 				</div>
