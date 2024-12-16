@@ -1,12 +1,71 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Footer 개선</title>
+<style>
+    footer {
+        border-top: 1px solid #ddd;
+        padding: 20px 0;
+        background-color: #f8f9fa;
+        color: #333;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .footer-links {
+        display: flex;
+        justify-content: center; /* 가운데 정렬 */
+        gap: 30px; /* 링크 간격 */
+        margin-bottom: 15px;
+    }
+
+    .footer-links a {
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+        transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+        color: #007bff; /* 링크 hover 시 색상 변경 */
+    }
+
+    .footer-info {
+        text-align: center;
+        margin-top: 10px;
+        color: #666;
+    }
+
+    /* 반응형 개선 */
+    @media (max-width: 768px) {
+        .footer-links {
+            flex-direction: column; /* 작은 화면에서 링크를 세로 배치 */
+            gap: 10px;
+        }
+    }
+</style>
 </head>
 <body>
-	<footer style="border: 1px solid gray; text-align: center;">
-		copyright &copy; 2024 ICIA Web
-	</footer>
+    <footer>
+        <!-- 푸터 링크 -->
+        <div class="footer-links">
+            <a href="/" th:href="@{/}">홈</a>
+            <a href="/terms" th:href="@{/terms}">이용약관</a>
+            <a href="/privacy" th:href="@{/privacy}">개인정보처리방침</a>
+            <a href="/guide" th:href= "@{/guide}">이용안내</a>
+        </div>
+        
+        <!-- 푸터 정보 -->
+        <div class="footer-info">
+            <p>
+                상호명: <strong>MyShoppingMall</strong> | 대표자: 홍길동 | 사업자등록번호: 123-45-67890<br>
+                주소: 인천광역시 연수구 미추홀로 123, 4층 | 고객센터: 1588-1234 | 이메일: support@shoppingmall.com
+            </p>
+            <p>
+                &copy; 2024 MyShoppingMall. All Rights Reserved.
+            </p>
+        </div>
+    </footer>
 </body>
 </html>
