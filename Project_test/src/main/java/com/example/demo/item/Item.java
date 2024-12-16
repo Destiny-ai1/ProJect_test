@@ -4,11 +4,13 @@ import org.springframework.stereotype.Component;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 // 상품 엔티티
 @Getter
@@ -22,7 +24,11 @@ public class Item {
 	@Id
     public Long itemNo; // 상품 고유 번호
     public String itemIrum; // 상품명
+    
+    @Setter
+    @Lob
     public String itemInfo; // 상품 정보
+    
     public Integer itemPrice; // 상품 가격
     public Integer itemJango; // 재고 수량
     public Integer itemSellQty; // 판매된 수량
