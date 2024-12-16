@@ -24,52 +24,51 @@
 }
 </style>
 <script>
-	$(document)
-			.ready(
-					function() {
-						// 기본 썸네일 선택 (첫 번째 이미지 선택)
-						$('.thumbnail:first-of-type').addClass("choice");
+	$(document).ready(
+			function() {
+				// 기본 썸네일 선택 (첫 번째 이미지 선택)
+				$('.thumbnail:first-of-type').addClass("choice");
 
-						$('.thumbnail').click(function() {
-							$('.thumbnail').removeClass("choice");
-							$(this).addClass("choice");
-							$('#image').attr('src', $(this).attr('src'));
-						});
+				$('.thumbnail').click(function() {
+					$('.thumbnail').removeClass("choice");
+					$(this).addClass("choice");
+					$('#image').attr('src', $(this).attr('src'));
+				});
 
-						// itemInfo에서 중복된 <p> 태그를 제거하는 작업
-						var itemInfo = $('#info').html();
+				// itemInfo에서 중복된 <p> 태그를 제거하는 작업
+				var itemInfo = $('#info').html();
 
-						// <p> 태그 중복 제거 (연속된 <p> 태그를 하나로 합침)
-						itemInfo = itemInfo.replace(/(<p>\s*)+/g, "<p>")
-								.replace(/(\s*<\/p>)+/g, "</p>");
+				// <p> 태그 중복 제거 (연속된 <p> 태그를 하나로 합침)
+				itemInfo = itemInfo.replace(/(<p>\s*)+/g, "<p>").replace(
+						/(\s*<\/p>)+/g, "</p>");
 
-						// 수정된 HTML을 다시 #info에 삽입
-						$('#info').html(itemInfo);
-						
-						/*
-						// CSRF 토큰을 AJAX 요청에 포함시키기 위해 설정
-						var csrfToken = $("meta[name='_csrf']").attr("content");
-						var csrfHeader = $("meta[name='_csrf_header']").attr(
-								"content");
+				// 수정된 HTML을 다시 #info에 삽입
+				$('#info').html(itemInfo);
 
-						// 모든 AJAX 요청에 CSRF 토큰을 자동으로 추가
-						$.ajaxSetup({
-							beforeSend : function(xhr) {
-								xhr.setRequestHeader(csrfHeader, csrfToken);
-							}
-						});
-						*/
-					});
+				/*
+				// CSRF 토큰을 AJAX 요청에 포함시키기 위해 설정
+				var csrfToken = $("meta[name='_csrf']").attr("content");
+				var csrfHeader = $("meta[name='_csrf_header']").attr(
+						"content");
+
+				// 모든 AJAX 요청에 CSRF 토큰을 자동으로 추가
+				$.ajaxSetup({
+					beforeSend : function(xhr) {
+						xhr.setRequestHeader(csrfHeader, csrfToken);
+					}
+				});
+				 */
+			});
 </script>
 <title>상품 상세</title>
 </head>
 <body>
-	 
+
 	<!-- CSRF 토큰 설정 (Spring Security에서 자동으로 포함됨) 
 	<meta name="_csrf" th:content="${_csrf.token}" />
 	<meta name="_csrf_header" th:content="${_csrf.headerName}" />
 	-->
-	
+
 
 	<div id="app">
 		<header th:replace="~{/fragment/header.html}"></header>
@@ -100,12 +99,14 @@
 						<div>
 							<!-- 가격 변경 버튼 -->
 							<!-- 주석 처리: 로그인 후 어드민 계정만 보이도록 처리할 것 -->
-							<button class="btn btn-outline-primary btn-sm" id="update-price">가격 변경하기</button>
+							<button class="btn btn-outline-primary btn-sm" id="update-price">가격
+								변경하기</button>
 						</div>
 						<div>
 							<!-- 재고 변경 버튼 -->
 							<!-- 주석 처리: 로그인 후 어드민 계정만 보이도록 처리할 것 -->
-							<button id="update-stock" class="btn btn-outline-warning btn-sm">재고 변경</button>
+							<button id="update-stock" class="btn btn-outline-warning btn-sm">재고
+								변경</button>
 
 							<!-- 재고 변경 폼 (숨김 처리, 버튼 클릭 시 표시) -->
 							<div id="stock-update-form" style="display: none;">
@@ -196,6 +197,38 @@
 					}
 				});
 			});
+		});
+	</script>
+
+	<script>
+		$('#update-price').click(function() {
+			const newPrice = prompt("변경할 가격을 입력하세요:");
+			console.log("변경 요청된 가격:", newPrice);
+			if (newPrice != null && newPrice.trim() !== "") {
+				$.ajax({
+					url : '/item/' + '[[${result.itemNo}]]' + '/update-price',
+					method : 'PATCH',
+					contentType : 'application/json',
+					data : JSON.stringify({
+						itemPrice : newPrice
+					}),
+					success : function() {
+						alert("가격이 성공적으로 변경되었습니다.");
+
+						// 1. 실시간으로 가격 갱신
+						$('#item-price').text(newPrice + "원");
+
+						// 2. 화면을 새로 고침하여 갱신된 데이터를 받아옴
+						location.reload();
+
+						// 장바구니에 담긴 해당 상품 가격 업데이트
+						updateCartPrice('[[${result.itemNo}]]', newPrice);
+					},
+					error : function() {
+						alert("가격을 변경할 수 없습니다.");
+					}
+				});
+			}
 		});
 	</script>
 
