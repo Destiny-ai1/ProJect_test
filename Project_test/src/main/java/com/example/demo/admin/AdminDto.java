@@ -18,14 +18,17 @@ public class AdminDto {
         private String role;
         private String status;
     }
-
     @Data
     @NoArgsConstructor
     public static class Order {
-        private Long orderId;
+        private Long orderNo;
         private String orderDate;
         private String customerName;
+        private String customerPhone;
+        private String customerAddress;
         private String orderStatus;
         private Double totalAmount;
+        private Long itemNo;
+        private String imgUrl; // 이미지 URL 필드 추가
     }
 }
