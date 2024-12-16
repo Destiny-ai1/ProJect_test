@@ -8,10 +8,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-
 @Controller
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('admin')") // 관리자 권한 제한
+@PreAuthorize("hasRole('admin')")
 public class AdminController {
 
     @Autowired
@@ -19,11 +18,19 @@ public class AdminController {
 
     // 사용자 관리 페이지
     @GetMapping("/members")
-    public String userManagementPage(Model model) {
-        List<AdminDto.User> users = adminService.getAllUser();
+    public String userManagementPage(Model model,
+                                     @RequestParam(defaultValue = "1") int page,
+                                     @RequestParam(defaultValue = "10") int pageSize) {
+        List<AdminDto.User> users = adminService.getPagedUsers(page, pageSize);
+        int totalUsers = adminService.getAllUser().size(); // 전체 사용자 수 계산
+        int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
+
         model.addAttribute("user", users);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "admin/members";
     }
+
 
     // 사용자 상태 활성화/비활성화
     @PatchMapping("/members/toggleStatus")
@@ -44,14 +51,20 @@ public class AdminController {
                                                 @RequestParam(required = false) String status) {
         return adminService.searchMembers(search, status);
     }
-
-    // 주문 관리 페이지
     @GetMapping("/orders")
     public String orderManagementPage(Model model) {
         List<AdminDto.Order> orders = adminService.getAllOrders();
-        model.addAttribute("ordersList", orders != null ? orders : new ArrayList<>());
+        if (orders == null) {
+            orders = new ArrayList<>();
+        }
+        System.out.println("Orders: " + orders); // 디버깅용
+        model.addAttribute("ordersList", orders);
         return "admin/orders";
     }
+
+
+
+
 
     // 주문 상태 변경
     @PatchMapping("/updateStatus")
@@ -72,5 +85,5 @@ public class AdminController {
                                                   @RequestParam(required = false) String status) {
         return adminService.searchOrders(search, status);
     }
+    
 }
-

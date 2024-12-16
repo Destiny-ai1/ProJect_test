@@ -80,111 +80,125 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- 페이지네이션 -->
+                <div class="d-flex justify-content-center">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/members(page=${currentPage - 1}, pageSize=${10})}">&laquo;</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" th:href="@{/admin/members(page=${i}, pageSize=${10})}" th:text="${i}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/members(page=${currentPage + 1}, pageSize=${10})}">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </section>
 
         <!-- Footer -->
         <footer th:replace="~{/fragment/footer.html}"></footer>
     </div>
-
    <script>
-    $(document).ready(function () {
-        // 검색 및 필터 기능
-        $("#searchButton").on("click", function () {
-            const searchInput = $("#searchInput").val();
-            const statusFilter = $("#statusFilter").val();
-            const csrfToken = $("meta[name='_csrf']").attr("content");
-            const csrfHeader = $("meta[name='_csrf_header']").attr("content");
+   $(document).ready(function () {
+       // 검색 및 필터 기능
+       $("#searchButton").on("click", function () {
+           const searchInput = $("#searchInput").val();
+           const statusFilter = $("#statusFilter").val();
+           const csrfToken = $("meta[name='_csrf']").attr("content");
+           const csrfHeader = $("meta[name='_csrf_header']").attr("content");
 
-            $.ajax({
-                url: "/admin/members/search",
-                type: "GET",
-                data: { search: searchInput, status: statusFilter },
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader(csrfHeader, csrfToken);
-                },
-                success: function (response) {
-                    updateUserTable(response); // 테이블 업데이트 함수 호출
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error:", xhr.responseText || error);
-                    alert("사용자 목록을 가져오는 중 문제가 발생했습니다.");
-                }
-            });
-        });
+           $.ajax({
+               url: "/admin/members/search",
+               type: "GET",
+               data: { search: searchInput, status: statusFilter },
+               beforeSend: function (xhr) {
+                   xhr.setRequestHeader(csrfHeader, csrfToken);
+               },
+               success: function (response) {
+                   updateUserTable(response); // 검색 결과 업데이트
+               },
+               error: function () {
+                   alert("사용자 목록을 가져오는 중 문제가 발생했습니다.");
+               }
+           });
+       });
 
-        // 활성화/비활성화 버튼 기능
-        $(document).on("click", ".toggle-status-btn", function () {
-            const button = $(this);
-            const username = button.data("username");
-            const csrfToken = $("meta[name='_csrf']").attr("content");
-            const csrfHeader = $("meta[name='_csrf_header']").attr("content");
+       // 상태 변경 버튼 (비활성화/활성화) 기능
+       $(document).on("click", ".toggle-status-btn", function () {
+           const button = $(this);
+           const username = button.data("username");
+           const csrfToken = $("meta[name='_csrf']").attr("content");
+           const csrfHeader = $("meta[name='_csrf_header']").attr("content");
 
-            $.ajax({
-                url: '/admin/members/toggleStatus',
-                method: 'PATCH',
-                data: { username: username },
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader(csrfHeader, csrfToken);
-                },
-                success: function (response) {
-                    if (response === 'success') {
-                        // 버튼 상태 및 텍스트 업데이트
-                        const statusSpan = button.closest('tr').find('span');
-                        const newStatus = statusSpan.hasClass('bg-success') ? 'inactive' : 'active';
+           $.ajax({
+               url: '/admin/members/toggleStatus',
+               type: 'PATCH',
+               data: { username: username },
+               beforeSend: function (xhr) {
+                   xhr.setRequestHeader(csrfHeader, csrfToken);
+               },
+               success: function (response) {
+                   if (response === 'success') {
+                       // 버튼 상태 및 텍스트 업데이트
+                       const statusSpan = button.closest('tr').find('span');
+                       const isActive = statusSpan.hasClass('bg-success');
 
-                        // 상태 텍스트 및 스타일 업데이트
-                        statusSpan
-                            .toggleClass('bg-success bg-danger')
-                            .text(newStatus === 'active' ? '활성' : '비활성');
+                       // 상태 반전
+                       if (isActive) {
+                           statusSpan.removeClass('bg-success').addClass('bg-danger').text('비활성');
+                           button.removeClass('btn-danger').addClass('btn-success').text('활성화');
+                       } else {
+                           statusSpan.removeClass('bg-danger').addClass('bg-success').text('활성');
+                           button.removeClass('btn-success').addClass('btn-danger').text('비활성화');
+                       }
+                   } else {
+                       alert("상태 변경 중 문제가 발생했습니다.");
+                   }
+               },
+               error: function () {
+                   alert("서버와의 통신 중 오류가 발생했습니다.");
+               }
+           });
+       });
 
-                        // 버튼 텍스트 및 스타일 업데이트
-                        button
-                            .toggleClass('btn-success btn-danger')
-                            .text(newStatus === 'active' ? '비활성화' : '활성화');
-                    } else {
-                        alert('상태 변경 중 오류가 발생했습니다.');
-                    }
-                },
-                error: function () {
-                    alert('서버와의 통신 중 오류가 발생했습니다.');
-                }
-            });
-        });
-
-        // 테이블 업데이트 함수
-        function updateUserTable(users) {
-            let tableBody = "";
-            if (users.length > 0) {
-                users.forEach(user => {
-                    tableBody += `
-                        <tr>
-                            <td>${user.username}</td>
-                            <td>${user.name}</td>
-                            <td>${user.email}</td>
-                            <td>${user.phone}</td>
-                            <td>${user.grade}</td>
-                            <td>${user.joinDate}</td>
-                            <td>
-                                <span class="${user.enabled ? 'bg-success badge' : 'bg-danger badge'}">
-                                    ${user.enabled ? '활성' : '비활성'}
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm toggle-status-btn ${user.enabled ? 'btn-danger' : 'btn-success'}"
-                                        data-username="${user.username}">
-                                    ${user.enabled ? '비활성화' : '활성화'}
-                                </button>
-                            </td>
-                        </tr>`;
-                });
-            } else {
-                tableBody = `<tr><td colspan="8" class="text-center">사용자를 찾을 수 없습니다.</td></tr>`;
-            }
-            $("#userTableBody").html(tableBody);
-        }
-    });
+       // 테이블 업데이트 함수
+       function updateUserTable(users) {
+           let tableBody = "";
+           if (users.length > 0) {
+               users.forEach(user => {
+                   tableBody += `
+                       <tr>
+                           <td>${user.username}</td>
+                           <td>${user.name}</td>
+                           <td>${user.email}</td>
+                           <td>${user.phone}</td>
+                           <td>${user.grade}</td>
+                           <td>${user.joinDate}</td>
+                           <td>
+                               <span class="${user.enabled ? 'bg-success badge' : 'bg-danger badge'}">
+                                   ${user.enabled ? '활성' : '비활성'}
+                               </span>
+                           </td>
+                           <td>
+                               <button class="btn btn-sm toggle-status-btn ${user.enabled ? 'btn-danger' : 'btn-success'}"
+                                       data-username="${user.username}">
+                                   ${user.enabled ? '비활성화' : '활성화'}
+                               </button>
+                           </td>
+                       </tr>`;
+               });
+           } else {
+               tableBody = `<tr><td colspan="8" class="text-center">사용자를 찾을 수 없습니다.</td></tr>`;
+           }
+           $("#userTableBody").html(tableBody);
+       }
+   });
 </script>
-
 </body>
 </html>

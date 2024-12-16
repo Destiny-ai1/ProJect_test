@@ -19,33 +19,48 @@ public class AdminService {
         return users;
     }
 
-    // 사용자 상태 변경
+    // 특정 사용자 상태 변경
     public void toggleUserStatus(String username) {
         AdminDto.User user = adminDao.findUserByUsername(username);
         if (user == null) {
             throw new IllegalArgumentException("User not found: " + username);
         }
-        adminDao.updateUserStatus(username, !user.isEnabled());
+        boolean newStatus = !user.isEnabled();
+        adminDao.updateUserStatus(username, newStatus);
     }
 
-    // 사용자 검색
+    // 검색 및 필터링
     public List<AdminDto.User> searchMembers(String search, String status) {
-        String numericStatus = "active".equalsIgnoreCase(status) ? "1" : "0";
+        // status 값 매핑: active -> 1, inactive -> 0
+        String numericStatus = null;
+        if ("active".equalsIgnoreCase(status)) {
+            numericStatus = "1";
+        } else if ("inactive".equalsIgnoreCase(status)) {
+            numericStatus = "0";
+        }
+
+        // AdminDao의 findUsersByCriteria 호출
         return adminDao.findUsersByCriteria(search, numericStatus);
     }
-
-    // 모든 주문 가져오기
     public List<AdminDto.Order> getAllOrders() {
-        return adminDao.getAllOrders();
+        List<AdminDto.Order> orders = adminDao.getAllOrders();
+        return (orders != null) ? orders : new ArrayList<>();
+    }
+    
+    public List<AdminDto.User> getPagedUsers(int page, int pageSize) {
+        int offset = (page - 1) * pageSize; // 페이지 번호에 따른 OFFSET 계산
+        return adminDao.getPagedUsers(offset, pageSize);
     }
 
-    // 주문 상태 변경
+
+    // 주문 상태 업데이트
     public void updateOrderStatus(Long orderId, String status) {
         adminDao.updateOrderStatus(orderId, status);
     }
 
-    // 주문 검색
+    // 주문 검색 및 필터링
     public List<AdminDto.Order> searchOrders(String search, String status) {
         return adminDao.findOrdersByCriteria(search, status);
     }
-}
+   
+    }
