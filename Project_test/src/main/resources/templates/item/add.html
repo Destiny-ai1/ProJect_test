@@ -128,8 +128,8 @@ $(document).ready(function() {
 		<section>
 			<form id="add-form" method="post" action="/item/add"
 				enctype="multipart/form-data">
-				<!-- CSRF 토큰 주석 처리 -->
-				<!-- <input type="hidden" name="_csrf" th:value="${_csrf.token}"> -->
+				<!-- CSRF 토큰 활성화 -->
+				<input type="hidden" name="_csrf" th:value="${_csrf.token}">
 				<div>
 					<select id="major" class="form-select">
 						<option disabled selected>대분류 선택</option>

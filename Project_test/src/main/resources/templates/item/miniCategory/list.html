@@ -45,24 +45,12 @@
                                 </p>
                             </div>
 
-                            <!-- 삭제 버튼 -->
-                            <!-- 
-                            ★★★★★★어드민 계정만 삭제 가능하도록 조건 추가★★★★★★
-                            아래 코드는 관리자(admin) 계정만 보이게 하기 위한 예시입니다.
-                            해당 코드의 주석을 해제하여 사용해주세요.
-                            -->
-
-                            <!-- 
-                            <div class="d-flex justify-content-end mt-4">
+                            <!-- 삭제 버튼 (admin 전용) -->
+                            <div sec:authorize="hasRole('ROLE_admin')" class="d-flex justify-content-end mt-4">
                                 <a href="javascript:void(0);" class="btn btn-danger delete-item" th:data-itemno="${item.itemNo}">
                                     삭제하기
                                 </a>
-                            </div> 
-                            -->
-                            <!-- CSRF 토큰 추가 -->
-                            <!-- 
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -74,11 +62,21 @@
     <!-- 삭제 처리용 스크립트 -->
     <script>
         $(document).ready(function() {
+            // CSRF 토큰 설정
+            const csrfToken = $('meta[name="_csrf"]').attr('content');
+            const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+
+            $.ajaxSetup({
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader(csrfHeader, csrfToken);
+                }
+            });
+
             // 삭제 버튼 클릭 시
             $(".delete-item").click(function() {
                 // 버튼에 설정된 상품 번호(itemNo) 가져오기
                 var itemNo = $(this).data("itemno");
-                
+
                 if (confirm("상품을 정말로 삭제하시겠습니까?")) {
                     // AJAX 요청 보내기
                     $.ajax({
