@@ -1,6 +1,8 @@
 package com.example.demo.cart;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,10 +12,11 @@ import com.example.demo.image.ItemImage;
 import com.example.demo.image.ItemImageSaveLoad;
 import com.example.demo.item.ItemDao;
 import com.example.demo.item.ItemDto;
+import com.example.demo.item.ItemDto.ItemDeleteDTO;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
+
 @Service
 @Transactional
 public class CartService {
@@ -25,7 +28,7 @@ public class CartService {
     private ItemDao itemDao;
     
     // 상품 추가 (장바구니에 추가) - 상품이 추가되거나 수량을 증가시키는 메서드
-    public List<CartDto.Read> addToCart(Long itemNo, String username, String itemSize, String imageUrl) {
+    public List<CartDto.Read> addToCart(Long itemNo, @AuthenticationPrincipal String username, String itemSize, String imageUrl) {
         try {
             // 장바구니에 동일한 상품(상품번호 + 사이즈)이 있는지 확인
             if (!cartDao.SearchCartByUsernameAndItemNoAndSize(username, itemNo, itemSize)) {
@@ -68,31 +71,34 @@ public class CartService {
     }
     
     // 장바구니 리스트 불러오기
-    public List<CartDto.Read> getCartList(String username,String imageUrl, Principal principal) {
-    	try {
-            if (principal != null && (username == null || username.isEmpty())) {
-                username = principal.getName(); 									// Principal에서 사용자 이름 가져오기
-            }
+    public List<CartDto.Read> getCartList(@AuthenticationPrincipal User principal) {
+        String username = principal != null ? principal.getUsername() : "guest"; // 로그인된 사용자 이름을 가져옵니다.
 
-            // 전체 장바구니 항목 조회
-            List<CartDto.Read> cartItems = cartDao.findByUsername(username, imageUrl);
+        try {
+            // 장바구니 목록을 조회
+            List<CartDto.Read> cartItems = cartDao.findByUsername(username, ItemImageSaveLoad.IMAGE_URL);
+            
             if (cartItems.isEmpty()) {
-                return null; // 장바구니가 비어있는 경우 null 반환
+                throw new FailException("장바구니가 비어있거나 사용자가 존재하지 않습니다.");
             }
 
-            // 이미지 URL 설정
+            // 각 장바구니 항목에 대해 이미지 URL을 설정
             for (CartDto.Read cartItem : cartItems) {
+                // 상품 번호를 기준으로 이미지를 조회해서 이미지 URL을 설정
                 List<ItemImage> itemImages = itemDao.findByItemNo(cartItem.getItemNo());
+                
                 if (itemImages != null && !itemImages.isEmpty()) {
+                    // 상품 이미지가 있으면 첫 번째 이미지를 사용 (여러 이미지가 있을 경우 첫 번째 이미지 사용)
                     cartItem.setItemImage("/api/images?imagename=" + itemImages.get(0).getImageName());
                 } else {
+                    // 상품에 이미지가 없다면 기본 이미지 URL 설정
                     cartItem.setItemImage("/api/images?imagename=default-image.jpg");
                 }
             }
-
+            
             return cartItems;
         } catch (Exception e) {
-            throw new FailException("장바구니 읽기 중 오류 발생: " + e.getMessage());
+            throw new FailException("장바구니 목록을 조회하는 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
 
@@ -131,7 +137,8 @@ public class CartService {
     }
 
     @Transactional
-    public List<CartDto.Read> updateCartEa(String username, List<CartDto.Read> cartUpdates) {
+    public List<CartDto.Read> updateCartEa(@AuthenticationPrincipal String username, List<CartDto.Read> cartUpdates) {
+
         for (CartDto.Read cartDto : cartUpdates) {
             System.out.println("Updating cart: " + cartDto.getItemNo() + " with size " + cartDto.getItemSize() + " and quantity " + cartDto.getCartEa());
 
@@ -174,24 +181,23 @@ public class CartService {
         return cartDao.findByUsername(username, ItemImageSaveLoad.IMAGE_URL);
     }
 
-    // 장바구니에서 여러개의 상품을 삭제하는 부분
+    // 장바구니에서 여러개의 상품을 삭제하는 메서드
     @Transactional
     public void deleteCartItems(List<ItemDto.ItemDeleteDTO> items, String username) {
+        // 1. 유효성 검증: 삭제할 상품 번호 또는 사이즈가 없거나 유효하지 않은 값이 포함되어 있는지 확인
         if (items == null || items.isEmpty() || items.stream().anyMatch(item -> item.getItemNo() == null || item.getItemSize() == null)) {
             throw new IllegalArgumentException("삭제할 상품 번호 또는 사이즈가 없거나 유효하지 않은 값이 포함되었습니다.");
         }
 
-        // 한 번의 DB 호출로 여러 항목 삭제
+        // 2. 한 번의 DB 호출로 여러 항목 삭제
         int deletedRows = cartDao.deleteCartItems(items, username);  // 삭제된 행 수는 int로 반환됨
 
-        if (deletedRows == 0) {  // 삭제된 항목이 없는 경우 예외 발생
+        // 3. 삭제된 항목이 없는 경우 예외 발생
+        if (deletedRows == 0) {
             throw new FailException("장바구니 항목을 찾을 수 없습니다.");
         }
-    }
 
-    /*
-    public Map<String, Object> orderCheck(ItemDto.Inos dto, String username) {
-    	return null;
+        // 4. 정상적으로 삭제된 경우, 삭제된 항목 수와 메시지를 반환하거나 로그를 남길 수 있습니다.
+        System.out.println("삭제된 상품 수: " + deletedRows);
     }
-    */
 }

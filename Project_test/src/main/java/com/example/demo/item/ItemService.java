@@ -203,11 +203,7 @@ public class ItemService {
 	     if (itemDto != null && itemSize != null && !itemSize.trim().isEmpty()) {
 	         String stockMessage = getStockMessage(itemNo, itemSize);
 	         itemDto.setStockMessage(stockMessage); // 사이즈별 재고 메시지 설정
-	     } else {
-	         // 사이즈가 없거나 비어있으면 기본 재고 메시지 처리 (예: '전체 재고')
-	         itemDto.setStockMessage("전체 재고 확인");
 	     }
-
 	     return itemDto;
 	 }
 

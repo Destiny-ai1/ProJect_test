@@ -81,8 +81,7 @@
 		it.review_ea,
 		it.cno,
 		COALESCE(#{imageUrl, jdbcType=VARCHAR} || im.image_name, 'normal/default-image.jpg') AS
-		item_image,
-		it.item_size  <!-- item_size 추가 -->
+		item_image
 		FROM item it
 		LEFT JOIN item_image im ON it.item_no = im.item_no
 		WHERE

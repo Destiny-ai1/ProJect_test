@@ -36,20 +36,26 @@
 		UPDATE cart
 		SET cart_ea =
 		COALESCE(cart_ea, 0) + 1,
-			cart_totalprice = cart_price *	(COALESCE(cart_ea, 0) + 1)
+		cart_totalprice = cart_price *
+		(COALESCE(cart_ea, 0) + 1)
 		WHERE username = #{username}
-		AND item_no = #{itemNo}
+		AND item_no =
+		#{itemNo}
 		AND item_size = #{itemSize}
 	</update>
 
 	<update id="updateCartEa" parameterType="map">
 		UPDATE cart
 		SET
-			cart_ea = #{cartEa},
-			cart_totalprice = #{cartEa} * (SELECT item_price FROM item WHERE item_no = #{itemNo})
-		WHERE username = #{username}
+		cart_ea = #{cartEa},
+		cart_totalprice = #{cartEa} *
+		(SELECT item_price FROM item WHERE item_no = #{itemNo})
+		WHERE username
+		= #{username}
 		AND item_no = #{itemNo}
-		AND item_size =	#{itemSize} <!-- itemSize 조건 추가 -->
+		AND item_size =
+		#{itemSize} <!-- itemSize 
+			조건 추가 -->
 		AND EXISTS (SELECT 1 FROM item WHERE item_no = #{itemNo})  <!-- 상품 존재 확인 -->
 	</update>
 
@@ -68,10 +74,9 @@
 	<!-- 상품 선택 삭제 -->
 	<delete id="deleteCartItems" parameterType="map">
 		delete from cart
-		where (item_no, item_size) in
-		<foreach collection="items" item="item" open="(" separator=","
-			close=")">
-			#{item.itemNo}, #{item.itemSize}
+		where username = #{username}
+		<foreach collection="items" item="item" open="and (" separator=") or (" close=")">
+			item_no = #{item.itemNo} and item_size = #{item.itemSize}
 		</foreach>
 	</delete>
 

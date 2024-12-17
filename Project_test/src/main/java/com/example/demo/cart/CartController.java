@@ -1,22 +1,19 @@
 package com.example.demo.cart;
 
-import java.security.Principal;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 
 import com.example.demo.item.ItemDto;
 
-import jakarta.validation.Valid;
+import java.security.Principal;
+import java.util.List;
 
 @Validated
 @Controller
@@ -33,7 +30,7 @@ public class CartController {
         List<CartDto.Read> result = cartService.read(null, imageUrl, principal);  // imageUrl도 함께 전달
         return new ModelAndView("cart/list").addObject("result", result);
     }
-    
+
     // 장바구니 항목 삭제 요청 처리 메소드
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/cart/delete")
@@ -52,4 +49,3 @@ public class CartController {
         }
     }
 }
-
