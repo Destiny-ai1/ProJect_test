@@ -11,6 +11,7 @@ import com.example.demo.image.ItemImageSaveLoad;
 import com.example.demo.item.ItemDao;
 import com.example.demo.item.ItemDto;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
@@ -67,40 +68,39 @@ public class CartService {
     }
     
     // 장바구니 리스트 불러오기
-    public List<CartDto.Read> getCartList(String username) {
-        try {
-            // 장바구니 목록을 조회
-            List<CartDto.Read> cartItems = cartDao.findByUsername(username, ItemImageSaveLoad.IMAGE_URL);
-            
-            if (cartItems.isEmpty()) {
-                throw new FailException("장바구니가 비어있거나 사용자가 존재하지 않습니다.");
+    public List<CartDto.Read> getCartList(String username,String imageUrl, Principal principal) {
+    	try {
+            if (principal != null && (username == null || username.isEmpty())) {
+                username = principal.getName(); 									// Principal에서 사용자 이름 가져오기
             }
 
-            // 각 장바구니 항목에 대해 이미지 URL을 설정
+            // 전체 장바구니 항목 조회
+            List<CartDto.Read> cartItems = cartDao.findByUsername(username, imageUrl);
+            if (cartItems.isEmpty()) {
+                return null; // 장바구니가 비어있는 경우 null 반환
+            }
+
+            // 이미지 URL 설정
             for (CartDto.Read cartItem : cartItems) {
-                // 상품 번호를 기준으로 이미지를 조회해서 이미지 URL을 설정
                 List<ItemImage> itemImages = itemDao.findByItemNo(cartItem.getItemNo());
-                
                 if (itemImages != null && !itemImages.isEmpty()) {
-                    // 상품 이미지가 있으면 첫 번째 이미지를 사용 (여러 이미지가 있을 경우 첫 번째 이미지 사용)
                     cartItem.setItemImage("/api/images?imagename=" + itemImages.get(0).getImageName());
                 } else {
-                    // 상품에 이미지가 없다면 기본 이미지 URL 설정
                     cartItem.setItemImage("/api/images?imagename=default-image.jpg");
                 }
             }
-            
+
             return cartItems;
         } catch (Exception e) {
-            throw new FailException("장바구니 목록을 조회하는 중 오류가 발생했습니다: " + e.getMessage());
+            throw new FailException("장바구니 읽기 중 오류 발생: " + e.getMessage());
         }
     }
 
     // 상품 읽어오기 - 장바구니에서 상품을 읽어오는 메서드
-    public List<CartDto.Read> read(String username, String imageUrl) {
+    public List<CartDto.Read> read(String username, String imageUrl, Principal principal) {
         try {
-            if (username == null || username.isEmpty()) {
-                username = "winter_shop";  // 하드코딩된 username (테스트용)
+        	if (principal != null && (username == null || username.isEmpty())) {
+                username = principal.getName(); 
             }
 
             // 장바구니 항목 조회

@@ -54,4 +54,5 @@ public interface CartDao {
     
     // 장바구니 총 가격 업데이트
     public Long updateCartTotalPrice(String username, Long itemNo);
+
 }

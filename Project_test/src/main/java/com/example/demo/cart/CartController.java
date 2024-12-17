@@ -26,22 +26,20 @@ public class CartController {
     private CartService cartService;
 
     // 장바구니 상품 목록
-    // principal 추가하기
-    // @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/cart/list")
-    public ModelAndView view() {
-        String username = "winter_shop";
+    public ModelAndView view(Principal principal) {
         String imageUrl = "/default/images/";  // 기본 이미지 URL 설정
-        List<CartDto.Read> result = cartService.read(username, imageUrl);  // imageUrl도 함께 전달
+        List<CartDto.Read> result = cartService.read(null, imageUrl, principal);  // imageUrl도 함께 전달
         return new ModelAndView("cart/list").addObject("result", result);
     }
     
     // 장바구니 항목 삭제 요청 처리 메소드
-    // @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/cart/delete")
-    public String deleteCartItems(@RequestBody List<ItemDto.ItemDeleteDTO> items) {
+    public String deleteCartItems(@RequestBody List<ItemDto.ItemDeleteDTO> items, Principal principal) {
         // items에는 클라이언트에서 보낸 itemNo, itemSize가 담긴 리스트가 넘어옵니다.
-        String username = "winter_shop";  // 하드코딩된 사용자는 나중에 로그인 사용자로 변경 예정
+        String username = principal.getName();  // 하드코딩된 사용자는 나중에 로그인 사용자로 변경 예정
 
         try {
             // 삭제 메서드 호출
@@ -53,6 +51,5 @@ public class CartController {
             return "redirect:/cart/list?error=" + e.getMessage();
         }
     }
-    // 주문 확인
 }
 

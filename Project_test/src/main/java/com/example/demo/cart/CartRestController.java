@@ -31,11 +31,11 @@ public class CartRestController {
     @PostMapping("/api/cart/addToCart")
     public ResponseEntity<List<CartDto.Read>> addToCart(
             @RequestParam Long itemNo,          // 상품 번호
-            @RequestParam String itemSize) {    // 선택한 사이즈
+            @RequestParam String itemSize,
+    		Principal principal) {    // 선택한 사이즈
 
-        String username = "winter_shop";  // 테스트용, 로그인 기능이 구현되면 아래 코드를 사용
-        // String username = principal.getName(); // 로그인된 사용자의 username을 가져오기
-
+        String username = principal.getName();  			
+  
         String imageUrl = "/default/images/";  // 기본 이미지 URL 설정
 
         try {
@@ -53,12 +53,12 @@ public class CartRestController {
     // 장바구니 상품 개수 변경
     // 로그인 구현 후 principal 추가하기
     @PostMapping("/api/cart/updateCart")
-    public ResponseEntity<List<CartDto.Read>> updateCart(@RequestBody List<CartDto.Read> cartUpdates) {
+    public ResponseEntity<List<CartDto.Read>> updateCart(@RequestBody List<CartDto.Read> cartUpdates,Principal principal) {
         
     	// 테스트용 사용자명 (로그인 기능이 구현되면 실제 사용자 이름으로 변경)
-        String username = "winter_shop";  // 임시로 하드코딩된 사용자 이름
+        //String username = "winter_shop";  // 임시로 하드코딩된 사용자 이름
         // 실제로는 로그인된 사용자의 username을 가져오는 방식으로 변경
-        // String username = principal.getName();  // 로그인된 사용자의 username을 가져오기
+         String username = principal.getName();  				// 로그인된 사용자의 username을 가져오기
 
         // 수량 변경 요청이 정상적으로 들어왔는지 확인
         System.out.println("Received cartUpdates for user " + username + ": " + cartUpdates);
