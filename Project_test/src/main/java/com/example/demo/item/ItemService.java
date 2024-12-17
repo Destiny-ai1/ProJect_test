@@ -75,24 +75,28 @@ public class ItemService {
 
 	@Transactional
 	public void save(ItemDto.Create dto) {
-	    // 1. 상품 정보를 DB에 저장
-	    Item item = dto.toEntity();  // DTO에서 엔티티로 변환
-	    item.setItemInfo(dto.getItemInfo());  // CKEditor에서 입력한 HTML을 그대로 저장
-	    itemDao.save(item);  // DB에 저장
+	    // 1. DTO에서 엔티티로 변환
+	    Item item = dto.toEntity();
+
+	    // 2. itemSellQty와 reviewEa가 null일 경우 0으로 설정
+	    item.updateSellQtyAndReview(dto.getItemSellQty(), dto.getReviewEa());
+
+	    // 3. 상품 정보를 DB에 저장
+	    itemDao.save(item); // DB에 item 저장
 
 	    Long itemNo = item.getItemNo();
 	    if (itemNo == null) {
 	        throw new RuntimeException("상품 저장 실패: itemNo가 생성되지 않았습니다.");
 	    }
 
-	    // 2. 이미지 저장
+	    // 4. 이미지 저장
 	    List<MultipartFile> images = dto.getItemImages();
 	    if (images == null || images.isEmpty()) {
 	        images = new ArrayList<>();
 	    }
 
-	    for (long i = 0; i < images.size(); i++) {
-	        MultipartFile imageFile = images.get((int) i);
+	    // 이미지 저장 처리
+	    for (MultipartFile imageFile : images) {
 	        if (imageFile.isEmpty()) {
 	            continue;
 	        }
@@ -109,16 +113,17 @@ public class ItemService {
 
 	            // item_image 테이블에 이미지 저장
 	            ItemImage itemImage = new ItemImage(null, itemNo, saveFilename);
-	            imageDao.save(itemImage);
+	            imageDao.save(itemImage); // 이미지 정보 DB에 저장
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	            throw new RuntimeException("이미지 저장 중 오류 발생", e);
 	        }
 	    }
 
-	    // 3. 상품 사이즈별 재고 정보 저장
+	    // 5. 상품 사이즈별 재고 정보 저장
 	    saveItemSizes(itemNo, dto.getItemSizes());
 	}
+
 
 
 	// 상품 번호에 해당하는 이미지 정보 삭제
