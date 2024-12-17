@@ -65,6 +65,4 @@
         ) AS imgUrl
     FROM orders o
 </select>
-
-
 </mapper>
