@@ -3,143 +3,135 @@
 <head>
 <meta charset="UTF-8">
 <title>Navigator</title>
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <style>
 /* 기본 스타일 초기화 */
 body {
-	margin: 0;
-	font-family: Arial, sans-serif;
+   margin: 0;
+   font-family: Arial, sans-serif;
 }
 
-/* 네비게이터 높이 및 너비 조절 */
+/* 네비게이션 기본 스타일 */
 .fixed-menu {
-	position: fixed;
-	top: 135px;
-	width: 100%;
-	background-color: rgba(255, 255, 255, 0.8);
-	color: black;
-	z-index: 1000;
-	padding: 5px 0;
-	text-align: center;
-	margin: auto;
-	left: 0;
-	right: 0;
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+   position: absolute; /* 초기에는 페이지 흐름 내 위치 */
+   top: 130px; /* 초기 위치 */
+   width: 100%;
+   background-color: rgba(255, 255, 255, 0.8);
+   color: black;
+   z-index: 1000;
+   padding: 10px 0;
+   text-align: center;
+   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+   transition: all 0.3s ease; /* 부드러운 전환 효과 */
+}
+
+.fixed-menu.fixed {
+   position: fixed; /* 특정 스크롤 위치에서 화면 상단에 고정 */
+   top: 0;
+   left: 0;
+   right: 0;
+   background-color: rgba(255, 255, 255, 1); /* 스크롤 시 배경색 변경 */
+   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* 고정 상태에서 그림자 강조 */
 }
 
 .fixed-menu .dropdown {
-	display: inline-block;
-	margin: 0 100px;
-	position: relative;
-	line-height: 1.5;
+   display: inline-block;
+   margin: 0 100px;
+   position: relative;
+   line-height: 1.5;
+}
+
+/* 대분류 텍스트 중앙 정렬 및 크기 확대 */
+.fixed-menu .dropdown > p {
+   margin: 0;
+   text-align: center;
+   font-size: 20px; /* 텍스트 크기를 두 배로 설정 */
 }
 
 .dropdown-content {
-	display: none;
-	position: absolute;
-	background-color: rgba(255, 255, 255, 0.8);
-	min-width: 200px;
-	box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-	padding: 12px 16px;
-	z-index: 1;
-	border-radius: 5px;
+   display: none;
+   position: absolute;
+   background-color: rgba(255, 255, 255, 0.8);
+   min-width: 200px;
+   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+   padding: 12px 16px;
+   z-index: 1;
+   border-radius: 5px;
 }
 
 .dropdown:hover .dropdown-content {
-	display: block;
+   display: block;
 }
 
 .fixed-menu .dropdown:hover {
-	background-color: #b9eeff;
-	border: 2px solid #000;
+   background-color: #b9eeff;
+   border: 2px solid #000;
 }
 
 .custom-button {
-	border: none;
-	background: none;
-	color: black;
-	font-weight: bold;
-	cursor: pointer;
-	padding: 12px 24px;
-	border-radius: 4px;
-	transition: background-color 0.3s;
+   border: none;
+   background: none;
+   color: black;
+   font-weight: bold;
+   cursor: pointer;
+   padding: 12px 24px;
+   border-radius: 4px;
+   transition: background-color 0.3s;
 }
 
 .custom-button:hover {
-	background-color: #b9eeff;
+   background-color: #b9eeff;
 }
 </style>
 </head>
 <body>
-    <div class="fixed-menu">
-        <p>
-            <a href="/" class="nav-link">홈으로</a>
-        </p>
+   <!-- 스크롤 시 고정되는 메뉴 -->
+   <div class="fixed-menu" id="navigator">
+      <div class="dropdown">
+         <p><a href="/category/1/items" class="nav-link">스키</a></p>
+         <div class="dropdown-content">
+            <p><a href="/category/11/items" class="nav-link">폴</a></p>
+            <p><a href="/category/12/items" class="nav-link">플레이트</a></p>
+            <p><a href="/category/13/items" class="nav-link">부츠</a></p>
+            <p><a href="/category/14/items" class="nav-link">스키의류</a></p>
+         </div>
+      </div>
+      <div class="dropdown">
+         <p><a href="/category/2/items" class="nav-link">스키/스노우용품</a></p>
+         <div class="dropdown-content">
+            <p><a href="/category/21/items" class="nav-link">고글</a></p>
+            <p><a href="/category/22/items" class="nav-link">장갑</a></p>
+            <p><a href="/category/23/items" class="nav-link">헬멧</a></p>
+            <p><a href="/category/24/items" class="nav-link">보호장비</a></p>
+            <p><a href="/category/25/items" class="nav-link">악세서리</a></p>
+            <p><a href="/category/26/items" class="nav-link">스키가방</a></p>
+            <p><a href="/category/27/items" class="nav-link">보드가방</a></p>
+         </div>
+      </div>
+      <div class="dropdown">
+         <p><a href="/category/3/items" class="nav-link">스노우보드</a></p>
+         <div class="dropdown-content">
+            <p><a href="/category/31/items" class="nav-link">데크</a></p>
+            <p><a href="/category/32/items" class="nav-link">바인딩</a></p>
+            <p><a href="/category/33/items" class="nav-link">부츠</a></p>
+            <p><a href="/category/34/items" class="nav-link">보드용상의</a></p>
+            <p><a href="/category/35/items" class="nav-link">보드용하의</a></p>
+         </div>
+      </div>
 
-        <!-- 스키 카테고리 -->
-        <div class="dropdown">
-            <p>
-                <a href="/category/1/items" class="nav-link">스키</a>
-            </p>
-            <div class="dropdown-content" id="ski-items-list">
-                <p><a href="/category/11/items" class="nav-link">폴</a></p>
-                <p><a href="/category/12/items" class="nav-link">플레이트</a></p>
-                <p><a href="/category/13/items" class="nav-link">부츠</a></p>
-                <p><a href="/category/14/items" class="nav-link">스키의류</a></p>
-            </div>
-        </div>
+<script>
+$(document).ready(function () {
+   // 네비게이션 바의 초기 위치 저장
+   var navOffset = $("#navigator").offset().top;
 
-        <!-- 스키용품 카테고리 -->
-        <div class="dropdown">
-            <p>
-                <a href="/category/2/items?excludeCno=27" class="nav-link" id="ski-items">스키용품</a>
-            </p>
-            <div class="dropdown-content" id="ski-products-list">
-                <p><a href="/category/21/items" class="nav-link">고글</a></p>
-                <p><a href="/category/22/items" class="nav-link">장갑</a></p>
-                <p><a href="/category/23/items" class="nav-link">헬멧</a></p>
-                <p><a href="/category/24/items" class="nav-link">보호장비</a></p>
-                <p><a href="/category/25/items" class="nav-link">악세서리</a></p>
-                <p><a href="/category/26/items" class="nav-link">스키가방</a></p>
-            </div>
-        </div>
-        
-        <!-- 스노우보드 카테고리 -->
-        <div class="dropdown">
-            <p>
-                <a href="/category/3/items" class="nav-link">스노우보드</a>
-            </p>
-            <div class="dropdown-content" id="snowboard-items-list">
-                <!-- 항상 표시되는 하위 카테고리들 -->
-                <p><a href="/category/31/items" class="nav-link">데크</a></p>
-                <p><a href="/category/32/items" class="nav-link">바인딩</a></p>
-                <p><a href="/category/33/items" class="nav-link">부츠</a></p>
-                <p><a href="/category/34/items" class="nav-link">보드용상의</a></p>
-                <p><a href="/category/35/items" class="nav-link">보드용하의</a></p>
-            </div>
-        </div>
-
-        <!-- 보드용품 카테고리 -->
-        <div class="dropdown">
-            <p>
-                <a href="/category/2/items?excludeCno=26" class="nav-link">보드용품</a>
-            </p>
-            <div class="dropdown-content" id="board-products-list">
-                <p><a href="/category/21/items" class="nav-link">고글</a></p>
-                <p><a href="/category/22/items" class="nav-link">장갑</a></p>
-                <p><a href="/category/23/items" class="nav-link">헬멧</a></p>
-                <p><a href="/category/24/items" class="nav-link">보호장비</a></p>
-                <p><a href="/category/25/items" class="nav-link">악세서리</a></p>
-                <p><a href="/category/27/items" class="nav-link">보드가방</a></p>
-            </div>
-        </div>
-        <p class="nav-item">
-			<a class="nav-link" href="/item/add">상품추가</a>
-		</p>
-		<p class="nav-item">
-			<a class="nav-link" href="/cart/list">장바구니</a>
-		</p>
-    </div>
+   $(window).on("scroll", function () {
+      if ($(window).scrollTop() >= navOffset) {
+         $("#navigator").addClass("fixed");
+      } else {
+         $("#navigator").removeClass("fixed");
+      }
+   });
+});
+</script>
 </body>
 </html>

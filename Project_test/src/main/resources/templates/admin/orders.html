@@ -1,116 +1,147 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>관리자 주문 관리</title>
+    <title>주문 관리</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/css/admin-style.css" rel="stylesheet">
+    <link href="/style/main.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
-<div class="container mt-5">
-    <h1 class="mb-4">관리자 주문 관리</h1>
+    <div id="app">
+        <!-- Header -->
+        <header th:replace="~{/fragment/header.html}"></header>
+        <!-- Navigation -->
+        <nav th:replace="~{/fragment/nav.html}"></nav>
 
-    <!-- 검색 및 상태 필터 -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <form class="d-flex" th:action="@{/admin/orders/search}" method="get">
-            <input class="form-control me-2" type="text" name="keyword" placeholder="주문번호, 고객 이름 검색" aria-label="Search">
-            <button class="btn btn-outline-success" type="submit">검색</button>
-        </form>
-        <div>
-            <a class="btn btn-outline-secondary" th:href="@{/admin/orders?status=all}">전체</a>
-            <a class="btn btn-outline-primary" th:href="@{/admin/orders?status=completed}">결제완료</a>
-            <a class="btn btn-outline-warning" th:href="@{/admin/orders?status=shipping}">배송중</a>
-            <a class="btn btn-outline-danger" th:href="@{/admin/orders?status=canceled}">취소됨</a>
-        </div>
+        <!-- Main Content -->
+        <section class="container mt-5">
+            <h2 class="mb-4">주문 관리</h2>
+
+            <!-- 검색 및 상태 필터 -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="orderSearch" placeholder="주문번호, 고객 이름으로 검색">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="orderStatusFilter">
+                        <option value="">상태로 필터링</option>
+                        <option value="completed">결제완료</option>
+                        <option value="shipping">배송중</option>
+                        <option value="canceled">취소됨</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" id="orderSearchButton">검색</button>
+                </div>
+            </div>
+
+            <!-- 주문 목록 테이블 -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>주문 번호</th>
+                            <th>주문 날짜</th>
+                            <th>고객 이름</th>
+                            <th>전화번호</th>
+                            <th>주소</th>
+                            <th>주문 금액</th>
+                            <th>상태</th>
+                            <th>상품</th>
+                            <th>작업</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${ordersList}">
+                            <td th:text="${order.orderNo}">주문 번호</td>
+                            <td th:text="${order.orderDate}">주문 날짜</td>
+                            <td th:text="${order.customerName}">고객 이름</td>
+                            <td th:text="${order.customerPhone}">전화번호</td>
+                            <td th:text="${order.customerAddress}">주소</td>
+                            <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + '원'}">주문 금액</td>
+                            <td>
+                                <span th:classappend="${order.orderStatus == '결제완료' ? 'bg-primary badge' :
+                                                        (order.orderStatus == '배송중' ? 'bg-warning badge' :
+                                                        (order.orderStatus == '취소됨' ? 'bg-danger badge' : 'badge'))}"
+                                      th:text="${order.orderStatus}">상태</span>
+                            </td>
+                            <td>
+                                <a th:if="${order.itemNo != null}" th:href="@{/item/read/{itemNo}(itemNo=${order.itemNo})}">
+                                    <img th:src="${order.imgUrl != null ? order.imgUrl : '/images/default.png'}" alt="상품 이미지" style="width: 80px;">
+                                </a>
+                                <span th:if="${order.itemNo == null}">상품 정보 없음</span>
+                            </td>
+                            <td>
+                                <!-- 작업 버튼 -->
+                                <button th:if="${order.orderStatus == '결제완료'}" class="btn btn-sm btn-primary" 
+                                        th:onclick="'startShipping(' + ${order.orderNo} + ')'">배송 시작</button>
+                                <button th:if="${order.orderStatus == '결제완료'}" class="btn btn-sm btn-danger" 
+                                        th:onclick="'cancelOrder(' + ${order.orderNo} + ')'">주문 취소</button>
+                                <button th:if="${order.orderStatus == '배송중'}" class="btn btn-sm btn-success" 
+                                        th:onclick="'completeOrder(' + ${order.orderNo} + ')'">배송 완료</button>
+                                <span th:if="${order.orderStatus == '취소됨'}" class="text-muted">취소된 주문</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${ordersList == null or #lists.isEmpty(ordersList)}">
+                            <td colspan="9" class="text-center">주문 목록이 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div class="d-flex justify-content-center">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/orders(page=${currentPage - 1})}">&laquo;</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/orders(page=${i})}" th:text="${i}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/orders(page=${currentPage + 1})}">&raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer th:replace="~{/fragment/footer.html}"></footer>
     </div>
 
-    <!-- 주문 목록 -->
-    <div th:if="${ordersList != null and #lists.size(ordersList) > 0}">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>상품 정보</th>
-                    <th>주문 번호</th>
-                    <th>고객 정보</th>
-                    <th>주문 금액</th>
-                    <th>주문 상태</th>
-                    <th>작업</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="order : ${ordersList}">
-                    <td>
-                        <a th:href="@{/item/read/{itemNo}(itemNo=${order.itemNo})}">
-                            <img th:src="${order.imgUrl}" alt="상품 이미지" style="width: 80px;">
-                            <span th:text="${order.itemName}"></span>
-                        </a>
-                    </td>
-                    <td th:text="${order.orderNo}"></td>
-                    <td>
-                        <span th:text="${order.customerName}"></span><br>
-                        <span th:text="${order.customerPhone}"></span><br>
-                        <span th:text="${order.customerAddress}"></span>
-                    </td>
-                    <td th:text="${order.totalPrice + '원'}"></td>
-                    <td th:text="${order.orderStatus}"></td>
-                    <td>
-                        <div th:if="${order.orderStatus == '결제완료'}">
-                            <button class="btn btn-primary btn-sm" th:onclick="'startShipping(' + ${order.orderNo} + ')'">배송 시작</button>
-                            <button class="btn btn-danger btn-sm" th:onclick="'cancelOrder(' + ${order.orderNo} + ')'">주문 취소</button>
-                        </div>
-                        <div th:if="${order.orderStatus == '배송중'}">
-                            <button class="btn btn-success btn-sm" th:onclick="'completeOrder(' + ${order.orderNo} + ')'">배송 완료</button>
-                        </div>
-                        <div th:if="${order.orderStatus == '취소됨'}">
-                            <span class="text-muted">취소된 주문</span>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <div th:if="${ordersList == null or #lists.size(ordersList) == 0}">
-        <p>주문 목록이 없습니다.</p>
-    </div>
+    <script>
+        // 상태 업데이트 함수
+        function startShipping(orderNo) {
+            updateOrderStatus(orderNo, "shipping");
+        }
 
-    <!-- 페이지 네비게이션 -->
-    <nav>
-    <ul class="pagination justify-content-center" th:if="${totalPages != null}">
-        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-            <a class="page-link" th:href="@{/admin/orders?page=1}" aria-label="First">처음</a>
-        </li>
-        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-            <a class="page-link" th:href="@{/admin/orders?page=${currentPage - 1}}" aria-label="Previous">이전</a>
-        </li>
-        <li class="page-item" th:each="page : ${#numbers.sequence(1, totalPages)}" th:classappend="${page == currentPage} ? 'active'">
-            <a class="page-link" th:href="@{/admin/orders?page=${page}}" th:text="${page}"></a>
-        </li>
-        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-            <a class="page-link" th:href="@{/admin/orders?page=${currentPage + 1}}" aria-label="Next">다음</a>
-        </li>
-        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-            <a class="page-link" th:href="@{/admin/orders?page=${totalPages}}" aria-label="Last">마지막</a>
-        </li>
-    </ul>
-    <p th:if="${totalPages == null}">페이지 정보가 없습니다.</p>
-</nav>
-</div>
+        function cancelOrder(orderNo) {
+            updateOrderStatus(orderNo, "canceled");
+        }
 
-<script>
-    function startShipping(orderNo) {
-        // AJAX 호출로 배송 상태 업데이트
-        alert("배송을 시작합니다. 주문 번호: " + orderNo);
-    }
+        function completeOrder(orderNo) {
+            updateOrderStatus(orderNo, "completed");
+        }
 
-    function cancelOrder(orderNo) {
-        // AJAX 호출로 주문 취소 처리
-        alert("주문을 취소합니다. 주문 번호: " + orderNo);
-    }
-
-    function completeOrder(orderNo) {
-        // AJAX 호출로 배송 완료 처리
-        alert("배송이 완료되었습니다. 주문 번호: " + orderNo);
-    }
-</script>
+        function updateOrderStatus(orderNo, status) {
+            fetch(`/admin/updateStatus?orderId=${orderNo}&status=${status}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' }
+            }).then(response => {
+                if (response.ok) {
+                    alert("상태가 업데이트되었습니다.");
+                    location.reload();
+                } else {
+                    alert("상태 업데이트에 실패했습니다.");
+                }
+            });
+        }
+    </script>
 </body>
 </html>
+

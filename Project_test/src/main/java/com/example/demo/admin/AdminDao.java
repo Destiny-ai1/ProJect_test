@@ -22,3 +22,4 @@ public interface AdminDao {
     List<AdminDto.User> getPagedUsers(@Param("offset") int offset, @Param("pageSize") int pageSize);
 
 }
+

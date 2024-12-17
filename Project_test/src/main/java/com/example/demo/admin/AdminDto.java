@@ -31,4 +31,6 @@ public class AdminDto {
         private Long itemNo;
         private String imgUrl; // 이미지 URL 필드 추가
     }
+
+
 }

@@ -52,15 +52,28 @@ public class AdminController {
         return adminService.searchMembers(search, status);
     }
     @GetMapping("/orders")
-    public String orderManagementPage(Model model) {
-        List<AdminDto.Order> orders = adminService.getAllOrders();
-        if (orders == null) {
-            orders = new ArrayList<>();
-        }
-        System.out.println("Orders: " + orders); // 디버깅용
-        model.addAttribute("ordersList", orders);
+    public String orderManagementPage(Model model,
+                                      @RequestParam(defaultValue = "1") int page,
+                                      @RequestParam(defaultValue = "10") int pageSize) {
+        // 전체 주문 리스트
+        List<AdminDto.Order> allOrders = adminService.getAllOrders();
+
+        // 페이지 단위로 데이터 나누기
+        int totalOrders = allOrders.size();
+        int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, totalOrders);
+
+        List<AdminDto.Order> pagedOrders = allOrders.subList(start, end);
+
+        // 모델에 데이터 추가
+        model.addAttribute("ordersList", pagedOrders);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+
         return "admin/orders";
     }
+
 
 
 
@@ -87,3 +100,4 @@ public class AdminController {
     }
     
 }
+
