@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.Setter;
 
 public class ItemDto {
     private ItemDto() { }
@@ -77,6 +78,14 @@ public class ItemDto {
 
         // Entity 객체로 변환
         public Item toEntity() {
+            // itemSellQty와 reviewEa가 null일 경우 0으로 설정
+            if (itemSellQty == null) {
+                itemSellQty = 0;
+            }
+            if (reviewEa == null) {
+                reviewEa = 0;
+            }
+
             return new Item(null, itemIrum, itemInfo, itemPrice, itemJango, itemSellQty, itemSize, reviewEa, cno);
         }
 
