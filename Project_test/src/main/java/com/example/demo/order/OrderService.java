@@ -7,13 +7,15 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.cart.*;
 import com.example.demo.exception.FailException;
+import com.example.demo.image.ItemImageSaveLoad;
+import com.example.demo.item.ItemDao;
+import com.example.demo.item.ItemDto;
 import com.example.demo.item.ItemService;
 
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
+import java.security.Principal;
 
 @Service
-@Slf4j
 public class OrderService {
 
     @Autowired
@@ -27,65 +29,77 @@ public class OrderService {
 
     @Autowired
     private ItemService itemService;
+    
+    @Autowired
+    private CartService cartService;
+    
+    @Autowired
+    private ItemDao itemDao;
 
     // 주문 생성 로직
     @Transactional
-    public Long createOrder(OrderDto.Create dto) {
-        log.info("Creating order for user: {}", dto.getMemberUsername());
-        Order order = dto.toEntity(); // DTO를 엔티티로 변환
-        orderDao.save(order); // 데이터베이스에 저장하면 orderNo가 자동으로 설정됨
-
-        Long orderNo = order.getOrderNo(); // 저장 후 자동 생성된 orderNo를 사용
+    public Long createOrder(OrderDto.Create dto, Principal principal) {
+        dto.setUsername(principal.getName()); 								// Principal에서 username 설정
+        Order order = dto.toEntity(); 										// DTO를 엔티티로 변환
+        orderDao.save(order); 												// 데이터베이스에 저장하면 orderNo가 자동으로 설정됨
+        Long orderNo = order.getOrderNo(); 									// 저장 후 자동 생성된 orderNo를 사용
 
         // 주문 상세 정보 처리 로직
         if (dto.getOrderDetails() != null) {
             for (OrderDetailDto detailDto : dto.getOrderDetails()) {
-                log.info("Processing order detail for item: {}", detailDto.getItemNo());
-                OrderDetail detail = detailDto.toEntity(); // OrderDetailDto를 OrderDetail로 변환
-                detail.setOrderNo(orderNo); // 주문 번호 설정
-                orderDetailDao.save(detail); // 각 주문 상세를 데이터베이스에 저장
+                OrderDetail detail = detailDto.toEntity(); 					// OrderDetailDto를 OrderDetail로 변환
+                detail.setOrderNo(orderNo); 								// 주문 번호 설정
+                orderDetailDao.save(detail); 								// 각 주문 상세를 데이터베이스에 저장
             }
         }
-
-        log.info("Order created successfully with orderNo: {}", orderNo);
-        return orderNo; // 생성된 주문 번호 반환
+        return orderNo;
     }
+
 
     // 선택된 장바구니 항목으로 주문 생성 로직
     @Transactional
-    public Long createOrderFromCart(List<Long> selectedItems, String username) throws FailException {
-        log.info("Creating order from cart for user: {}, with selected items: {}", username, selectedItems);
+    public Long createOrderFromCart(List<Long> selectedItems,String imageUrl ,Principal principal) throws FailException {
+        String username = principal.getName();
+        
+		// 1. 장바구니 항목 조회
+        List<CartDto.Read> cartItems = cartService.getCartList(username, imageUrl, principal);
+
+        System.out.println("Service - 장바구니 항목들: " + cartItems);
 
         // 중복 항목 합치기
         Map<Long, Integer> itemCountMap = new HashMap<>();
         for (Long itemNo : selectedItems) {
             itemCountMap.put(itemNo, itemCountMap.getOrDefault(itemNo, 0) + 1);
         }
+        System.out.println("Service - 선택된 아이템과 수량: " + itemCountMap);
 
+        // 2. 주문 생성
         Order order = new Order();
-        order.setMemberUsername(username);
+        order.setUsername(username);
         orderDao.save(order);
-
         Long orderNo = order.getOrderNo(); // 저장 후 자동 생성된 orderNo를 사용
+        System.out.println("Service - 생성된 주문 번호: " + orderNo);
+
+        // 3. 삭제할 항목 준비
+        List<ItemDto.ItemDeleteDTO> itemsToDelete = new ArrayList<>();
 
         for (Map.Entry<Long, Integer> entry : itemCountMap.entrySet()) {
             Long itemNo = entry.getKey();
             int totalQuantity = entry.getValue();
 
-            log.info("Processing cart item: {} for user: {} with total quantity: {}", itemNo, username, totalQuantity);
-
             // 장바구니 항목에서 정보 조회
-            var cartItem = cartDao.findByItemNoAndUsername(itemNo, username)
+            CartDto.Read cartItem = cartItems.stream()
+                    .filter(cart -> cart.getItemNo().equals(itemNo))
+                    .findFirst()
                     .orElseThrow(() -> new FailException("장바구니 항목을 찾을 수 없습니다."));
 
+            System.out.println("Service - 장바구니 항목: " + cartItem);
+
             // 재고 확인 및 업데이트
-            int jango = itemService.getItemJango(itemNo);
-            if (totalQuantity > jango) {
-                log.error("Order quantity exceeds stock for item: {}", itemNo);
-                throw new FailException("주문 수량이 재고 수량을 초과할 수 없습니다.");
+            Integer stock = itemDao.getStockByItemSize(itemNo, cartItem.getItemSize());
+            if (stock == null || stock < totalQuantity) {
+                throw new FailException("주문 수량이 재고를 초과합니다.");
             }
-            itemService.updateItemJango(itemNo, jango - totalQuantity);
-            log.info("Stock updated for item: {}, remaining stock: {}", itemNo, jango - totalQuantity);
 
             // 주문 상세 항목 추가
             OrderDetail detail = OrderDetail.builder()
@@ -93,64 +107,60 @@ public class OrderService {
                     .itemNo(cartItem.getItemNo())
                     .itemName(cartItem.getItemIrum())
                     .detailEa(totalQuantity)
-                    .price(cartItem.getCartPrice())
+                    .price(cartItem.getCartTotalPrice())
                     .build();
             orderDetailDao.save(detail);
-            log.info("Order detail saved for item: {} in order: {}", itemNo, orderNo);
+            System.out.println("Service - 저장된 주문 상세 정보: " + detail);
 
-            // 장바구니에서 항목 삭제
-            cartDao.delete(itemNo, username);
-            log.info("Cart item deleted for item: {} and user: {}", itemNo, username);
+            // 삭제할 항목 준비
+            itemsToDelete.add(new ItemDto.ItemDeleteDTO(cartItem.getItemNo(), cartItem.getItemSize()));
         }
 
-        log.info("Order from cart created successfully with orderNo: {}", orderNo);
+        // 4. 장바구니 항목 삭제
+        cartService.deleteCartItems(itemsToDelete, username);
+
+        System.out.println("Service - 주문 생성 완료, 주문 번호: " + orderNo);
         return orderNo;
     }
 
-    // 주문 조회 로직
+    // 주문 정보 조회
     public OrderDto.Read getOrder(Long orderNo) {
-        log.info("Fetching order with orderNo: {}", orderNo);
         OrderDto.Read order = orderDao.findById(orderNo)
                 .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
+        System.out.println("Service - 주문 정보: " + order);
 
-        // 주문 상세 정보 조회 추가
+        // 주문 상세 정보 조회
         List<OrderDetail> orderDetails = orderDetailDao.findByOrderNo(orderNo);
+        System.out.println("Service - 주문 상세 정보 (OrderDetail): " + orderDetails);
 
-        // OrderDetail을 OrderDetailDto로 변환
-        List<OrderDetailDto> orderDetailDtos = new ArrayList<>();
-        for (OrderDetail detail : orderDetails) {
-            log.info("Processing order detail for orderNo: {}, itemNo: {}", orderNo, detail.getItemNo());
-            OrderDetailDto detailDto = OrderDetailDto.builder()
-                    .orderNo(detail.getOrderNo()) // 주문 번호가 있을 때 설정
-                    .itemNo(detail.getItemNo())
-                    .itemName(detail.getItemName())
-                    .image(detail.getImage())
-                    .detailEa(detail.getDetailEa())
-                    .price(detail.getPrice())
-                    .reviewWritten(detail.getReviewWritten())
-                    .build();
-            orderDetailDtos.add(detailDto);
-        }
+        // DTO로 변환
+        List<OrderDetailDto> orderDetailDtos = orderDetails.stream()
+                .map(detail -> OrderDetailDto.builder()
+                        .orderNo(detail.getOrderNo())
+                        .itemNo(detail.getItemNo())
+                        .itemName(detail.getItemName())
+                        .image(detail.getImage())
+                        .detailEa(detail.getDetailEa())
+                        .price(detail.getPrice())
+                        .build())
+                .toList();
+        System.out.println("Service - 변환된 주문 상세 정보 (OrderDetailDto): " + orderDetailDtos);
 
-        order.setOrderDetails(orderDetailDtos); // OrderDetailDto 리스트 설정
-        log.info("Order fetched successfully with orderNo: {}", orderNo);
+        order.setOrderDetails(orderDetailDtos);
         return order;
     }
 
     // 전체 주문 목록 조회 로직
     public List<OrderDto.OrderList> getAllOrders() {
-        log.info("Fetching all orders");
         List<OrderDto.OrderList> orders = orderDao.findAll();
 
         // 각 주문의 주문 상세 정보 조회 로직 추가 (선택 사항)
         for (OrderDto.OrderList order : orders) {
-            log.info("Fetching order details for orderNo: {}", order.getOrderNo());
             List<OrderDetail> orderDetails = orderDetailDao.findByOrderNo(order.getOrderNo());
 
             // OrderDetail을 OrderDetailDto로 변환
             List<OrderDetailDto> orderDetailDtos = new ArrayList<>();
             for (OrderDetail detail : orderDetails) {
-                log.info("Processing order detail for orderNo: {}, itemNo: {}", order.getOrderNo(), detail.getItemNo());
                 OrderDetailDto detailDto = OrderDetailDto.builder()
                         .orderNo(detail.getOrderNo()) // 주문 번호가 있을 때 설정
                         .itemNo(detail.getItemNo())
@@ -166,22 +176,18 @@ public class OrderService {
             order.setOrderDetails(orderDetailDtos); // OrderDetailDto 리스트 설정
         }
 
-        log.info("All orders fetched successfully");
         return orders;
     }
 
     // 전체 주문 목록과 결제 정보 조회 로직
     public List<OrderDto.OrderListWithPayment> getAllOrdersWithPayments() {
-        log.info("Fetching all orders with payments");
         List<OrderDto.OrderListWithPayment> ordersWithPayments = orderDao.findAllWithPayments();
 
         for (OrderDto.OrderListWithPayment order : ordersWithPayments) {
-            log.info("Fetching order details for orderNo: {}", order.getOrderNo());
             List<OrderDetail> orderDetails = orderDetailDao.findByOrderNo(order.getOrderNo());
 
             List<OrderDetailDto> orderDetailDtos = new ArrayList<>();
             for (OrderDetail detail : orderDetails) {
-                log.info("Processing order detail for orderNo: {}, itemNo: {}", order.getOrderNo(), detail.getItemNo());
                 OrderDetailDto detailDto = OrderDetailDto.builder()
                         .orderNo(detail.getOrderNo()) // 주문 번호가 있을 때 설정
                         .itemNo(detail.getItemNo())
@@ -197,14 +203,12 @@ public class OrderService {
             order.setOrderDetails(orderDetailDtos);
         }
 
-        log.info("All orders with payments fetched successfully");
         return ordersWithPayments;
     }
 
     // 주문 업데이트 로직
     @Transactional
     public void updateOrder(OrderDto.Update dto) {
-        log.info("Updating order with orderNo: {}", dto.getOrderNo());
         OrderDto.Read order = orderDao.findById(dto.getOrderNo())
                 .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
         orderDao.update(dto.toEntity());
@@ -212,7 +216,6 @@ public class OrderService {
         // 주문 상세 정보 업데이트 로직 추가
         if (dto.getOrderDetails() != null) {
             for (OrderDetailDto detailDto : dto.getOrderDetails()) {
-                log.info("Updating order detail for orderNo: {}, itemNo: {}", dto.getOrderNo(), detailDto.getItemNo());
                 // OrderDetailDto를 OrderDetail로 변환
                 OrderDetail detail = detailDto.toEntity();
                 detail.setOrderNo(dto.getOrderNo()); // 주문 번호 설정
@@ -221,59 +224,51 @@ public class OrderService {
                 orderDetailDao.update(detail);
             }
         }
-        log.info("Order updated successfully with orderNo: {}", dto.getOrderNo());
     }
 
     // 주문 삭제 로직
     @Transactional
     public void deleteOrder(Long orderNo) {
-        log.info("Deleting order with orderNo: {}", orderNo);
         OrderDto.Read order = orderDao.findById(orderNo)
                 .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
         // 관련된 주문 상세 항목 삭제 로직 추가
         orderDetailDao.deleteByOrderNo(orderNo);
         orderDao.delete(orderNo);
-        log.info("Order deleted successfully with orderNo: {}", orderNo);
     }
 
     // 장바구니에서 선택된 항목의 총 가격 계산 로직 추가
-    public int calculateTotalPriceFromCart(List<Long> selectedItems, String username) throws FailException {
-        log.info("Calculating total price for selected items: {}, user: {}", selectedItems, username);
+    public int calculateTotalPriceFromCart(List<Long> selectedItems, Principal principal) throws FailException {
+        String username = principal.getName();
         int totalPrice = 0;
         for (Long itemNo : selectedItems) {
             var cartItem = cartDao.findByItemNoAndUsername(itemNo, username)
                     .orElseThrow(() -> new FailException("장바구니 항목을 찾을 수 없습니다."));
             totalPrice += cartItem.getCartEa() * cartItem.getCartPrice();
         }
-        log.info("Total price calculated: {} for user: {}", totalPrice, username);
         return totalPrice;
     }
 
     // 주문을 취소하고 장바구니로 복구하는 로직
     @Transactional
     public void cancelOrderAndRestoreToCart(Long orderNo) throws FailException {
-        log.info("Cancelling order with orderNo: {} and restoring items to cart", orderNo);
         OrderDto.Read order = orderDao.findById(orderNo)
                 .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
 
         // 주문 상세 정보 조회 추가
         List<OrderDetail> orderDetails = orderDetailDao.findByOrderNo(orderNo);
-        String username = order.getMemberUsername();
+        String username = order.getUsername();
 
         for (OrderDetail detail : orderDetails) {
             // 장바구니에 항목 추가
             cartDao.save(detail.getItemNo(), username, detail.getDetailEa(), detail.getPrice());
-            log.info("Restored item: {} to cart for user: {}", detail.getItemNo(), username);
 
             // 재고 복구
             int jango = itemService.getItemJango(detail.getItemNo());
             itemService.updateItemJango(detail.getItemNo(), jango + detail.getDetailEa());
-            log.info("Restored stock for item: {}, new stock: {}", detail.getItemNo(), jango + detail.getDetailEa());
         }
 
         // 주문 삭제
         deleteOrder(orderNo);
-        log.info("Order cancelled and items restored to cart successfully for orderNo: {}", orderNo);
     }
     
     @Transactional
@@ -282,13 +277,12 @@ public class OrderService {
         for (OrderDetail detail : orderDetails) {
             Cart cart = new Cart();
             cart.setItemNo(detail.getItemNo());
-            cart.setUsername(order.getMemberUsername());
+            cart.setUsername(order.getUsername());
             cart.setCartEa(detail.getDetailEa());
             cart.setCartPrice(detail.getPrice());
             cart.setCartTotalPrice(detail.getDetailEa() * detail.getPrice());
             cartDao.save(cart);
         }
-        log.info("Order restored to cart for orderNo: {}", order.getOrderNo());
     }
 
     public Order findById(Long orderId) {

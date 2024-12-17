@@ -34,7 +34,7 @@ public class Order {
     // 실제 결제 금액
     private int actPayment;
     // 회원 사용자 이름
-    private String memberUsername;
+    private String username;
     // 배송지 번호
     private Long addressNo;
 }

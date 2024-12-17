@@ -15,30 +15,29 @@ public class OrderDto {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Create {
-        @NotNull // 주문 번호는 null일 수 없음
+        @NotNull 									// 주문 번호는 null일 수 없음
         private Long orderNo;
-        @NotNull // 총 가격은 null일 수 없음
+        @NotNull 									// 총 가격은 null일 수 없음
         private int totalPrice;
-        @NotEmpty // 주문 상태는 비어있을 수 없음
+        @NotEmpty 									// 주문 상태는 비어있을 수 없음
         private String orderStatus;
-        private int usedPoint; // 사용된 포인트 (옵션)
-        private int actPayment; // 실제 결제 금액 (옵션)
-        @NotEmpty // 회원의 사용자 이름은 비어있을 수 없음
-        private String memberUsername;
-        @NotNull // 우편 번호는 null일 수 없음
-        private Long addressNo;
-        private List<OrderDetailDto> orderDetails; // 주문 상세 항목 리스트
+        private int usedPoint; 						// 사용된 포인트 (옵션)
+        private int actPayment; 					// 실제 결제 금액 (옵션)
+        @NotEmpty 				
+        private String username;					// 회원의 사용자 이름은 비어있을 수 없음
+        private Long addressNo;						// 우편 번호는 null일 수 없음
+        private List<OrderDetailDto> orderDetails; 	// 주문 상세 항목 리스트
 
         // DTO를 엔티티로 변환하는 메소드
         public Order toEntity() {
             return Order.builder()
                     .orderNo(orderNo)
-                    .orderDate(LocalDate.now()) // 주문 날짜는 현재 날짜로 설정
+                    .orderDate(LocalDate.now()) 					// 주문 날짜는 현재 날짜로 설정
                     .totalPrice(totalPrice)
                     .orderStatus(orderStatus)
                     .usedPoint(usedPoint)
                     .actPayment(actPayment)
-                    .memberUsername(memberUsername)
+                    .username(username)
                     .addressNo(addressNo)
                     .build();
         }
@@ -84,7 +83,7 @@ public class OrderDto {
         private String orderStatus; // 주문 상태
         private int usedPoint; // 사용된 포인트
         private int actPayment; // 실제 결제 금액
-        private String memberUsername; // 회원의 사용자 이름
+        private String username; // 회원의 사용자 이름
         private Long addressNo; // 배송지 번호
         private List<OrderDetailDto> orderDetails; // 주문 상세 항목 리스트
     }
