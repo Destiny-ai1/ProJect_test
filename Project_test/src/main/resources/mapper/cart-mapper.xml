@@ -36,26 +36,20 @@
 		UPDATE cart
 		SET cart_ea =
 		COALESCE(cart_ea, 0) + 1,
-		cart_totalprice = cart_price *
-		(COALESCE(cart_ea, 0) + 1)
+			cart_totalprice = cart_price *	(COALESCE(cart_ea, 0) + 1)
 		WHERE username = #{username}
-		AND item_no =
-		#{itemNo}
+		AND item_no = #{itemNo}
 		AND item_size = #{itemSize}
 	</update>
 
 	<update id="updateCartEa" parameterType="map">
 		UPDATE cart
 		SET
-		cart_ea = #{cartEa},
-		cart_totalprice = #{cartEa} *
-		(SELECT item_price FROM item WHERE item_no = #{itemNo})
-		WHERE username
-		= #{username}
+			cart_ea = #{cartEa},
+			cart_totalprice = #{cartEa} * (SELECT item_price FROM item WHERE item_no = #{itemNo})
+		WHERE username = #{username}
 		AND item_no = #{itemNo}
-		AND item_size =
-		#{itemSize} <!-- itemSize 
-			조건 추가 -->
+		AND item_size =	#{itemSize} <!-- itemSize 조건 추가 -->
 		AND EXISTS (SELECT 1 FROM item WHERE item_no = #{itemNo})  <!-- 상품 존재 확인 -->
 	</update>
 
@@ -73,35 +67,36 @@
 
 	<!-- 상품 선택 삭제 -->
 	<delete id="deleteCartItems" parameterType="map">
-		delete from cart
-		where username = #{username}
-		<foreach collection="items" item="item" open="and (" separator=") or (" close=")">
-			item_no = #{item.itemNo} and item_size = #{item.itemSize}
-		</foreach>
+    	delete from cart
+    	where (item_no, item_size) in
+    		<foreach collection="items" item="item" open="(" separator="," close=")">
+        		(#{item.itemNo}, #{item.itemSize})
+    		</foreach>
 	</delete>
 
-
 	<!-- 상품 주문 페이지에서 상품 정보 표시 -->
-	<!-- winter_shop 을 username으로 변경하기 -->
-	<select id="findByUsernameAndInos"
-		resultType="com.example.demo.cart.CartDto$Read">
-		select c.item_no,
-		i.item_irum,
-		i.item_price,
-		COALESCE(#{imageUrl},
-		'/default/images/') || ii.image_name AS item_image,
-		c.cart_ea,
-		c.cart_totalprice
-		from cart c
-		join item i on c.item_no = i.item_no
-		join
-		item_image ii on c.item_no = ii.item_no
-		where c.username = #{username}
-		and ii.image_no in
-		<foreach collection="inos" item="item" open="(" separator=","
-			close=")">
-			#{item}
-		</foreach>
-		and ii.image_no = 0
+	<select id="findByUsernameAndInos" resultType="com.example.demo.cart.CartDto$Read">
+    SELECT 
+        c.item_no AS itemNo,            <!-- 상품 번호 -->
+        c.username AS username,         <!-- 사용자 이름 -->
+        i.item_irum AS itemIrum,        <!-- 상품 이름 -->
+        i.item_price AS itemPrice,      <!-- 상품 개별 가격 -->
+        CASE 
+            WHEN #{imageUrl} IS NOT NULL THEN #{imageUrl} || NVL(ii.image_name, 'default.png')
+            ELSE '/default/images/' || NVL(ii.image_name, 'default.png')
+        END AS itemImage,               <!-- 상품 이미지 URL -->
+        c.cart_ea AS cartEa,            <!-- 장바구니 상품 개수 -->
+        c.cart_totalprice AS cartTotalPrice, <!-- 상품 총 가격 -->
+        c.item_size AS itemSize         <!-- 상품 사이즈 -->
+    FROM cart c
+    JOIN item i ON c.item_no = i.item_no
+    LEFT JOIN item_image ii 
+        ON c.item_no = ii.item_no 
+        AND ii.image_no = 0
+    WHERE c.username = #{username}
+      AND c.item_no IN 
+        <foreach collection="inos" item="item" open="(" separator="," close=")">
+            #{item, jdbcType=NUMERIC}
+        </foreach>
 	</select>
 </mapper>

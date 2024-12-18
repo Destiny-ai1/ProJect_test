@@ -46,7 +46,8 @@ public interface CartDao {
     public int deleteCartItems(@Param("items") List<ItemDeleteDTO> items, @Param("username") String username);
 
     // 주문내용 확인
-    public List<CartDto.Read> findByUsernameAndInos(String username, String imageUrl, List<Long> inos);
+    public List<CartDto.Read> findByUsernameAndInos(@Param("username") String username, @Param("imageUrl") String imageUrl, @Param("inos") List<Long> inos);
+
 
     // 장바구니 상품 개수 검색 (itemSize 포함)
     @Select("SELECT cart_ea FROM cart WHERE username=#{username} AND item_no=#{itemNo} AND item_size=#{itemSize}")
@@ -54,4 +55,5 @@ public interface CartDao {
     
     // 장바구니 총 가격 업데이트
     public Long updateCartTotalPrice(String username, Long itemNo);
+
 }

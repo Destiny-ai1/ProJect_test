@@ -3,20 +3,23 @@ package com.example.demo.cart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.exception.FailException;
+import com.example.demo.item.ItemDto;
 
 import jakarta.validation.ConstraintViolationException;
-
+import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @Validated
+// @PreAuthorize("isAuthenticated()")  // 로그인된 사용자만 접근 가능
 @RestController
 public class CartRestController {
 
@@ -24,6 +27,7 @@ public class CartRestController {
     private CartService cartService;
 
     // 장바구니에 상품 추가
+ // 장바구니에 상품 추가
     @PostMapping("/api/cart/addToCart")
     public ResponseEntity<List<CartDto.Read>> addToCart(
             @RequestParam Long itemNo,          // 상품 번호
@@ -45,7 +49,9 @@ public class CartRestController {
         }
     }
 
+
     // 장바구니 상품 개수 변경
+    // 로그인 구현 후 principal 추가하기
     @PostMapping("/api/cart/updateCart")
     public ResponseEntity<List<CartDto.Read>> updateCart(@RequestBody List<CartDto.Read> cartUpdates,Principal principal) {
         
