@@ -12,8 +12,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import com.example.demo.exception.FailException;
-import com.example.demo.item.ItemService;
-import com.example.demo.member.MemberService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,20 +32,25 @@ public class OrderController {
     // 주문 생성 요청을 처리하는 메소드
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/order/create")
-    public ResponseEntity<Long> createOrderFromCart(@RequestBody List<Long> selectedItems, Principal principal) {
-        log.info("Selected Items: {}", selectedItems);
-
+    public ModelAndView createOrder(@RequestBody List<Long> selectedItems,String imageUrl, Principal principal) {
         if (selectedItems == null || selectedItems.isEmpty()) {
-            return ResponseEntity.badRequest().body(null); // 에러 반환
+            return new ModelAndView("error/error").addObject("message", "상품을 선택해야 주문을 진행할 수 있습니다.");
         }
+
         try {
-            Long orderNo = orderService.createOrderFromCart(selectedItems, null, principal); // imageUrl은 임시로 null
-            return ResponseEntity.ok(orderNo); // 성공 시 주문 번호 반환
+            // Step 1: 주문 생성
+            Long orderNo = orderService.createOrderFromCart(selectedItems, imageUrl, principal);
+
+            // Step 2: 입력 페이지로 이동
+            ModelAndView mav = new ModelAndView("order/create");
+            mav.addObject("orderNo", orderNo);
+            return mav;
+
         } catch (FailException e) {
-            log.error("주문 생성 실패", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return new ModelAndView("error/error").addObject("message", "주문 생성 실패: " + e.getMessage());
         }
     }
+
 
     // 주문 상세 정보를 조회하고 주문 읽기 뷰를 보여주는 메소드
     @GetMapping("/order/read")
@@ -78,21 +81,23 @@ public class OrderController {
     // 모든 주문 목록을 조회하고 주문 상세 및 결제 페이지를 보여주는 메소드
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/order/list")
-    public ModelAndView createOrderFromCart(@RequestParam(value = "selectedItems", required = false) List<Long> selectedItems,String imageUrl ,Principal principal) {
-        log.info("Selected Items: {}", selectedItems);
+    public ModelAndView viewOrderList(@RequestBody List<Long> selectedItems, Principal principal) {
+        System.out.println("Selected Items for View: " + selectedItems);
+        System.out.println("Logged-in Username: " + principal.getName());
 
         if (selectedItems == null || selectedItems.isEmpty()) {
             return new ModelAndView("cart/list").addObject("errorMessage", "최소 하나의 상품을 선택해야 합니다.");
         }
+
         try {
-            Long orderNo = orderService.createOrderFromCart(selectedItems,imageUrl, principal);
+            Long orderNo = orderService.createOrderFromCart(selectedItems, null, principal);
             OrderDto.Read order = orderService.getOrder(orderNo);
             return new ModelAndView("order/list").addObject("orders", List.of(order));
         } catch (FailException e) {
-            log.error("주문 생성 실패", e);
             return new ModelAndView("cart/list").addObject("error", e.getMessage());
         }
     }
+
 
     // 기존 주문을 수정하기 위한 폼을 보여주는 메소드
     @PreAuthorize("isAuthenticated()")
@@ -141,7 +146,7 @@ public class OrderController {
     @PostMapping("/order/complete")
     public String completeOrder(@RequestParam Long orderId) {
         try {
-            orderService.completeOrder(orderId);
+            orderService.completeOrder(orderId, null);
             return "redirect:/order/success";
         } catch (FailException e) {
             log.error("주문 완료 처리 실패", e);

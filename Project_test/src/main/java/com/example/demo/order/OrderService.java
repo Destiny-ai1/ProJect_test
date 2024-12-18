@@ -1,6 +1,7 @@
 package com.example.demo.order;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,12 +59,26 @@ public class OrderService {
 
     // 선택된 장바구니 항목으로 주문 생성 로직
     @Transactional
-    public Long createOrderFromCart(List<Long> selectedItems,String imageUrl ,Principal principal) throws FailException {
-        String username = principal.getName();
-        
-		// 1. 장바구니 항목 조회
-        List<CartDto.Read> cartItems = cartService.getCartList(username, imageUrl, principal);
+    public Long createOrderFromCart(List<Long> selectedItems, String imageUrl, Principal principal) throws FailException {
+        String username = principal.getName(); // username 가져오기
 
+        if (selectedItems == null || selectedItems.isEmpty()) {
+            throw new FailException("선택된 항목이 없습니다.");
+        }
+
+        // imageUrl이 null이면 기본값 설정
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = "/default/images/";
+        }
+
+        // 값 검증
+        System.out.println("Selected Items for Order: " + selectedItems);
+        selectedItems.forEach(item -> System.out.println("Item Type: " + item.getClass()));
+        System.out.println("Image URL: " + imageUrl);
+
+        // 장바구니 항목 조회
+        List<CartDto.Read> cartItems = cartDao.findByUsernameAndInos(username, imageUrl, selectedItems);
+        
         System.out.println("Service - 장바구니 항목들: " + cartItems);
 
         // 중복 항목 합치기
@@ -73,14 +88,15 @@ public class OrderService {
         }
         System.out.println("Service - 선택된 아이템과 수량: " + itemCountMap);
 
-        // 2. 주문 생성
+        // 주문 생성
         Order order = new Order();
         order.setUsername(username);
+        order.setOrderStatus(null);
         orderDao.save(order);
-        Long orderNo = order.getOrderNo(); // 저장 후 자동 생성된 orderNo를 사용
+        Long orderNo = order.getOrderNo();
         System.out.println("Service - 생성된 주문 번호: " + orderNo);
 
-        // 3. 삭제할 항목 준비
+        // 삭제할 항목 준비
         List<ItemDto.ItemDeleteDTO> itemsToDelete = new ArrayList<>();
 
         for (Map.Entry<Long, Integer> entry : itemCountMap.entrySet()) {
@@ -116,7 +132,7 @@ public class OrderService {
             itemsToDelete.add(new ItemDto.ItemDeleteDTO(cartItem.getItemNo(), cartItem.getItemSize()));
         }
 
-        // 4. 장바구니 항목 삭제
+        // 장바구니 항목 삭제
         cartService.deleteCartItems(itemsToDelete, username);
 
         System.out.println("Service - 주문 생성 완료, 주문 번호: " + orderNo);
