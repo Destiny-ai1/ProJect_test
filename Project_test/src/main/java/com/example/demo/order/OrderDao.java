@@ -12,7 +12,7 @@ import org.apache.ibatis.annotations.Insert;
 @Mapper
 public interface OrderDao {
     // 주문 저장
-    int save(Order order);
+	void save(OrderDto.Create create);
 
     // 주문 번호로 주문 조회
     Optional<OrderDto.Read> findById(@Param("orderNo") Long orderNo);

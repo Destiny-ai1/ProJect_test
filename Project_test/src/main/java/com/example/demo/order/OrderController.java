@@ -3,6 +3,10 @@ package com.example.demo.order;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +15,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.example.demo.cart.CartDao;
+import com.example.demo.cart.CartDto;
 import com.example.demo.exception.FailException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -21,37 +28,47 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+    
+    @Autowired
+    private CartDao cartDao;
 
     // 주문 생성 폼을 보여주는 메소드
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/order/create")
-    public ModelAndView createOrderForm() {
-        return new ModelAndView("order/create");
+    public ModelAndView createOrderForm(@RequestParam("selectedItems") String selectedItemsJson, Principal principal) {
+        String username = principal.getName();
+        ModelAndView mav = new ModelAndView("order/create");
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<CartDto.Read> selectedCartItems = objectMapper.readValue(selectedItemsJson, 
+                    new TypeReference<List<CartDto.Read>>() {});
+
+            // 합계 계산
+            int totalAmount = selectedCartItems.stream()
+                    .mapToInt(CartDto.Read::getCartTotalPrice)
+                    .sum();
+
+            // 데이터 모델에 추가
+            mav.addObject("orders", selectedCartItems);
+            mav.addObject("totalAmount", totalAmount);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            mav.setViewName("error/error");
+            mav.addObject("message", "주문 생성 중 오류 발생: " + e.getMessage());
+        }
+        return mav;
     }
 
-    // 주문 생성 요청을 처리하는 메소드
+    // POST: 입력된 주문 데이터 처리
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/order/create")
-    public ModelAndView createOrder(@RequestBody List<Long> selectedItems,String imageUrl, Principal principal) {
-        if (selectedItems == null || selectedItems.isEmpty()) {
-            return new ModelAndView("error/error").addObject("message", "상품을 선택해야 주문을 진행할 수 있습니다.");
-        }
-
-        try {
-            // Step 1: 주문 생성
-            Long orderNo = orderService.createOrderFromCart(selectedItems, imageUrl, principal);
-
-            // Step 2: 입력 페이지로 이동
-            ModelAndView mav = new ModelAndView("order/create");
-            mav.addObject("orderNo", orderNo);
-            return mav;
-
-        } catch (FailException e) {
-            return new ModelAndView("error/error").addObject("message", "주문 생성 실패: " + e.getMessage());
-        }
+    public ResponseEntity<Long> createOrder(@RequestBody OrderDto.Create orderCreate) {
+        Long orderNo = orderService.createOrder(orderCreate);
+        return ResponseEntity.ok(orderNo); // 생성된 주문번호 반환
     }
 
-
+    
     // 주문 상세 정보를 조회하고 주문 읽기 뷰를 보여주는 메소드
     @GetMapping("/order/read")
     public ModelAndView readOrder(@RequestParam("orderNo") Long orderNo) {
