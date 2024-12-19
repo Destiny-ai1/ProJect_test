@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +36,9 @@ public class ItemRestController {
 
 	// 상품 가격 업데이트 API
 	@PatchMapping("/item/{itemNo}/update-price")
-	public ResponseEntity<String> updatePrice(@PathVariable Long itemNo, @RequestBody ItemDto.price_update dto) {
-		String username = "winter_shop"; // 하드코딩된 username
+	public ResponseEntity<String> updatePrice(@PathVariable Long itemNo, @RequestBody ItemDto.price_update dto,
+			Principal principal) {
+		 String username = principal.getName(); 
 
 		dto.setItemNo(itemNo);
 
@@ -81,8 +83,9 @@ public class ItemRestController {
 	// 재고 업데이트 API (POST 방식)
 	@PostMapping("/item/{itemNo}/update-stock") // itemNo를 경로에 포함
 	public ResponseEntity<String> updateStock(@PathVariable Long itemNo,
-			@RequestBody ItemDto.jango_update jangoUpdateDto) {
-		String username = "winter_shop"; // 하드코딩된 username
+			@RequestBody ItemDto.jango_update jangoUpdateDto,
+			Principal principal) {
+		 String username = principal.getName(); 
 
 		// itemNo를 DTO에 설정
 		jangoUpdateDto.setItemNo(itemNo);
