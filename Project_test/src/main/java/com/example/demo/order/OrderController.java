@@ -19,6 +19,10 @@ import org.springframework.web.servlet.ModelAndView;
 import com.example.demo.cart.CartDao;
 import com.example.demo.cart.CartDto;
 import com.example.demo.exception.FailException;
+import com.example.demo.member.Member;
+import com.example.demo.member.MemberDao;
+import com.example.demo.member.MemberService;
+
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,17 +32,23 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
-    
+ 
     @Autowired
-    private CartDao cartDao;
-
+    private MemberDao memberDao;
+    
+    
     // 주문 생성 폼을 보여주는 메소드
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/order/create")
     public ModelAndView createOrderForm(@RequestParam("selectedItems") String selectedItemsJson, Principal principal) {
         String username = principal.getName();
         ModelAndView mav = new ModelAndView("order/create");
+        
         try {
+        	
+        	Integer userPoints = memberDao.userpoint(username);
+            mav.addObject("userPoints", userPoints);
+        	
             ObjectMapper objectMapper = new ObjectMapper();
             List<CartDto.Read> selectedCartItems = objectMapper.readValue(selectedItemsJson, 
                     new TypeReference<List<CartDto.Read>>() {});
