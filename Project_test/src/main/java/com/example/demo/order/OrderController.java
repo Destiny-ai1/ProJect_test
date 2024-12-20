@@ -1,6 +1,8 @@
 package com.example.demo.order;
 
 import java.security.Principal;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ import com.example.demo.member.Member;
 import com.example.demo.member.MemberDao;
 import com.example.demo.member.MemberService;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,42 +43,87 @@ public class OrderController {
     // 주문 생성 폼을 보여주는 메소드
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/order/create")
-    public ModelAndView createOrderForm(@RequestParam("selectedItems") String selectedItemsJson, Principal principal) {
-        String username = principal.getName();
+    public ModelAndView showOrderPage(Principal principal, HttpSession session) {
         ModelAndView mav = new ModelAndView("order/create");
-        
-        try {
-        	
-        	Integer userPoints = memberDao.userpoint(username);
-            mav.addObject("userPoints", userPoints);
-        	
-            ObjectMapper objectMapper = new ObjectMapper();
-            List<CartDto.Read> selectedCartItems = objectMapper.readValue(selectedItemsJson, 
-                    new TypeReference<List<CartDto.Read>>() {});
 
-            // 합계 계산
-            int totalAmount = selectedCartItems.stream()
-                    .mapToInt(CartDto.Read::getCartTotalPrice)
-                    .sum();
+        try {
+            // 세션에서 주문 항목과 합계 가져오기
+            List<CartDto.Read> selectedCartItems = (List<CartDto.Read>) session.getAttribute("selectedItems");
+            Integer totalAmount = (Integer) session.getAttribute("totalAmount");
+            Long orderNo = (Long) session.getAttribute("orderNo");  // 주문 번호 추가
+
+            // 세션 정보 확인
+            System.out.println("Selected Items from session: " + selectedCartItems);
+            System.out.println("Total Amount from session: " + totalAmount);
+            System.out.println("Order No from session: " + orderNo);
+
+            if (selectedCartItems == null || totalAmount == null || orderNo == null) {
+                throw new Exception("주문 정보가 없습니다.");
+            }
 
             // 데이터 모델에 추가
             mav.addObject("orders", selectedCartItems);
             mav.addObject("totalAmount", totalAmount);
+            mav.addObject("orderNo", orderNo);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            mav.setViewName("error/error");
-            mav.addObject("message", "주문 생성 중 오류 발생: " + e.getMessage());
+            e.printStackTrace(); // 예외 스택 트레이스를 콘솔에 출력
+            mav.addObject("message", "주문 페이지 로딩 중 오류 발생: " + e.getMessage());
+            mav.setViewName("error");
         }
+
         return mav;
+    }
+
+    // 주문 번호 생성 로직
+    private Long generateOrderNo() {
+        // 주문 번호를 고유하게 생성하는 로직, 예시로 현재 시간을 기반으로 생성
+        return System.currentTimeMillis();
     }
 
     // POST: 입력된 주문 데이터 처리
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/order/create")
-    public ResponseEntity<Long> createOrder(@RequestBody OrderDto.Create orderCreate) {
-        Long orderNo = orderService.createOrder(orderCreate);
-        return ResponseEntity.ok(orderNo); // 생성된 주문번호 반환
+    public ResponseEntity<Map<String, Object>> createOrderForm(@RequestBody List<CartDto.Read> selectedCartItems, Principal principal, HttpSession session) {
+        String username = principal.getName();
+
+        try {
+            // 선택한 상품들의 총 가격 계산
+            int totalAmount = selectedCartItems.stream()
+                    .mapToInt(CartDto.Read::getCartTotalPrice)
+                    .sum();
+
+            // 선택한 상품들을 세션에 저장
+            session.setAttribute("selectedItems", selectedCartItems);  // 세션에 selectedItems 저장
+            session.setAttribute("totalAmount", totalAmount);  // 총 금액도 세션에 저장
+
+            // OrderDto.Create 객체를 만들어서 필요한 정보를 설정
+            OrderDto.Create orderCreate = new OrderDto.Create();
+            orderCreate.setUsername(username); // 로그인된 사용자 정보
+            orderCreate.setTotalPrice((long) totalAmount); // 총 금액
+            orderCreate.setOrderStatus("pending"); // 주문 상태 (예: pending)
+
+            // 주문 번호 생성
+            Long orderNo = generateOrderNo();
+
+            // 세션에 주문 번호 저장
+            session.setAttribute("orderNo", orderNo);
+
+            // 주문 정보 저장
+            orderCreate.setOrderNo(orderNo);  // 생성된 주문 번호를 OrderDto에 설정
+            
+            // HttpSession을 추가로 넘겨주어야 합니다.
+            orderService.createOrder(orderCreate, session);  // 세션을 함께 전달
+
+            // 생성된 주문 번호를 응답으로 반환
+            Map<String, Object> response = new HashMap<>();
+            response.put("orderNo", orderNo);
+
+            return ResponseEntity.ok(response);  // 주문 번호 반환
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("message", "서버 오류"));
+        }
     }
 
     

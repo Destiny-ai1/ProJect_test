@@ -1,5 +1,6 @@
 package com.example.demo.order;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import jakarta.validation.constraints.NotEmpty;
@@ -10,19 +11,20 @@ import lombok.NoArgsConstructor;
 
 public class OrderDto {
 
-    // 주문 생성에 사용되는 DTO 클래스
+	// 주문 생성에 사용되는 DTO 클래스
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Create {
         @NotNull 									// 주문 번호는 null일 수 없음
         private Long orderNo;
+        private Date orderDate;
         @NotNull 									// 총 가격은 null일 수 없음
-        private int totalPrice;
+        private Long totalPrice;
         @NotEmpty 									// 주문 상태는 비어있을 수 없음
         private String orderStatus;
-        private int usedPoint; 						// 사용된 포인트 (옵션)
-        private int actPayment; 					// 실제 결제 금액 (옵션)
+        private Long usedPoint; 						// 사용된 포인트 (옵션)
+        private Long actPayment; 					// 실제 결제 금액 (옵션)
         @NotEmpty 				
         private String username;					// 회원의 사용자 이름은 비어있을 수 없음
         private Long addressNo;						// 우편 번호는 null일 수 없음

@@ -11,53 +11,50 @@
 <title>주문 상세 및 결제 페이지</title>
 </head>
 <body>
-    <div id="app">
-        <header th:replace="~{/fragment/header.html}"> </header>
-        <nav th:replace="~{/fragment/nav.html}"></nav>
-        <main>
-            <section class="container mt-5">
-                <h1 class="mb-4">주문 상세 및 결제 페이지</h1>
+	<div id="app">
+		<header th:replace="~{/fragment/header.html}"> </header>
+		<nav th:replace="~{/fragment/nav.html}"></nav>
+		<main>
+			<section class="container mt-5">
+				<h1 class="mb-4">주문 상세 및 결제 페이지</h1>
+				<div>
+				<!-- 주문 정보가 없는 경우 표시하는 메시지 -->
+				<div th:if="${orders == null || #lists.isEmpty(orders)}">
+					<p>주문 정보가 없습니다.</p>
+				</div>
 
-                <!-- 주문 정보가 없는 경우 표시하는 메시지 -->
-                <div th:if="${orders == null || #lists.isEmpty(orders)}">
-                    <p>주문 정보가 없습니다.</p>
-                </div>
-
-				<!-- 주문 정보가 있는 경우 -->
 				<div th:if="${orders != null && !#lists.isEmpty(orders)}">
-				    <!-- 주문 목록 -->
-				    <div class="card mb-3">
-				        <div class="card-header">주문 정보</div>
-				        <div class="card-body">
-				            <table class="table table-bordered">
-				                <thead>
-				                    <tr>
-				                        <th>상품 번호</th>
-				                        <th>이미지</th>
-				                        <th>상품 이름</th>
-				                        <th>수량</th>
-				                        <th>가격</th>
-				                        <th>사이즈</th>
+					<!-- 주문 목록 -->
+					<div class="card mb-3">
+						<div class="card-header">주문 정보</div>
+						<div class="card-body">
+							<table class="table table-bordered">
+								<thead>
+									<tr>
+										<th>상품 번호</th>
+										<th>이미지</th>
+										<th>상품 이름</th>
+										<th>수량</th>
+										<th>가격</th>
+										<th>사이즈</th>
 										<th>총 가격</th>
-				                    </tr>
-				                </thead>
-				                <tbody>
-				                    <!-- 장바구니에서 전달된 주문 데이터를 출력 -->
-				                    <tr th:each="order : ${orders}">
-				                        <td th:text="${order.itemNo}"></td>
-				                        <td>
-				                            <img th:src="${order.itemImage}" alt="상품 이미지" style="width: 100px;" />
-				                        </td>
-				                        <td th:text="${order.itemIrum}"></td>
-				                        <td th:text="${order.cartEa}"></td>
-				                        <td th:text="${order.itemPrice}"></td>
-				                        <td th:text="${order.itemSize}"></td>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="order : ${orders}">
+										<td th:text="${order.itemNo}"></td>
+										<td><img th:src="${order.itemImage}" alt="상품 이미지"
+											style="width: 100px;" /></td>
+										<td th:text="${order.itemIrum}"></td>
+										<td th:text="${order.cartEa}"></td>
+										<td th:text="${order.itemPrice}"></td>
+										<td th:text="${order.itemSize}"></td>
 										<td th:text="${order.cartTotalPrice}"></td>
-				                    </tr>
-				                </tbody>
-				            </table>
-				        </div>
-				    </div>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
 					
 					<!--장바구니에서 넘어온 상품의 정보들의 가격-->
 		

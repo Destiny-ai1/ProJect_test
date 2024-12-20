@@ -5,8 +5,9 @@
 
     <!-- 주문 저장 -->
     <insert id="save" parameterType="com.example.demo.order.Order" useGeneratedKeys="true" keyProperty="orderNo" keyColumn="order_no">
-        INSERT INTO orders (order_date, total_price, order_status, used_point, act_payment, member_username, address_no)
-        VALUES (#{orderDate, jdbcType=DATE}, #{totalPrice, jdbcType=NUMERIC}, #{orderStatus, jdbcType=VARCHAR}, 
+        INSERT INTO orders (order_no, order_date, total_price, order_status, used_point, act_payment, member_username, address_no)
+        VALUES (#{orderNo, jdbcType=NUMERIC}, #{orderDate, jdbcType=DATE},
+        		#{totalPrice, jdbcType=NUMERIC}, #{orderStatus, jdbcType=VARCHAR}, 
                 #{usedPoint, jdbcType=NUMERIC}, #{actPayment, jdbcType=NUMERIC}, #{username, jdbcType=VARCHAR}, 
                 #{addressNo, jdbcType=NUMERIC})
     </insert>

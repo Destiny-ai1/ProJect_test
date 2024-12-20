@@ -11,6 +11,10 @@ import org.apache.ibatis.annotations.Insert;
 
 @Mapper
 public interface OrderDao {
+	// 주문 번호 생성 (시퀀스를 이용)
+    @Select("SELECT order_no_seq.NEXTVAL FROM DUAL")
+    Long createOrderNo();
+	
     // 주문 저장
 	void save(OrderDto.Create create);
 

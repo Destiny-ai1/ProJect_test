@@ -26,13 +26,13 @@ public class Order {
     // 주문 날짜
     private LocalDate orderDate;
     // 총 가격
-    private int totalPrice;
+    private Long totalPrice;
     // 주문 상태
     private String orderStatus;
     // 사용된 포인트
-    private int usedPoint;
+    private Long usedPoint;
     // 실제 결제 금액
-    private int actPayment;
+    private Long actPayment;
     // 회원 사용자 이름
     private String username;
     // 배송지 번호

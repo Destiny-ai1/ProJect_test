@@ -14,6 +14,7 @@ import com.example.demo.item.ItemDao;
 import com.example.demo.item.ItemDto;
 import com.example.demo.item.ItemService;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import java.security.Principal;
 
@@ -38,16 +39,22 @@ public class OrderService {
     @Autowired
     private ItemDao itemDao;
 
-    // 주문 생성 로직
     @Transactional
-    public Long createOrder(OrderDto.Create create) {
-        // 랜덤 주문번호 생성 (수정된 부분)
-        Long randomOrderNo = ThreadLocalRandom.current().nextLong(1000000000L, 9999999999L);
-        create.setOrderNo(randomOrderNo);
+    public Long createOrder(OrderDto.Create create, HttpSession session) {
+        // 주문 번호 생성
+        Long orderNo = orderDao.createOrderNo();
 
-        // 주문 저장
+        // 주문 번호를 DTO에 설정
+        create.setOrderNo(orderNo);
+
+        // 주문 정보 저장 (DB에 저장)
         orderDao.save(create);
-        return randomOrderNo; // 생성된 주문번호 반환
+
+        // 생성된 주문 번호를 세션에 저장
+        session.setAttribute("orderNo", orderNo);
+
+        // 생성된 주문 번호 반환
+        return orderNo;
     }
 
 

@@ -28,6 +28,12 @@ DROP TRIGGER trg_item_size_default;
 -- 시퀀스 삭제
 DROP SEQUENCE item_seq;
 DROP SEQUENCE item_image_seq;
+DROP SEQUENCE BOARD_SEQ;
+DROP SEQUENCE COMMENTS_SEQ;
+DROP SEQUENCE IMAGE_NO_SEQ;
+DROP SEQUENCE IMAGE_SEQ;
+DROP SEQUENCE ORDER_NO_SEQ;
+DROP SEQUENCE REVIEW_SEQ;
 
 PURGE RECYCLEBIN;
 
@@ -224,6 +230,7 @@ create table orders(
     constraint orders_fk_member_username foreign key (member_username) references member (username),
     constraint orders_fk_post_no foreign key (address_no) references address (address_no)
 );
+create sequence order_no_seq;                            		 -- 시퀀스 생성
 
 --주문 상세
 create table orders_detail (
