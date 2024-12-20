@@ -113,49 +113,49 @@
     </div>
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
-				    const totalAmountElement = document.getElementById("totalAmountDisplay");
-				    const finalAmountElement = document.getElementById("finalAmountDisplay");
-				    const availablePointsElement = document.getElementById("availablePointsDisplay");
-				    const remainingPointsElement = document.getElementById("remainingPointsDisplay");
-				    const earnedPointsElement = document.getElementById("earnedPointsDisplay");
-				    const usedPointInput = document.getElementById("usedPoint");
+		    const totalAmountElement = document.getElementById("totalAmountDisplay");
+		    const finalAmountElement = document.getElementById("finalAmountDisplay");
+		    const availablePointsElement = document.getElementById("availablePointsDisplay");
+		    const remainingPointsElement = document.getElementById("remainingPointsDisplay");
+		    const earnedPointsElement = document.getElementById("earnedPointsDisplay");
+		    const usedPointInput = document.getElementById("usedPoint");
 
-				    let totalAmount = parseInt(totalAmountElement.textContent.replace("원", "").trim());
-				    let availablePoints = parseInt(availablePointsElement.textContent.replace("P", "").trim());
+		    // 초기 데이터 파싱
+		    let totalAmount = parseInt(totalAmountElement.textContent.replace("원", "").trim());
+		    let availablePoints = parseInt(availablePointsElement.textContent.replace("P", "").trim());
 
-				    usedPointInput.addEventListener("input", function () {
-				        let usedPoint = parseInt(usedPointInput.value);
+		    usedPointInput.addEventListener("input", function () {
+		        let usedPoint = parseInt(usedPointInput.value) || 0;
 
-				        // 입력값 검증 및 초기화
-				        if (isNaN(usedPoint) || usedPoint < 0) {
-				            usedPoint = 0;
-				            usedPointInput.value = 0;
-				        }
+		        // 입력값 검증
+		        if (isNaN(usedPoint) || usedPoint < 0) {
+		            usedPoint = 0;
+		            usedPointInput.value = 0;
+		        } else if (usedPoint > availablePoints) {
+		            alert("보유 포인트를 초과할 수 없습니다.");
+		            usedPoint = availablePoints;
+		            usedPointInput.value = availablePoints;
+		        } else if (usedPoint > totalAmount) {
+		            alert("사용 포인트는 총 금액을 초과할 수 없습니다.");
+		            usedPoint = totalAmount;
+		            usedPointInput.value = totalAmount;
+		        }
 
-				        // 사용 포인트 유효성 검사
-				        if (usedPoint > availablePoints) {
-				            alert("보유 포인트를 초과할 수 없습니다.");
-				            usedPoint = availablePoints;
-				            usedPointInput.value = availablePoints;
-				        } else if (usedPoint > totalAmount) {
-				            alert("사용 포인트는 총 금액을 초과할 수 없습니다.");
-				            usedPoint = totalAmount;
-				            usedPointInput.value = totalAmount;
-				        }
+		        // 결제 금액 및 남은 포인트 계산
+		        const finalAmount = Math.max(totalAmount - usedPoint, 0);
+		        finalAmountElement.textContent = finalAmount + "원";
 
-				        // 결제 금액 계산
-				        const finalAmount = Math.max(totalAmount - usedPoint, 0);
-				        finalAmountElement.textContent = finalAmount + "원";
+		        const remainingPoints = availablePoints - usedPoint;
+		        remainingPointsElement.textContent = remainingPoints + " P";
 
-				        // 남은 포인트 계산
-				        const remainingPoints = availablePoints - usedPoint;
-				        remainingPointsElement.textContent = remainingPoints + " P";
+		        // 적립 포인트 계산 (포인트 사용하지 않을 때만)
+		        const earnedPoints = usedPoint === 0 ? Math.floor(totalAmount * 0.05) : 0;
+		        earnedPointsElement.textContent = earnedPoints + " P";
+		    });
 
-				        // 적립 포인트 계산 (포인트 사용 안 했을 때만)
-				        let earnedPoints = (usedPoint === 0 && finalAmount > 0) ? Math.floor(finalAmount * 0.05) : 0;
-				        earnedPointsElement.textContent = earnedPoints + " P";
-				    });
-				});
+		    // 초기 계산 실행
+		    usedPointInput.dispatchEvent(new Event("input"));
+		});
 	</script>
 	
 	<script>
