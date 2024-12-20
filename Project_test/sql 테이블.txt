@@ -69,6 +69,7 @@ CREATE TABLE item (
     item_sell_qty NUMBER(5),                                -- 판매된 상품의 수량
     review_ea NUMBER(7),                                    -- 리뷰 갯수
     cno NUMBER(5),                                          -- 카테고리 ID (외래 키)
+    creation_date DATE DEFAULT SYSDATE,          --생성 날자(현재 날자)신규추가 지우지않고 할시 ALTER TABLE item ADD creation_date DATE DEFAULT SYSDATE;로추가
     CONSTRAINT fk_item_category FOREIGN KEY (cno) REFERENCES category (cno), -- 카테고리와의 관계
     CONSTRAINT pk_item PRIMARY KEY (item_no)                 -- item_no를 기본키로 사용
 );

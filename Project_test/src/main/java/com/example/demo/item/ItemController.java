@@ -1,12 +1,12 @@
 package com.example.demo.item;
 
 import java.security.Principal;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.HtmlUtils;
 
 import com.example.demo.category.CategoryService;
+import com.example.demo.newitem.*;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -29,16 +30,40 @@ import jakarta.validation.Valid;
 public class ItemController {
     @Autowired
     private ItemService itemService;
-
+    @Autowired
+    private NewItemService newitemService;
     // 메인 페이지
     @GetMapping("/")
-    public ModelAndView list(Principal p) {
+    public ModelAndView list() {
         String imageUrl = "/api/images?imagename=";
-        List<ItemDto.ItemList> result = itemService.findAll(imageUrl); // 상품 목록 조회
-        return new ModelAndView("item/list").addObject("result", result); // list.html에 결과 전달
+        List<ItemDto.ItemList> allItems = itemService.findAll(imageUrl);
+        List<NewItemDto.ItemResponse> newItems = newitemService.getNewItems(30, imageUrl);
+        List<NewItemDto.ItemResponse> popularItems = newitemService.getPopularItems(100, imageUrl);
+
+        // 데이터를 4개씩 나누어 그룹화
+        List<List<NewItemDto.ItemResponse>> newItemGroups = partitionList(newItems, 4);
+        List<List<NewItemDto.ItemResponse>> popularItemGroups = partitionList(popularItems, 4);
+
+        ModelAndView mav = new ModelAndView("item/index");
+        mav.addObject("newItemGroups", newItemGroups);
+        mav.addObject("popularItemGroups", popularItemGroups);
+
+        return mav;
+    }
+
+    private <T> List<List<T>> partitionList(List<T> list, int size) {
+    	  // 결과를 저장할 리스트 초기화
+        List<List<T>> partitioned = new ArrayList<>();
+        // 원본 리스트를 그룹화
+        for (int i = 0; i < list.size(); i += size) {
+            partitioned.add(list.subList(i, Math.min(i + size, list.size())));
+        }
+     // 그룹화된 리스트 반환
+        return partitioned;
     }
 
     // 관리자의 상품 추가 페이지 이동
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/item/add")
     public ModelAndView addItem() {
         List<Map> majorCategory = itemService.findMajorCategory();
@@ -46,6 +71,7 @@ public class ItemController {
     }
 
     // 상품 추가 후 루트 페이지로 이동
+    @PreAuthorize("hasRole('admin')")
     @PostMapping("/item/add")
     public ModelAndView addItem(@Valid ItemDto.Create dto, BindingResult br) {
         if (br.hasErrors()) {
@@ -58,7 +84,7 @@ public class ItemController {
         // 상품 저장 로직 처리
         itemService.save(dto);  // 유효성 검사 통과 시, 상품 저장
 
-        return new ModelAndView("redirect:/");  // 상품 리스트로 리다이렉트
+        return new ModelAndView("redirect:/item/list");  // 상품 리스트로 리다이렉트 분리이유 아이템이 생성제대로되었는지 확인하기위해 관리자만
     }
 
  // 상품 상세 정보 페이지 이동
