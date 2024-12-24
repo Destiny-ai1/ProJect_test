@@ -34,6 +34,15 @@
 				xhr.setRequestHeader(csrfHeader, csrfToken);
 			}
 		});
+		
+		// 상품 이미지 선택
+        $('.thumbnail:first-of-type').addClass("choice");
+
+        $('.thumbnail').click(function() {
+            $('.thumbnail').removeClass("choice");
+            $(this).addClass("choice");
+            $('#image').attr('src', $(this).attr('src'));
+        });
 
 		// 재고 변경 버튼 클릭 시
 		$('#update-stock').click(function() {
