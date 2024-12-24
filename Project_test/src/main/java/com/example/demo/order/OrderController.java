@@ -40,41 +40,84 @@ public class OrderController {
     private MemberDao memberDao;
     
     
-    // 주문 생성 폼을 보여주는 메소드
+ // 주문 생성 폼을 보여주는 메소드
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/order/create")
-    public ModelAndView showOrderPage(Principal principal, HttpSession session) {
+    public ModelAndView createOrderForm(OrderDto.Create dto,
+                                        @RequestParam(value = "selectedItems", required = false) String selectedItemsJson,
+                                        Principal principal, HttpSession session) {
+        String username = principal.getName(); // 사용자 이름 가져오기
         ModelAndView mav = new ModelAndView("order/create");
 
         try {
-            // 세션에서 주문 항목과 합계 가져오기
-            List<CartDto.Read> selectedCartItems = (List<CartDto.Read>) session.getAttribute("selectedItems");
-            Integer totalAmount = (Integer) session.getAttribute("totalAmount");
-            Long orderNo = (Long) session.getAttribute("orderNo");  // 주문 번호 추가
+            // 사용자 포인트 조회
+            Integer userPoints = memberDao.userpoint(username);
+            mav.addObject("userPoints", userPoints);
 
-            // 세션 정보 확인
+            // 세션에서 주문 항목과 합계 가져오기 (세션 데이터 우선 사용)
+            List<CartDto.Read> selectedCartItems;
+            Integer totalAmount;
+            Long orderNo;
+            String itemName = ""; // itemName 초기화
+
+            if (session.getAttribute("selectedItems") != null && session.getAttribute("totalAmount") != null && session.getAttribute("orderNo") != null) {
+                selectedCartItems = (List<CartDto.Read>) session.getAttribute("selectedItems");
+                totalAmount = (Integer) session.getAttribute("totalAmount");
+                orderNo = (Long) session.getAttribute("orderNo");
+
+                // 첫 번째 아이템 이름 가져오기 (예: 여러 상품 중 첫 번째 상품)
+                if (!selectedCartItems.isEmpty()) {
+                    itemName = selectedCartItems.get(0).getItemIrum();
+                }
+            } else {
+                // 세션 데이터가 없는 경우 JSON에서 파싱
+                ObjectMapper objectMapper = new ObjectMapper();
+                selectedCartItems = objectMapper.readValue(selectedItemsJson,
+                        new TypeReference<List<CartDto.Read>>() {});
+
+                // 합계 계산
+                totalAmount = selectedCartItems.stream()
+                        .mapToInt(CartDto.Read::getCartTotalPrice)
+                        .sum();
+
+                // 주문 번호 생성 (임시)
+                orderNo = System.currentTimeMillis(); // 예시로 현재 시간을 사용해 주문 번호 생성
+
+                // 첫 번째 아이템 이름 가져오기
+                if (!selectedCartItems.isEmpty()) {
+                    itemName = selectedCartItems.get(0).getItemIrum();
+                }
+
+                // 세션에 저장
+                session.setAttribute("selectedItems", selectedCartItems);
+                session.setAttribute("totalAmount", totalAmount);
+                session.setAttribute("orderNo", orderNo);
+            }
+
+            // 세션 정보 확인 로그
             System.out.println("Selected Items from session: " + selectedCartItems);
             System.out.println("Total Amount from session: " + totalAmount);
             System.out.println("Order No from session: " + orderNo);
-
-            if (selectedCartItems == null || totalAmount == null || orderNo == null) {
-                throw new Exception("주문 정보가 없습니다.");
-            }
+            System.out.println("Username: " + username);
+            System.out.println("Item Name: " + itemName);
 
             // 데이터 모델에 추가
             mav.addObject("orders", selectedCartItems);
             mav.addObject("totalAmount", totalAmount);
             mav.addObject("orderNo", orderNo);
+            mav.addObject("username", username); // 사용자 이름 추가
+            mav.addObject("itemName", itemName); // 아이템 이름 추가
 
         } catch (Exception e) {
-            e.printStackTrace(); // 예외 스택 트레이스를 콘솔에 출력
-            mav.addObject("message", "주문 페이지 로딩 중 오류 발생: " + e.getMessage());
-            mav.setViewName("error");
+            e.printStackTrace();
+            mav.setViewName("error/error");
+            mav.addObject("message", "주문 생성 중 오류 발생: " + e.getMessage());
         }
 
         return mav;
     }
 
+    
     // 주문 번호 생성 로직
     private Long generateOrderNo() {
         // 주문 번호를 고유하게 생성하는 로직, 예시로 현재 시간을 기반으로 생성
@@ -125,9 +168,10 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("message", "서버 오류"));
         }
     }
-
+   
     
     // 주문 상세 정보를 조회하고 주문 읽기 뷰를 보여주는 메소드
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/order/read")
     public ModelAndView readOrder(@RequestParam("orderNo") Long orderNo) {
         try {
@@ -135,15 +179,16 @@ public class OrderController {
             if (dto == null) {
                 return new ModelAndView("error/error").addObject("message", "주문 정보를 찾을 수 없습니다.");
             }
-            log.info("조회된 주문 정보: " + dto);
+         
             return new ModelAndView("order/read").addObject("result", dto);
         } catch (FailException e) {
-            log.error("주문 조회 실패", e);
+         
             return new ModelAndView("error/error").addObject("message", e.getMessage());
         }
     }
 
     // 모든 주문 목록을 조회하고 주문 및 결제 내역 뷰를 보여주는 메소드
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/order/order_payment_summary")
     public ModelAndView listOrdersWithPayments() {
         var orders = orderService.getAllOrdersWithPayments();
@@ -155,17 +200,14 @@ public class OrderController {
 
     // 모든 주문 목록을 조회하고 주문 상세 및 결제 페이지를 보여주는 메소드
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/order/list")
-    public ModelAndView viewOrderList(@RequestBody List<Long> selectedItems, Principal principal) {
-        System.out.println("Selected Items for View: " + selectedItems);
-        System.out.println("Logged-in Username: " + principal.getName());
-
-        if (selectedItems == null || selectedItems.isEmpty()) {
+    @PostMapping("/order/order_payment_summary")
+    public ModelAndView viewOrderList(@RequestBody List<Long> orderNo, Principal principal) {
+        if (orderNo == null || orderNo.isEmpty()) {
             return new ModelAndView("cart/list").addObject("errorMessage", "최소 하나의 상품을 선택해야 합니다.");
         }
 
         try {
-            Long orderNo = orderService.createOrderFromCart(selectedItems, null, principal);
+            Long orderNo = orderService.createOrderFromCart(orderNo), null, principal);
             OrderDto.Read order = orderService.getOrder(orderNo);
             return new ModelAndView("order/list").addObject("orders", List.of(order));
         } catch (FailException e) {
@@ -182,7 +224,7 @@ public class OrderController {
             OrderDto.Read dto = orderService.getOrder(orderNo);
             return new ModelAndView("order/update").addObject("result", dto);
         } catch (FailException e) {
-            log.error("주문 수정 폼 로딩 실패", e);
+
             return new ModelAndView("error/error").addObject("message", e.getMessage());
         }
     }
@@ -198,7 +240,6 @@ public class OrderController {
             orderService.updateOrder(dto);
             return new ModelAndView("redirect:/order/read?orderNo=" + dto.getOrderNo());
         } catch (FailException e) {
-            log.error("주문 수정 실패", e);
             return new ModelAndView("order/update").addObject("error", e.getMessage());
         }
     }
@@ -211,7 +252,6 @@ public class OrderController {
             orderService.deleteOrder(orderNo);
             return new ModelAndView("redirect:/order/list");
         } catch (FailException e) {
-            log.error("주문 삭제 실패", e);
             return new ModelAndView("error/error").addObject("message", e.getMessage());
         }
     }
@@ -224,7 +264,6 @@ public class OrderController {
             orderService.completeOrder(orderId, null);
             return "redirect:/order/success";
         } catch (FailException e) {
-            log.error("주문 완료 처리 실패", e);
             return "redirect:/order/failure";
         }
     }
@@ -237,7 +276,6 @@ public class OrderController {
             orderService.cancelOrderAndRestoreToCart(orderId);
             return "redirect:/order/cancel_success";
         } catch (FailException e) {
-            log.error("주문 취소 실패", e);
             return "redirect:/order/failure";
         }
     }
@@ -259,7 +297,6 @@ public class OrderController {
     // 예외 처리 핸들러
     @ExceptionHandler(FailException.class)
     public ModelAndView failExceptionHandler(FailException e) {
-        log.error("예외 발생", e);
         return new ModelAndView("error/error").addObject("message", e.getMessage());
     }
 }
