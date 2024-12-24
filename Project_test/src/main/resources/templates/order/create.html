@@ -114,56 +114,55 @@
     </div>
 
 	<script>
-	    document.addEventListener("DOMContentLoaded", function () {
-	        const totalAmountElement = document.getElementById("totalAmountDisplay");
-	        const finalAmountElement = document.getElementById("finalAmountDisplay");
-	        const availablePointsElement = document.getElementById("availablePointsDisplay");
-	        const remainingPointsElement = document.getElementById("remainingPointsDisplay");
-	        const earnedPointsElement = document.getElementById("earnedPointsDisplay");
-	        const usedPointInput = document.getElementById("usedPoint");
-	        const finalAmountInput = document.getElementById("finalAmount"); // 숨겨진 input 태그
+    document.addEventListener("DOMContentLoaded", function () {
+        const totalAmountElement = document.getElementById("totalAmountDisplay");
+        const finalAmountElement = document.getElementById("finalAmountDisplay");
+        const availablePointsElement = document.getElementById("availablePointsDisplay");
+        const remainingPointsElement = document.getElementById("remainingPointsDisplay");
+        const earnedPointsElement = document.getElementById("earnedPointsDisplay");
+        const usedPointInput = document.getElementById("usedPoint");
+        const finalAmountInput = document.getElementById("finalAmount"); // 숨겨진 input 태그
 
-	        // 초기 데이터 파싱
-	        let totalAmount = parseInt(totalAmountElement.textContent.replace("원", "").trim());
-	        let availablePoints = parseInt(availablePointsElement.textContent.replace("P", "").trim());
+        // 초기 데이터 파싱
+        let totalAmount = parseInt(totalAmountElement.textContent.replace("원", "").trim());
+        let availablePoints = parseInt(availablePointsElement.textContent.replace("P", "").trim());
 
-	        usedPointInput.addEventListener("input", function () {
-	            let usedPoint = parseInt(usedPointInput.value) || 0;
+        usedPointInput.addEventListener("input", function () {
+            let usedPoint = parseInt(usedPointInput.value) || 0;
 
-	            // 입력값 검증
-	            if (isNaN(usedPoint) || usedPoint < 0) {
-	                usedPoint = 0;
-	                usedPointInput.value = 0;
-	            } else if (usedPoint > availablePoints) {
-	                alert("보유 포인트를 초과할 수 없습니다.");
-	                usedPoint = availablePoints;
-	                usedPointInput.value = availablePoints;
-	            } else if (usedPoint > totalAmount) {
-	                alert("사용 포인트는 총 금액을 초과할 수 없습니다.");
-	                usedPoint = totalAmount;
-	                usedPointInput.value = totalAmount;
-	            }
+            // 입력값 검증
+            if (isNaN(usedPoint) || usedPoint < 0) {
+                usedPoint = 0;
+                usedPointInput.value = 0;
+            } else if (usedPoint > availablePoints) {
+                alert("보유 포인트를 초과할 수 없습니다.");
+                usedPoint = availablePoints;
+                usedPointInput.value = availablePoints;
+            } else if (usedPoint > totalAmount) {
+                alert("사용 포인트는 총 금액을 초과할 수 없습니다.");
+                usedPoint = totalAmount;
+                usedPointInput.value = totalAmount;
+            }
 
-	            // 결제 금액 및 남은 포인트 계산
-	            const finalAmount = Math.max(totalAmount - usedPoint, 0);
-	            finalAmountElement.textContent = finalAmount + "원";
-	            finalAmountInput.value = finalAmount; // 숨겨진 input에 최종 금액 저장
+            // 결제 금액 및 남은 포인트 계산
+            const finalAmount = Math.max(totalAmount - usedPoint, 0);
+            finalAmountElement.textContent = finalAmount + "원";
+            finalAmountInput.value = finalAmount; // 숨겨진 input에 최종 금액 저장
 
-	            const remainingPoints = availablePoints - usedPoint;
-	            remainingPointsElement.textContent = remainingPoints + " P";
+            const remainingPoints = availablePoints - usedPoint;
+            remainingPointsElement.textContent = remainingPoints + " P";
 
-	            // 적립 포인트 계산 (포인트 사용하지 않을 때만)
-	            const earnedPoints = usedPoint === 0 ? Math.floor(totalAmount * 0.05) : 0;
-	            earnedPointsElement.textContent = earnedPoints + " P";
-	        });
+            // 적립 포인트 계산 (포인트 사용하지 않을 때만)
+            const earnedPoints = usedPoint === 0 ? Math.floor(totalAmount * 0.05) : 0;
+            earnedPointsElement.textContent = earnedPoints + " P";
+        });
 
-	        // 초기 계산 실행
-	        usedPointInput.dispatchEvent(new Event("input"));
-	    });
-	</script>
+        // 초기 계산 실행
+        usedPointInput.dispatchEvent(new Event("input"));
+    });
+</script>
 
-
-    <script>
+	<script>
     function execDaumPostcode() {
         new daum.Postcode({
             oncomplete: function(data) {
@@ -193,8 +192,7 @@
             }
         }).open();
     }
-
-    </script>
+</script>
 
 	<script>
     // 주문 선택 후, 선택된 주문의 정보를 각 필드에 설정합니다.
@@ -221,67 +219,63 @@
         };
     }
     
-	document.querySelector("form[action='/payment/ready']").addEventListener("submit", function (event) {
-	    // 주문 번호, 사용자 정보 및 배송 정보 가져오기
-	    let orderNo = document.querySelector('input[name="orderNo"]').value;
-	    let username = document.querySelector('input[name="username"]').value;
-	    let itemName = document.querySelector('input[name="itemName"]').value;
-	    let finalAmount = parseInt(document.querySelector('input[name="finalAmount"]').value); // 최종 결제 금액
-	    let totalAmount = parseInt(document.querySelector('input[name="totalAmount"]').value); // 원래 총 금액
-	    let usedPoint = parseInt(document.getElementById('usedPoint').value) || 0; // 사용된 포인트
-	    let postNo = document.getElementById('postNo').value;
-	    let addressMain = document.getElementById('addressMain').value;
-	    let addressDetail = document.getElementById('addressDetail').value;
+    document.querySelector("form[action='/payment/ready']").addEventListener("submit", function (event) {
+        // 주문 번호, 사용자 정보 및 배송 정보 가져오기
+        let orderNo = document.querySelector('input[name="orderNo"]').value;
+        let username = document.querySelector('input[name="username"]').value;
+        let itemName = document.querySelector('input[name="itemName"]').value;
+        let finalAmount = parseInt(document.querySelector('input[name="finalAmount"]').value); // 최종 결제 금액
+        let totalAmount = parseInt(document.querySelector('input[name="totalAmount"]').value); // 원래 총 금액
+        let usedPoint = parseInt(document.getElementById('usedPoint').value) || 0; // 사용된 포인트
+        let postNo = document.getElementById('postNo').value;
+        let addressMain = document.getElementById('addressMain').value;
+        let addressDetail = document.getElementById('addressDetail').value;
 
-	    console.log("orderNo:", orderNo);
-	    console.log("username:", username);
-	    console.log("itemName:", itemName);
-	    console.log("finalAmount:", finalAmount);
-	    console.log("totalAmount:", totalAmount);
-	    console.log("usedPoint:", usedPoint);
+        console.log("orderNo:", orderNo);
+        console.log("username:", username);
+        console.log("itemName:", itemName);
+        console.log("finalAmount:", finalAmount);
+        console.log("totalAmount:", totalAmount);
+        console.log("usedPoint:", usedPoint);
 
-	    // 필수 데이터 확인
-	    if (!orderNo || !username || !itemName || isNaN(finalAmount)) {
-	        event.preventDefault();
-	        alert("주문 정보를 확인해 주세요. 모든 필수 항목이 설정되어야 합니다.");
-	        return;
-	    }
+        // 필수 데이터 확인
+        if (!orderNo || !username || !itemName || isNaN(finalAmount)) {
+            event.preventDefault();
+            alert("주문 정보를 확인해 주세요. 모든 필수 항목이 설정되어야 합니다.");
+            return;
+        }
 
-	    // 포인트 사용 검증
-	    const expectedFinalAmount = totalAmount - usedPoint;
-	    if (finalAmount !== expectedFinalAmount) {
-	        event.preventDefault();
-	        alert("포인트 사용 계산이 올바르지 않습니다. 다시 확인해 주세요.");
-	        return;
-	    }
+        // 포인트 사용 검증
+        const expectedFinalAmount = totalAmount - usedPoint;
+        if (finalAmount !== expectedFinalAmount) {
+            event.preventDefault();
+            alert("포인트 사용 계산이 올바르지 않습니다. 다시 확인해 주세요.");
+            return;
+        }
 
-	    // 배송지 정보 확인
-	    if (!postNo || !addressMain || !addressDetail) {
-	        event.preventDefault();
-	        alert("배송지 정보를 모두 입력해 주세요.");
-	        return;
-	    }
+        // 배송지 정보 확인
+        if (!postNo || !addressMain || !addressDetail) {
+            event.preventDefault();
+            alert("배송지 정보를 모두 입력해 주세요.");
+            return;
+        }
 
-	    // 카카오페이 API 요청 준비 데이터 출력 (디버깅용)
-	    console.log("카카오페이 요청 데이터:");
-	    console.log({
-	        orderNo: orderNo,
-	        username: username,
-	        itemName: itemName,
-	        finalAmount: finalAmount, // 최종 금액
-	        usedPoint: usedPoint, // 사용된 포인트
-	        postNo: postNo,
-	        addressMain: addressMain,
-	        addressDetail: addressDetail
-	    });
-	});
+        // 카카오페이 API 요청 준비 데이터 출력 (디버깅용)
+        console.log("카카오페이 요청 데이터:");
+        console.log({
+            orderNo: orderNo,
+            username: username,
+            itemName: itemName,
+            finalAmount: finalAmount, // 최종 금액
+            usedPoint: usedPoint, // 사용된 포인트
+            postNo: postNo,
+            addressMain: addressMain,
+            addressDetail: addressDetail
+        });
+    });
+</script>
 
-
-
-
-	</script>
-
-    <script>
+	<script>
     document.addEventListener('DOMContentLoaded', function() {
         let orderNo = document.getElementById('orderNo').value;/* 주문 번호를 설정하는 로직 추가 (e.g., 템플릿 엔진을 사용하여 값 삽입) */
         
@@ -304,6 +298,6 @@
             }
         });
     });
-    </script>
+</script>
 </body>
 </html>
