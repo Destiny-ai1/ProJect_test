@@ -2,11 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.order.OrderDetailDao">
-
-    <!-- 주문 상세 정보 저장 -->
+	<!-- 주문 상세 정보 저장 -->
     <insert id="save" parameterType="com.example.demo.order.OrderDetailDto">
-        INSERT INTO orders_detail (order_no, item_no, item_name, image, detail_ea, price, review_written)
-        VALUES (#{orderNo}, #{itemNo}, #{itemName}, #{image, jdbcType=VARCHAR}, #{detailEa}, #{price}, #{reviewWritten, jdbcType=CHAR})
+        INSERT INTO orders_detail (order_no, item_no, item_name, image, detail_ea, price, item_size, review_written)
+        VALUES (#{orderNo}, #{itemNo}, #{itemName}, #{image, jdbcType=VARCHAR}, #{detailEa}, #{price}, #{itemSize}, #{reviewWritten, jdbcType=CHAR})
     </insert>
 
     <!-- 주문 번호로 주문 상세 정보 조회 -->

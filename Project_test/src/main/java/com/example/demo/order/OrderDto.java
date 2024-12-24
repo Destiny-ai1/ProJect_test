@@ -45,6 +45,15 @@ public class OrderDto {
         }
     }
     
+    // 결제 전 세션정보를 테이블에 저장하기 위한 dto
+    @Data
+    public static class Update {
+        private Long orderNo;             // 주문 번호
+        private String shippingAddress;   // 배송지
+        private Long totalAmount;         // 결제 금액
+        private Long usedPoints;          // 사용된 포인트
+    }
+    
     // 주문 목록을 제공하기 위한 DTO 클래스
     @Data
     @AllArgsConstructor
@@ -94,7 +103,7 @@ public class OrderDto {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Update {
+    public static class UpdateOrder {
         @NotNull // 주문 번호는 null일 수 없음
         private Long orderNo;
         @NotEmpty // 주문 상태는 비어있을 수 없음

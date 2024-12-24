@@ -19,9 +19,9 @@ public class OrderDetailDto {
     @NotNull
     private String image; // 이미지 URL
     @NotNull
-    private int detailEa; // 수량
+    private Long detailEa; // 수량
     @NotNull
-    private int price; // 가격
+    private Long price; // 가격
     @NotNull
     private String reviewWritten; // 리뷰 작성 여부 (Y/N)
 

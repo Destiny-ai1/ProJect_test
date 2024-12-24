@@ -19,8 +19,9 @@ public class OrderDetail {
     private Long itemNo;
     private String itemName;
     private String image;
-    private int detailEa;
-    private int price;
+    private Long detailEa;
+    private Long price;
+    private String itemSize;
     private String reviewWritten;
    
 }

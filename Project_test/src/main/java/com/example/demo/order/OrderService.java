@@ -85,7 +85,6 @@ public class OrderService {
         Order order = new Order();
         order.setUsername(username);
         order.setOrderStatus("PENDING"); // 초기 상태 설정
-        orderDao.save(order);
 
         Long orderNo = order.getOrderNo();
 
@@ -95,25 +94,56 @@ public class OrderService {
             if (stock < cartItem.getCartEa()) {
                 throw new FailException("주문 수량이 재고를 초과합니다.");
             }
+        }
+        // 주문 번호 반환
+        return orderNo;
+    }
+    
+    @Transactional
+    public void updateOrderPayment(Long orderNo, Long totalAmount, Long usedPoint, HttpSession session) {
+        // 1. 결제 완료 후 주문 정보 업데이트 (주문 상태, 결제액, 사용된 포인트, 주문 날짜 등)
+        orderDao.updatePaymentInfo(orderNo, totalAmount, usedPoint);
 
-            OrderDetail detail = OrderDetail.builder()
-                    .orderNo(orderNo)
-                    .itemNo(cartItem.getItemNo())
-                    .itemName(cartItem.getItemIrum())
-                    .detailEa(cartItem.getCartEa().intValue())
-                    .price(cartItem.getCartTotalPrice())
-                    .build();
-            orderDetailDao.save(detail);
+        // 2. 세션에서 장바구니 정보 가져오기
+        List<CartDto.Read> cartItems = (List<CartDto.Read>) session.getAttribute("selectedItems");  // 장바구니에서 선택된 상품들
+
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new FailException("장바구니 항목이 비어있습니다.");
         }
 
-        // 장바구니 항목 삭제 (주문 성공 후에만 삭제)
-        cartService.deleteCartItems(
-                cartItems.stream()
-                        .map(item -> new ItemDto.ItemDeleteDTO(item.getItemNo(), item.getItemSize()))
-                        .collect(Collectors.toList()), 
-                username);
+        // 3. 주문 상세 정보 삽입 (orders_detail에 저장)
+        for (CartDto.Read cartItem : cartItems) {
+            // 재고 체크
+            int stock = itemDao.getStockByItemSize(cartItem.getItemNo(), cartItem.getItemSize());
+            if (stock < cartItem.getCartEa()) {
+                throw new FailException("주문 수량이 재고를 초과합니다.");
+            }
 
-        return orderNo;
+            /// 4. 주문 상세 정보 생성
+            OrderDetail orderDetail = OrderDetail.builder()
+            	    .orderNo(orderNo)                           // 생성된 주문 번호
+            	    .itemNo(cartItem.getItemNo())               // 상품 번호
+            	    .itemName(cartItem.getItemIrum())           // 상품명
+            	    .image(cartItem.getItemImage())             // 상품 이미지
+            	    .detailEa(cartItem.getCartEa() != null ? Long.valueOf(cartItem.getCartEa()) : 0L)  // 상품 수량 (null 체크)
+            	    .price(cartItem.getCartTotalPrice() != null ? Long.valueOf(cartItem.getCartTotalPrice()) : 0L) // 상품 총 가격 (null 체크)
+            	    .itemSize(cartItem.getItemSize())           // 상품 사이즈
+            	    .reviewWritten("N")                         // 리뷰 작성 여부 (기본값 "N")
+            	    .build();
+
+
+            // 5. 주문 상세 정보 저장
+            orderDetailDao.save(orderDetail); // 주문 상세 정보 테이블에 저장
+        }
+        
+        // 세션 상태 확인 (디버그용 로그)
+        System.out.println("세션에서 장바구니 항목 삭제 후: " + session.getAttribute("selectedItems"));
+    }
+
+	// 결제 실패 시, 아무 작업도 하지 않음
+    public void handlePaymentFailure(Long orderNo) {
+        // 결제 실패 시, 아무 작업도 하지 않음 (장바구니 항목도 그대로 유지)
+        // 결제 실패 후 추가 작업이 없다면 빈 메소드로 남겨둡니다.
     }
 
 
