@@ -34,9 +34,6 @@ public class OrderService {
     private ItemService itemService;
     
     @Autowired
-    private CartService cartService;
-    
-    @Autowired
     private ItemDao itemDao;
 
     @Transactional
@@ -145,70 +142,59 @@ public class OrderService {
         // 결제 실패 시, 아무 작업도 하지 않음 (장바구니 항목도 그대로 유지)
         // 결제 실패 후 추가 작업이 없다면 빈 메소드로 남겨둡니다.
     }
+    
+    public List<OrderDto.OrderList> getAllOrders(String username) {
+        // 주문 목록을 조회하는 부분에서 orderDetailDao.findAll() 호출
+        // 모든 주문에 대해 상세 정보를 조회하기 위해 orderNo를 전달
+        List<OrderDetail> orderDetails = orderDetailDao.findAll(username, null); // 여기서는 orderNo는 null이 아닌, 전체 주문 목록을 가져오기 위한 호출
 
+        // 주문 정보 필터링 및 정렬
+        List<OrderDto.OrderList> filteredOrders = orderDetails.stream()
+                .filter(orderDetail -> "SUCCESS".equals(orderDetail.getOrderStatus()) && username.equals(orderDetail.getMemberUsername()))
+                .sorted(Comparator.comparing(OrderDetail::getOrderDate).reversed()) // 최신 날짜순으로 정렬
+                .map(orderDetail -> { // 타입 명시
+                    return OrderDto.OrderList.builder()
+                            .orderNo(orderDetail.getOrderNo())
+                            .orderStatus(orderDetail.getOrderStatus())
+                            .orderDate(orderDetail.getOrderDate())
+                            .memberUsername(orderDetail.getMemberUsername())
+                            .build();
+                })
+                .collect(Collectors.toList());
 
-    // 주문 정보 조회
-    public OrderDto.Read getOrder(Long orderNo) {
-        OrderDto.Read order = orderDao.findById(orderNo)
-                .orElseThrow(() -> new FailException("주문을 찾을 수 없습니다"));
-        System.out.println("Service - 주문 정보: " + order);
+        // 각 주문에 대해 상세 정보를 조회하여 설정
+        for (OrderDto.OrderList order : filteredOrders) {
+            // 주문 번호를 사용해 상세 주문 정보 조회
+            List<OrderDetail> orderDetailsList = orderDetailDao.findAll(username, order.getOrderNo()); // 각 주문의 orderNo를 전달
 
-        // 주문 상세 정보 조회
-        List<OrderDetail> orderDetails = orderDetailDao.findByOrderNo(orderNo);
-        System.out.println("Service - 주문 상세 정보 (OrderDetail): " + orderDetails);
+            // 상세 주문 정보를 DTO로 변환하여 설정
+            List<OrderDetailDto> orderDetailDtos = orderDetailsList.stream()
+                    .map(detail -> OrderDetailDto.builder()
+                            .orderNo(detail.getOrderNo())
+                            .itemNo(detail.getItemNo())
+                            .itemName(detail.getItemName())
+                            .image(detail.getImage())
+                            .detailEa(detail.getDetailEa())
+                            .price(detail.getPrice())
+                            .itemSize(detail.getItemSize())  // item_size 추가
+                            .reviewWritten(detail.getReviewWritten())
+                            .build())
+                    .collect(Collectors.toList());
 
-        // DTO로 변환
-        List<OrderDetailDto> orderDetailDtos = orderDetails.stream()
-                .map(detail -> OrderDetailDto.builder()
-                        .orderNo(detail.getOrderNo())
-                        .itemNo(detail.getItemNo())
-                        .itemName(detail.getItemName())
-                        .image(detail.getImage())
-                        .detailEa(detail.getDetailEa())
-                        .price(detail.getPrice())
-                        .build())
-                .toList();
-        System.out.println("Service - 변환된 주문 상세 정보 (OrderDetailDto): " + orderDetailDtos);
-
-        order.setOrderDetails(orderDetailDtos);
-        return order;
-    }
-
-    // 전체 주문 목록 조회 로직
-    public List<OrderDto.OrderList> getAllOrders() {
-        List<OrderDto.OrderList> orders = orderDao.findAll();
-
-        // 각 주문의 주문 상세 정보 조회 로직 추가 (선택 사항)
-        for (OrderDto.OrderList order : orders) {
-            List<OrderDetail> orderDetails = orderDetailDao.findByOrderNo(order.getOrderNo());
-
-            // OrderDetail을 OrderDetailDto로 변환
-            List<OrderDetailDto> orderDetailDtos = new ArrayList<>();
-            for (OrderDetail detail : orderDetails) {
-                OrderDetailDto detailDto = OrderDetailDto.builder()
-                        .orderNo(detail.getOrderNo()) // 주문 번호가 있을 때 설정
-                        .itemNo(detail.getItemNo())
-                        .itemName(detail.getItemName())
-                        .image(detail.getImage())
-                        .detailEa(detail.getDetailEa())
-                        .price(detail.getPrice())
-                        .reviewWritten(detail.getReviewWritten())
-                        .build();
-                orderDetailDtos.add(detailDto);
-            }
-
-            order.setOrderDetails(orderDetailDtos); // OrderDetailDto 리스트 설정
+            order.setOrderDetails(orderDetailDtos);
         }
 
-        return orders;
+        return filteredOrders;
     }
 
+
+    
     // 전체 주문 목록과 결제 정보 조회 로직
     public List<OrderDto.OrderListWithPayment> getAllOrdersWithPayments() {
         List<OrderDto.OrderListWithPayment> ordersWithPayments = orderDao.findAllWithPayments();
 
         for (OrderDto.OrderListWithPayment order : ordersWithPayments) {
-            List<OrderDetail> orderDetails = orderDetailDao.findByOrderNo(order.getOrderNo());
+            List<OrderDetail> orderDetails = orderDetailDao.findAll(order.getOrderNo(), null);
 
             List<OrderDetailDto> orderDetailDtos = new ArrayList<>();
             for (OrderDetail detail : orderDetails) {

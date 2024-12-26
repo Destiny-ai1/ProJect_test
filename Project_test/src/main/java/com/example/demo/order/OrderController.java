@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -190,28 +191,44 @@ public class OrderController {
     // 모든 주문 목록을 조회하고 주문 및 결제 내역 뷰를 보여주는 메소드
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/order/order_payment_summary")
-    public ModelAndView listOrdersWithPayments() {
-        var orders = orderService.getAllOrdersWithPayments();
+    public ModelAndView listOrdersWithPayments(Principal principal) {
+        String username = principal.getName(); // 로그인한 사용자 ID
+
+        // 로그인한 사용자의 모든 'SUCCESS' 상태인 주문 목록 조회
+        var orders = orderService.getAllOrders(username);
+
         if (orders == null || orders.isEmpty()) {
-            return new ModelAndView("order/order_payment_summary").addObject("message", "주문 정보가 없습니다.");
+            return new ModelAndView("order/order_payment_summary")
+                    .addObject("message", "주문 정보가 없습니다.");
         }
-        return new ModelAndView("order/order_payment_summary").addObject("orders", orders);
+
+        return new ModelAndView("order/order_payment_summary")
+                .addObject("orders", orders);
     }
 
-    // 모든 주문 목록을 조회하고 주문 상세 및 결제 페이지를 보여주는 메소드
+    // 주문 목록에서 특정 주문을 선택하고 주문 상세 및 결제 페이지를 보여주는 메소드
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/order/order_payment_summary")
-    public ModelAndView viewOrderList(@RequestBody List<Long> orderNo, Principal principal) {
-        if (orderNo == null || orderNo.isEmpty()) {
-            return new ModelAndView("cart/list").addObject("errorMessage", "최소 하나의 상품을 선택해야 합니다.");
+    public ModelAndView viewOrderDetails(@RequestParam List<Long> orderNos, Principal principal) {
+        if (orderNos == null || orderNos.isEmpty()) {
+            return new ModelAndView("order/order_payment_summary")
+                    .addObject("errorMessage", "최소 하나의 주문을 선택해야 합니다.");
         }
 
         try {
-            Long orderNo = orderService.createOrderFromCart(orderNo), null, principal);
-            OrderDto.Read order = orderService.getOrder(orderNo);
-            return new ModelAndView("order/list").addObject("orders", List.of(order));
-        } catch (FailException e) {
-            return new ModelAndView("cart/list").addObject("error", e.getMessage());
+            // 로그인한 사용자의 모든 주문 목록을 가져온 후, 선택한 주문만 필터링
+            List<OrderDto.OrderList> orders = orderService.getAllOrders(principal.getName());
+
+            // 주문 번호로 선택된 주문만 필터링
+            List<OrderDto.OrderList> selectedOrders = orders.stream()
+                    .filter(order -> orderNos.contains(order.getOrderNo()))
+                    .collect(Collectors.toList());
+
+            return new ModelAndView("order/order_details")
+                    .addObject("orders", selectedOrders);
+        } catch (Exception e) {
+            return new ModelAndView("order/order_payment_summary")
+                    .addObject("error", e.getMessage());
         }
     }
 

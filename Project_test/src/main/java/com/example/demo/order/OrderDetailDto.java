@@ -23,17 +23,20 @@ public class OrderDetailDto {
     @NotNull
     private Long price; // 가격
     @NotNull
+    private String itemSize; // 상품 사이즈
+    @NotNull
     private String reviewWritten; // 리뷰 작성 여부 (Y/N)
 
     // DTO -> Entity 변환 메소드 추가
     public OrderDetail toEntity() {
         return OrderDetail.builder()
-                .orderNo(orderNo) // 주문 번호 설정 추가 (없을 수도 있음)
+                .orderNo(orderNo != null ? orderNo : null) // 주문 번호가 null일 경우 처리
                 .itemNo(itemNo)
                 .itemName(itemName)
                 .image(image)
                 .detailEa(detailEa)
                 .price(price) // 가격 설정 추가
+                .itemSize(itemSize != null ? itemSize : "DEFAULT_SIZE") // itemSize가 null일 경우 기본값 처리
                 .reviewWritten(reviewWritten) // 리뷰 작성 여부 추가
                 .build();
     }
