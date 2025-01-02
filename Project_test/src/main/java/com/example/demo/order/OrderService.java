@@ -96,6 +96,7 @@ public class OrderService {
         return orderNo;
     }
     
+    // 결제 완료후 상품 정보 업데이트
     @Transactional
     public void updateOrderPayment(Long orderNo, Long totalAmount, Long usedPoint, HttpSession session) {
         // 1. 결제 완료 후 주문 정보 업데이트 (주문 상태, 결제액, 사용된 포인트, 주문 날짜 등)
@@ -118,16 +119,15 @@ public class OrderService {
 
             /// 4. 주문 상세 정보 생성
             OrderDetail orderDetail = OrderDetail.builder()
-            	    .orderNo(orderNo)                           // 생성된 주문 번호
-            	    .itemNo(cartItem.getItemNo())               // 상품 번호
-            	    .itemName(cartItem.getItemIrum())           // 상품명
-            	    .image(cartItem.getItemImage())             // 상품 이미지
-            	    .detailEa(cartItem.getCartEa() != null ? Long.valueOf(cartItem.getCartEa()) : 0L)  // 상품 수량 (null 체크)
-            	    .price(cartItem.getCartTotalPrice() != null ? Long.valueOf(cartItem.getCartTotalPrice()) : 0L) // 상품 총 가격 (null 체크)
-            	    .itemSize(cartItem.getItemSize())           // 상품 사이즈
-            	    .reviewWritten("N")                         // 리뷰 작성 여부 (기본값 "N")
-            	    .build();
-
+                    .orderNo(orderNo)                            // 생성된 주문 번호
+                    .itemNo(cartItem.getItemNo())                // 상품 번호
+                    .itemName(cartItem.getItemIrum())            // 상품명
+                    .image(cartItem.getItemImage())              // 상품 이미지
+                    .detailEa(cartItem.getCartEa() != null ? Long.valueOf(cartItem.getCartEa()) : 0L)  // 상품 수량 (null 체크)
+                    .price(cartItem.getCartTotalPrice() != null ? Long.valueOf(cartItem.getCartTotalPrice()) : 0L) // 상품 총 가격 (null 체크)
+                    .itemSize(cartItem.getItemSize())            // 상품 사이즈
+                    .reviewWritten(false)  // 기본적으로 false (리뷰 작성 안 됨)
+                    .build();
 
             // 5. 주문 상세 정보 저장
             orderDetailDao.save(orderDetail); // 주문 상세 정보 테이블에 저장
@@ -143,51 +143,25 @@ public class OrderService {
         // 결제 실패 후 추가 작업이 없다면 빈 메소드로 남겨둡니다.
     }
     
-    public List<OrderDto.OrderList> getAllOrders(String username) {
-        // 주문 목록을 조회하는 부분에서 orderDetailDao.findAll() 호출
-        // 모든 주문에 대해 상세 정보를 조회하기 위해 orderNo를 전달
-        List<OrderDetail> orderDetails = orderDetailDao.findAll(username, null); // 여기서는 orderNo는 null이 아닌, 전체 주문 목록을 가져오기 위한 호출
-
-        // 주문 정보 필터링 및 정렬
-        List<OrderDto.OrderList> filteredOrders = orderDetails.stream()
-                .filter(orderDetail -> "SUCCESS".equals(orderDetail.getOrderStatus()) && username.equals(orderDetail.getMemberUsername()))
-                .sorted(Comparator.comparing(OrderDetail::getOrderDate).reversed()) // 최신 날짜순으로 정렬
-                .map(orderDetail -> { // 타입 명시
-                    return OrderDto.OrderList.builder()
-                            .orderNo(orderDetail.getOrderNo())
-                            .orderStatus(orderDetail.getOrderStatus())
-                            .orderDate(orderDetail.getOrderDate())
-                            .memberUsername(orderDetail.getMemberUsername())
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        // 각 주문에 대해 상세 정보를 조회하여 설정
-        for (OrderDto.OrderList order : filteredOrders) {
-            // 주문 번호를 사용해 상세 주문 정보 조회
-            List<OrderDetail> orderDetailsList = orderDetailDao.findAll(username, order.getOrderNo()); // 각 주문의 orderNo를 전달
-
-            // 상세 주문 정보를 DTO로 변환하여 설정
-            List<OrderDetailDto> orderDetailDtos = orderDetailsList.stream()
-                    .map(detail -> OrderDetailDto.builder()
-                            .orderNo(detail.getOrderNo())
-                            .itemNo(detail.getItemNo())
-                            .itemName(detail.getItemName())
-                            .image(detail.getImage())
-                            .detailEa(detail.getDetailEa())
-                            .price(detail.getPrice())
-                            .itemSize(detail.getItemSize())  // item_size 추가
-                            .reviewWritten(detail.getReviewWritten())
-                            .build())
-                    .collect(Collectors.toList());
-
-            order.setOrderDetails(orderDetailDtos);
+    // 주문 정보를 조회하는 메서드
+    public List<OrderDto.OrderList> findOrder() {
+        // 주문 상태가 'SUCCESS'인 주문들을 조회
+        List<OrderDto.OrderList> orderList = orderDao.findOrderStatus();
+        
+        // 확인을 위한 로그 출력
+        if (orderList.isEmpty()) {
+            System.out.println("주문 목록이 없습니다.");
+        } else {
+            System.out.println("주문 목록이 " + orderList.size() + "개 있습니다.");
         }
-
-        return filteredOrders;
+        
+        return orderList;
     }
-
-
+    
+    // 주문 상세 정보를 조회하는 메서드
+    public List<OrderDetail> findOrderDetailsByOrderNo(Long orderNo) {
+    	return orderDetailDao.findOrderDetailsByOrderNo(orderNo);
+    }
     
     // 전체 주문 목록과 결제 정보 조회 로직
     public List<OrderDto.OrderListWithPayment> getAllOrdersWithPayments() {

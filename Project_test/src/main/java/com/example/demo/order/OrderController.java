@@ -1,6 +1,7 @@
 package com.example.demo.order;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -41,7 +45,7 @@ public class OrderController {
     private MemberDao memberDao;
     
     
- // 주문 생성 폼을 보여주는 메소드
+    // 주문 생성 폼을 보여주는 메소드
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/order/create")
     public ModelAndView createOrderForm(OrderDto.Create dto,
@@ -118,7 +122,6 @@ public class OrderController {
         return mav;
     }
 
-    
     // 주문 번호 생성 로직
     private Long generateOrderNo() {
         // 주문 번호를 고유하게 생성하는 로직, 예시로 현재 시간을 기반으로 생성
@@ -169,67 +172,43 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("message", "서버 오류"));
         }
     }
-   
     
-    // 주문 상세 정보를 조회하고 주문 읽기 뷰를 보여주는 메소드
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/order/read")
-    public ModelAndView readOrder(@RequestParam("orderNo") Long orderNo) {
-        try {
-            OrderDto.Read dto = orderService.getOrder(orderNo);
-            if (dto == null) {
-                return new ModelAndView("error/error").addObject("message", "주문 정보를 찾을 수 없습니다.");
-            }
-         
-            return new ModelAndView("order/read").addObject("result", dto);
-        } catch (FailException e) {
-         
-            return new ModelAndView("error/error").addObject("message", e.getMessage());
-        }
-    }
-
-    // 모든 주문 목록을 조회하고 주문 및 결제 내역 뷰를 보여주는 메소드
+    // 주문 목록을 조회하는 메소드
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/order/order_payment_summary")
-    public ModelAndView listOrdersWithPayments(Principal principal) {
-        String username = principal.getName(); // 로그인한 사용자 ID
+    public ModelAndView readOrderStatus(Principal principal) {
+        // 현재 로그인한 사용자 정보를 가져오기
+        String username = principal.getName();
 
-        // 로그인한 사용자의 모든 'SUCCESS' 상태인 주문 목록 조회
-        var orders = orderService.getAllOrders(username);
+        // 로그인한 사용자의 주문 목록을 가져오기 (서비스에서 조회)
+        List<OrderDto.OrderList> orderList = orderService.findOrder();
 
-        if (orders == null || orders.isEmpty()) {
-            return new ModelAndView("order/order_payment_summary")
-                    .addObject("message", "주문 정보가 없습니다.");
+        // 확인을 위한 로그 출력
+        System.out.println("주문 목록 size: " + orderList.size());
+        if (orderList.isEmpty()) {
+            System.out.println("주문 목록이 없습니다.");
         }
 
-        return new ModelAndView("order/order_payment_summary")
-                .addObject("orders", orders);
+        // ModelAndView 객체 생성
+        ModelAndView modelAndView = new ModelAndView();
+
+        // 주문 목록을 모델에 추가
+        modelAndView.addObject("orders", orderList);  // JSP/Thymeleaf에서 orders로 사용
+
+        // 현재 로그인한 사용자 이름을 모델에 추가
+        modelAndView.addObject("username", username);
+
+        // 뷰 이름 설정 (뷰 페이지의 이름을 설정)
+        modelAndView.setViewName("order/order_payment_summary");  // 해당 경로의 HTML 페이지로 이동
+
+        return modelAndView;
     }
-
-    // 주문 목록에서 특정 주문을 선택하고 주문 상세 및 결제 페이지를 보여주는 메소드
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/order/order_payment_summary")
-    public ModelAndView viewOrderDetails(@RequestParam List<Long> orderNos, Principal principal) {
-        if (orderNos == null || orderNos.isEmpty()) {
-            return new ModelAndView("order/order_payment_summary")
-                    .addObject("errorMessage", "최소 하나의 주문을 선택해야 합니다.");
-        }
-
-        try {
-            // 로그인한 사용자의 모든 주문 목록을 가져온 후, 선택한 주문만 필터링
-            List<OrderDto.OrderList> orders = orderService.getAllOrders(principal.getName());
-
-            // 주문 번호로 선택된 주문만 필터링
-            List<OrderDto.OrderList> selectedOrders = orders.stream()
-                    .filter(order -> orderNos.contains(order.getOrderNo()))
-                    .collect(Collectors.toList());
-
-            return new ModelAndView("order/order_details")
-                    .addObject("orders", selectedOrders);
-        } catch (Exception e) {
-            return new ModelAndView("order/order_payment_summary")
-                    .addObject("error", e.getMessage());
-        }
+    
+    @GetMapping("/order/order_payment_summary_details/{orderNo}")
+    public String orderDetails(@PathVariable Long orderNo, Model model) {
+        List<OrderDetail> orderDetails = orderService.findOrderDetailsByOrderNo(orderNo);
+        model.addAttribute("orderDetails", orderDetails);
+        return "order/order_payment_summary_details";  // 템플릿 이름을 정확히 입력해야 함
     }
 
 

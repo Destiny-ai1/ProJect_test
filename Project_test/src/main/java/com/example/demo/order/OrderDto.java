@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -45,27 +46,31 @@ public class OrderDto {
         }
     }
     
-    // 결제 전 세션정보를 테이블에 저장하기 위한 dto
+    // 결제 준비를 위한 DTO
     @Data
-    public static class Update {
-        private Long orderNo;             // 주문 번호
-        private String shippingAddress;   // 배송지
-        private Long totalAmount;         // 결제 금액
-        private Long usedPoints;          // 사용된 포인트
+    public static class PaymentPreparation {
+        private Long orderNo;      // 주문 번호
+        private Long totalAmount;  // 총 결제 금액
+        private Long usedPoint;   // 사용된 포인트
+        private String shippingAddress; // 배송지
     }
     
     // 주문 목록을 제공하기 위한 DTO 클래스
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class OrderList {
         private Long orderNo; // 주문 번호
         private LocalDate orderDate; // 주문 날짜
         private String orderStatus; // 주문 상태
-        private int totalPrice; // 총 가격
+        private Long totalPrice; // 총 가격
         private int usedPoint; // 사용 포인트
-        private int actPayment; // 실제 결제 금액
+        private Long actPayment; // 실제 결제 금액
         private List<OrderDetailDto> orderDetails; // 주문 상세 항목 리스트
+        private String memberUsername;   // 로그인한 사용자 ID 추가
+        private String itemName;
+        private String image;
     }
 
     // 결제 정보를 포함한 주문 목록을 제공하기 위한 DTO 클래스
@@ -103,7 +108,7 @@ public class OrderDto {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class UpdateOrder {
+    public static class Update {
         @NotNull // 주문 번호는 null일 수 없음
         private Long orderNo;
         @NotEmpty // 주문 상태는 비어있을 수 없음

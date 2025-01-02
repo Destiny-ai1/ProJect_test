@@ -14,9 +14,9 @@ public interface OrderDetailDao {
     // 주문 상세 정보 저장
     int save(OrderDetail orderDetail);
 
-    // 주문 번호와 사용자명을 Map을 통해 전달받는 방식
-    public List<OrderDetail> findAll(String memberUsername, Long orderNo);
-
+    // 주문 상세 정보 조회 (주문번호 및 회원 ID로 필터링)
+    public List<OrderDetail> findOrderDetailsByOrderNo(Long orderNo);
+    
     // 주문 상세 정보 업데이트
     int update(OrderDetail orderDetail);
 

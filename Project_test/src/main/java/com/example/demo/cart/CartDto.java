@@ -37,6 +37,7 @@ public class CartDto { // 장바구니 관련 데이터 전달 객체
         private String itemIrum;    // 상품 이름 (item 패키지에서 가져옴)
         private String itemImage; // 상품 이미지 URL (image 패키지에서 가져옴)
         private String itemSize;    // 상품 사이즈
+        private String reviewWritten; // 리뷰 작성 여부 (Y/N) 추가
     }
     
     @Data

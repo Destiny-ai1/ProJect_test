@@ -32,12 +32,13 @@ public interface OrderDao {
 
     // 주문 삭제
     int delete(@Param("orderNo") Long orderNo);
-    
-    List<Order> findByOrderStatus(@Param("orderStatus") String orderStatus);
-    
+
     // 결제 후에 주문 상태 업데이트
     @Update("UPDATE ORDERS SET ORDER_STATUS = 'SUCCESS', act_payment = #{actPayment}, USED_POINT = #{usedPoint}, order_date = SYSDATE " +
             "WHERE ORDER_NO = #{orderNo}")
     void updatePaymentInfo(@Param("orderNo") Long orderNo, @Param("actPayment") Long actPayment, 
                            @Param("usedPoint") Long usedPoint);
+    
+    // 주문된 상품의 정보를 조회
+    List<OrderDto.OrderList> findOrderStatus();
 }

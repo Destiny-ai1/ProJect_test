@@ -84,7 +84,7 @@ public class ItemController {
         // 상품 저장 로직 처리
         itemService.save(dto);  // 유효성 검사 통과 시, 상품 저장
 
-        return new ModelAndView("redirect:/item/list");  // 상품 리스트로 리다이렉트 분리이유 아이템이 생성제대로되었는지 확인하기위해 관리자만
+        return new ModelAndView("redirect:/");  // 상품 리스트로 리다이렉트 분리이유 아이템이 생성제대로되었는지 확인하기위해 관리자만
     }
 
  // 상품 상세 정보 페이지 이동

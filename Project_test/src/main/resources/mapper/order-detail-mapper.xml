@@ -3,33 +3,29 @@
 
 <mapper namespace="com.example.demo.order.OrderDetailDao">
 	<!-- 주문 상세 정보 저장 -->
-	<insert id="save"
-		parameterType="com.example.demo.order.OrderDetailDto">
-		INSERT INTO orders_detail (order_no, item_no, item_name,
-		image, detail_ea,
-		price, item_size, review_written)
-		VALUES (#{orderNo},
-		#{itemNo}, #{itemName}, #{image, jdbcType=VARCHAR},
-		#{detailEa},
-		#{price}, #{itemSize}, #{reviewWritten, jdbcType=CHAR})
-	</insert>
+    <insert id="save"
+        parameterType="com.example.demo.order.OrderDetailDto">
+        INSERT INTO orders_detail (order_no, item_no, item_name,
+        image, detail_ea, price, item_size, review_written)
+        VALUES (#{orderNo},
+        #{itemNo}, #{itemName}, #{image, jdbcType=VARCHAR},
+        #{detailEa},
+        #{price}, #{itemSize}, #{reviewWritten, jdbcType=CHAR, typeHandler=com.example.demo.handler.BooleanCharTypeHandler})
+    </insert>
 
-	<select id="findAll" parameterType="map" resultMap="OrderDetailResultMap">
-   		 SELECT 
-		        od.order_no, od.item_no, od.item_name, od.image, od.detail_ea, od.price, 
-		        od.review_written, od.item_size, o.order_status, o.order_date, o.member_username
-    	FROM orders_detail od
-    		JOIN orders o ON od.order_no = o.order_no
-    		WHERE o.order_status = 'SUCCESS'
-    		AND o.order_date IS NOT NULL
-    		AND o.member_username = #{memberUsername}
-    	<if test="orderNo != null">
-    	   		AND od.order_no = #{orderNo}
-    	</if>
-	</select>
-
-
-
+	<!-- order_no에 맞는 주문 상세 정보 조회 쿼리 -->
+    <select id="findOrderDetailsByOrderNo" resultType="com.example.demo.order.OrderDetail">
+        SELECT 
+            order_no,
+            item_name,
+            image,
+            detail_ea,
+            price,
+            item_size,
+            review_written
+        FROM orders_detail
+        WHERE order_no = #{orderNo}
+    </select>
 
 	<!-- 주문 상세 정보 업데이트 -->
 	<update id="update"
@@ -54,25 +50,17 @@
 		#{detailEa}, #{price}, #{detailEa} * #{price})
 	</insert>
 
-	<!-- 주문 상세 조회를 위한 OrderDetailResultMap -->
-	<resultMap id="OrderDetailResultMap"
-		type="com.example.demo.order.OrderDetail">
-		<id property="orderNo" column="order_no" jdbcType="NUMERIC" />
-		<result property="itemNo" column="item_no" jdbcType="NUMERIC" />
-		<result property="itemName" column="item_name"
-			jdbcType="VARCHAR" />
-		<result property="image" column="image" jdbcType="VARCHAR" />
-		<result property="detailEa" column="detail_ea"
-			jdbcType="INTEGER" />
-		<result property="price" column="price" jdbcType="NUMERIC" />
-		<result property="reviewWritten" column="review_written"
-			jdbcType="CHAR" />
-		<!-- 새로운 컬럼들 추가 -->
-		<result property="orderStatus" column="order_status"
-			jdbcType="VARCHAR" />
-		<result property="orderDate" column="order_date"
-			jdbcType="TIMESTAMP" />
-		<result property="memberUsername" column="member_username"
-			jdbcType="VARCHAR" />
-	</resultMap>
+	<!-- 주문 상세 조회를 위한 ResultMap -->
+    <resultMap id="OrderDetailResultMap" type="com.example.demo.order.OrderDetail">
+        <id property="orderNo" column="order_no" jdbcType="NUMERIC" />
+        <result property="itemNo" column="item_no" jdbcType="NUMERIC" />
+        <result property="itemName" column="item_name" jdbcType="VARCHAR" />
+        <result property="image" column="image" jdbcType="VARCHAR" />
+        <result property="detailEa" column="detail_ea" jdbcType="INTEGER" />
+        <result property="price" column="price" jdbcType="NUMERIC" />
+        <result property="reviewWritten" column="review_written" jdbcType="CHAR" />
+        <result property="orderStatus" column="order_status" jdbcType="VARCHAR" />
+        <result property="orderDate" column="order_date" jdbcType="TIMESTAMP" />
+        <result property="memberUsername" column="member_username" jdbcType="VARCHAR" />
+    </resultMap>
 </mapper>
